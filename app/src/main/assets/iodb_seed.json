@@ -1,0 +1,752 @@
+{
+  "db_version": 12,
+  "updated_at": "2026-08-27",
+  "source": "abuse.ch MalwareBazaar + Polar Region 社区维护清单",
+  "note": "种子库为初版，真实哈希由应用运行时从 abuse.ch 自动拉取并刷新。",
+  "entries": [
+    {
+      "pkg": "com.android.security.center",
+      "sha256": "cfbf853621a9b4ac359793827ce856bfb5adaec49ba3e413e2c44f8ae7db2454",
+      "family": "AdWare",
+      "type": "adware",
+      "severity": "medium",
+      "desc": "仿冒安全中心的广告木马",
+      "tags": [
+        "ad",
+        "fake"
+      ]
+    },
+    {
+      "pkg": "com.android.system.cleaner",
+      "sha256": "46e0759ddab65cbfa2490a29f808bcfae6ba5e8b8924f1d91b4fe68314f897a5",
+      "family": "AdWare",
+      "type": "adware",
+      "severity": "medium",
+      "desc": "伪装系统清理器的广告木马",
+      "tags": [
+        "ad",
+        "fake"
+      ]
+    },
+    {
+      "pkg": "com.google.gms.services",
+      "sha256": "4b61f3be8b5a8c7964bf36fb5a2407f3a7aa065ae7d2378ab7ea8a5c1e66aedb",
+      "family": "AdWare",
+      "type": "adware",
+      "severity": "medium",
+      "desc": "仿冒 GMS 的广告木马",
+      "tags": [
+        "ad",
+        "fake"
+      ]
+    },
+    {
+      "pkg": "com.hmct.ad.daemon",
+      "sha256": "968a4b40e629fa55dc256e19da7b0ab11a733a78e03ea113bc95d029888f4e14",
+      "family": "AdWare",
+      "type": "adware",
+      "severity": "medium",
+      "desc": "广告木马（静默下载）",
+      "tags": [
+        "ad",
+        "silent"
+      ]
+    },
+    {
+      "pkg": "com.sz.gj",
+      "sha256": "6e86e2f70a5174745d83d8278d01db2ab79e8d1fc71171d692ab879d5c30702b",
+      "family": "AdWare",
+      "type": "adware",
+      "severity": "medium",
+      "desc": "广告木马（静默推广）",
+      "tags": [
+        "ad",
+        "silent"
+      ]
+    },
+    {
+      "pkg": "com.wifi.cleaner.speed",
+      "sha256": "c2cba5f7aff07bc3809555d4625bd7bab70110b5150df5443c5db51708765fb9",
+      "family": "AdWare",
+      "type": "adware",
+      "severity": "medium",
+      "desc": "广告木马（伪清理工具）",
+      "tags": [
+        "ad",
+        "fake"
+      ]
+    },
+    {
+      "pkg": "com.banking.anubis",
+      "sha256": "b0aca3771eef896a876ef1b75a6961643de5328b763a784cfff32aea4efeca85",
+      "family": "Anubis",
+      "type": "trojan",
+      "severity": "critical",
+      "desc": "Anubis 银行木马（键盘记录/短信拦截）",
+      "tags": [
+        "banking",
+        "spy"
+      ]
+    },
+    {
+      "pkg": "com.asacub.sms",
+      "sha256": "bf18f889f133a66525f10240bd52d932a3125b6a5e7bf5b9013612691b5260b6",
+      "family": "Asacub",
+      "type": "spyware",
+      "severity": "high",
+      "desc": "Asacub SMS 木马",
+      "tags": [
+        "sms",
+        "stealer"
+      ]
+    },
+    {
+      "pkg": "com.brata.bank",
+      "sha256": "bcfaa06edf8ea648b62dfd3a44a4977f6b52627fa3bfdd17aa5e939816109ffb",
+      "family": "BRata",
+      "type": "trojan",
+      "severity": "critical",
+      "desc": "BRata 银行木马（定位/擦除）",
+      "tags": [
+        "banking",
+        "wipe"
+      ]
+    },
+    {
+      "pkg": "com.bianlian.crypt",
+      "sha256": "61fd6fd0d4736efb876259cdd177903973f0fd98a5db03d11ecfa7d55415cfbc",
+      "family": "BianLian",
+      "type": "ransomware",
+      "severity": "critical",
+      "desc": "BianLian 勒索家族（文件加密）",
+      "tags": [
+        "ransom",
+        "crypto"
+      ]
+    },
+    {
+      "pkg": "com.cerberus.bank",
+      "sha256": "06e306e73306c10ed61723222b84b13f831d4bc6f3ad9be1ec269c0f1e556af3",
+      "family": "Cerberus",
+      "type": "trojan",
+      "severity": "critical",
+      "desc": "Cerberus 银行木马",
+      "tags": [
+        "banking"
+      ]
+    },
+    {
+      "pkg": "com.copycat.ad",
+      "sha256": "354f89bf24789ced200534a81b74860c8f9c1e607975cd91619f7bb92dc02b67",
+      "family": "CopyCat",
+      "type": "trojan",
+      "severity": "high",
+      "desc": "CopyCat 提权/广告欺诈",
+      "tags": [
+        "trojan",
+        "root",
+        "ad"
+      ]
+    },
+    {
+      "pkg": "com.ransom.crypt",
+      "sha256": "f99f2c761578a73d3f16a47e57822f66a63c10942917440759a80fe37861ac2f",
+      "family": "CryptLocker",
+      "type": "ransomware",
+      "severity": "critical",
+      "desc": "勒索文件加密木马",
+      "tags": [
+        "ransom",
+        "crypto"
+      ]
+    },
+    {
+      "pkg": "com.eventbot.bank",
+      "sha256": "86c0a6368e978004032dd427156f5ff520b3b1154a5fa05cc274dcb35297f2b9",
+      "family": "EventBot",
+      "type": "trojan",
+      "severity": "critical",
+      "desc": "EventBot 银行木马",
+      "tags": [
+        "banking",
+        "spy"
+      ]
+    },
+    {
+      "pkg": "com.fakebank.trojan",
+      "sha256": "86d7b1c8d9f29b6176bebede5099204e19559e11117ad3b01ab4d243ab97dcaa",
+      "family": "FakeBank",
+      "type": "trojan",
+      "severity": "critical",
+      "desc": "仿冒银行应用木马",
+      "tags": [
+        "banking",
+        "phishing"
+      ]
+    },
+    {
+      "pkg": "com.falseguide.ad",
+      "sha256": "9b37c6df0d9951ff033e1c4ba9745f74f2813efa3d5e083f1743c1cc15bec144",
+      "family": "FalseGuide",
+      "type": "adware",
+      "severity": "medium",
+      "desc": "仿冒指南类广告木马",
+      "tags": [
+        "ad",
+        "fake"
+      ]
+    },
+    {
+      "pkg": "com.flubot.sms",
+      "sha256": "f40e6c9ab8f23401267ae7b4e9c1ee4d1e7c86453489da8fe943bcd1fb959331",
+      "family": "FluBot",
+      "type": "spyware",
+      "severity": "critical",
+      "desc": "FluBot 短信蠕虫（窃取短信/银行凭据）",
+      "tags": [
+        "sms",
+        "banking",
+        "stealer"
+      ]
+    },
+    {
+      "pkg": "com.ginp.bank",
+      "sha256": "d03ea4fc620f7f51d029ff677f3e909179b3b222d1ba5a2d78be9ea71a558c85",
+      "family": "Ginp",
+      "type": "trojan",
+      "severity": "critical",
+      "desc": "Ginp 银行木马",
+      "tags": [
+        "banking",
+        "overlay"
+      ]
+    },
+    {
+      "pkg": "com.gooligan.root",
+      "sha256": "d5014c4299c9a16cdbeb9a0beff7cbdc0886e8e008c6ae9fbf26227793815e83",
+      "family": "Gooligan",
+      "type": "trojan",
+      "severity": "high",
+      "desc": "Gooligan 提权木马",
+      "tags": [
+        "trojan",
+        "root"
+      ]
+    },
+    {
+      "pkg": "com.guerrilla.ad",
+      "sha256": "2ca6779531a0055fc8b93a0a5578dd5cec2c32b1375c9967ea372b978f65e6be",
+      "family": "Guerrilla",
+      "type": "adware",
+      "severity": "medium",
+      "desc": "Guerrilla 广告推送",
+      "tags": [
+        "ad"
+      ]
+    },
+    {
+      "pkg": "com.hummingbad.root",
+      "sha256": "2a9e9bc8d79c93c1ec3fb786cac10c7b1e3192b8d86eaea1d0e195232e1975e0",
+      "family": "HummingBad",
+      "type": "trojan",
+      "severity": "high",
+      "desc": "HummingBad 提权木马",
+      "tags": [
+        "trojan",
+        "root"
+      ]
+    },
+    {
+      "pkg": "com.hydra.bank",
+      "sha256": "2d876b6908133e50285c3e07c7aee1af9d14b64108b93224db71ca6e64528bb6",
+      "family": "Hydra",
+      "type": "trojan",
+      "severity": "critical",
+      "desc": "Hydra 银行木马",
+      "tags": [
+        "banking"
+      ]
+    },
+    {
+      "pkg": "com.agent.bigbang",
+      "sha256": "af36fa657ff6a057ca4349b7f234fd3a778e2a805f720e78f8060e7c38603aa9",
+      "family": "Joker",
+      "type": "trojan",
+      "severity": "high",
+      "desc": "Joker 订阅木马（自动扣费）",
+      "tags": [
+        "subscription",
+        "billing_fraud"
+      ]
+    },
+    {
+      "pkg": "com.huawei.smartapp.joker",
+      "sha256": "a0149c821fcaefae921119495d118285846d533684dba7e3e5b3d3c5de332a58",
+      "family": "Joker",
+      "type": "trojan",
+      "severity": "high",
+      "desc": "Joker 伪装系统组件的订阅木马",
+      "tags": [
+        "subscription",
+        "billing_fraud"
+      ]
+    },
+    {
+      "pkg": "com.joy.andc",
+      "sha256": "17d012880eea6a8f1bde41958c8b13de4b6576546266c3ffbed66836a54820bf",
+      "family": "Joker",
+      "type": "trojan",
+      "severity": "high",
+      "desc": "Joker 订阅木马（自动扣费）",
+      "tags": [
+        "subscription",
+        "billing_fraud"
+      ]
+    },
+    {
+      "pkg": "com.joy.tjft",
+      "sha256": "25af77ce2e6a19422618c9ff4039ffe79be58cbf1f2d62e706c3be33b2d02c24",
+      "family": "Joker",
+      "type": "trojan",
+      "severity": "high",
+      "desc": "Joker 订阅木马（自动扣费）",
+      "tags": [
+        "subscription",
+        "billing_fraud"
+      ]
+    },
+    {
+      "pkg": "com.zui.joker",
+      "sha256": "fee39a1637cfde8f97fb45ac1555fda24b4b3035c14e1792e5db77a48422d4ea",
+      "family": "Joker",
+      "type": "trojan",
+      "severity": "high",
+      "desc": "Joker 订阅木马（自动扣费）",
+      "tags": [
+        "subscription",
+        "billing_fraud"
+      ]
+    },
+    {
+      "pkg": "com.judy.ad",
+      "sha256": "66162403b0af822b42fb8b074961da72ec1903d06b83b04c69cd2f260b6d8a85",
+      "family": "Judy",
+      "type": "adware",
+      "severity": "medium",
+      "desc": "Judy 广告欺诈木马",
+      "tags": [
+        "ad",
+        "fraud"
+      ]
+    },
+    {
+      "pkg": "com.leifaccess.fraud",
+      "sha256": "73d4493fe9191be99a624209ca364c38ed5b45682d8fcffb30bf3b413fb8df21",
+      "family": "LeifAccess",
+      "type": "riskware",
+      "severity": "medium",
+      "desc": "LeifAccess 点击欺诈",
+      "tags": [
+        "clickfraud",
+        "fraud"
+      ]
+    },
+    {
+      "pkg": "com.happy.locker",
+      "sha256": "256bd408ed38b995d39c6b851e6f8fbe4c5dde944b2736765ede00f437130582",
+      "family": "Locker",
+      "type": "ransomware",
+      "severity": "critical",
+      "desc": "锁机勒索木马",
+      "tags": [
+        "locker",
+        "ransom"
+      ]
+    },
+    {
+      "pkg": "com.mobi.locker",
+      "sha256": "fdb6adbce1d89f835760406f67ab9a64a9c36173ed2ec459c47f62fbea36ae84",
+      "family": "Locker",
+      "type": "ransomware",
+      "severity": "critical",
+      "desc": "锁机勒索木马",
+      "tags": [
+        "locker",
+        "ransom"
+      ]
+    },
+    {
+      "pkg": "com.zhh.locker",
+      "sha256": "59dd3bfedfca86a76cf967d5811f924e51988d0410e6482aed92c5ab12fa683b",
+      "family": "Locker",
+      "type": "ransomware",
+      "severity": "critical",
+      "desc": "锁机勒索木马",
+      "tags": [
+        "locker",
+        "ransom"
+      ]
+    },
+    {
+      "pkg": "com.zxq.locker",
+      "sha256": "963190ae18ea6d40138583d6fa7223ca591c9020c2aaaaa30c2f3448eb249b5e",
+      "family": "Locker",
+      "type": "ransomware",
+      "severity": "critical",
+      "desc": "锁机勒索木马",
+      "tags": [
+        "locker",
+        "ransom"
+      ]
+    },
+    {
+      "pkg": "com.medusa.bank",
+      "sha256": "ee4f965c33e16feb8e705abb352b2f21ae856c9aef03b2957d1116fa6516f2dd",
+      "family": "Medusa",
+      "type": "trojan",
+      "severity": "critical",
+      "desc": "Medusa 银行木马",
+      "tags": [
+        "banking",
+        "overlay"
+      ]
+    },
+    {
+      "pkg": "com.crypto.miner.hidden",
+      "sha256": "7595f8ee9946fac8465fb2de8d3d2ba9081d070d1288b8e3ea2a96ede9b9acf3",
+      "family": "Miner",
+      "type": "miner",
+      "severity": "high",
+      "desc": "挖矿木马（隐藏）",
+      "tags": [
+        "miner",
+        "crypto"
+      ]
+    },
+    {
+      "pkg": "com.mine.monero.worker",
+      "sha256": "735aabb6c3c6a6415d639ea5e84aabc32d11f17d8d2b64d99aca044b18f587b6",
+      "family": "Miner",
+      "type": "miner",
+      "severity": "high",
+      "desc": "挖矿木马（Monero）",
+      "tags": [
+        "miner",
+        "crypto"
+      ]
+    },
+    {
+      "pkg": "com.android.gms.updater",
+      "sha256": "570f594d750d0c9ddc069afb941a4dcdc704a29027bbcd5cdc1b39cb03db41a5",
+      "family": "Phishing",
+      "type": "phishing",
+      "severity": "high",
+      "desc": "仿冒 GMS 更新的钓鱼木马",
+      "tags": [
+        "phishing",
+        "fake"
+      ]
+    },
+    {
+      "pkg": "com.google.androids",
+      "sha256": "e6270c3c832f255b6688e56faf53959de715ed4a2bf73497c11236360d73f5db",
+      "family": "Phishing",
+      "type": "phishing",
+      "severity": "high",
+      "desc": "仿冒 Google 的钓鱼木马",
+      "tags": [
+        "phishing",
+        "fake"
+      ]
+    },
+    {
+      "pkg": "com.qq.vip.helper",
+      "sha256": "c81f2cc9c361fee2c254613e183a5cb1689309edc68d8713081743b94d0663a7",
+      "family": "Phishing",
+      "type": "phishing",
+      "severity": "high",
+      "desc": "仿冒 QQ 会员的钓鱼木马",
+      "tags": [
+        "phishing",
+        "fake"
+      ]
+    },
+    {
+      "pkg": "com.whatsapp.update.fake",
+      "sha256": "6661f3a1fdb659425494ff31a2f3a34b8775983f52a1afc03ac9d29f183420c1",
+      "family": "Phishing",
+      "type": "phishing",
+      "severity": "high",
+      "desc": "仿冒 WhatsApp 的钓鱼应用",
+      "tags": [
+        "phishing",
+        "fake"
+      ]
+    },
+    {
+      "pkg": "com.spy.rat.remote",
+      "sha256": "bfdf41d177f1b3d691af68f1024c905c7d2f223791fbc6ba1fb60bc11c23082a",
+      "family": "RAT",
+      "type": "trojan",
+      "severity": "critical",
+      "desc": "远控木马（RAT）",
+      "tags": [
+        "rat",
+        "remote"
+      ]
+    },
+    {
+      "pkg": "com.by.zd",
+      "sha256": "df9141ae7e621852078b2c1a3a39929f1c3d281ce1ad3942b4a2e2d1c1fa34f0",
+      "family": "RiskPromo",
+      "type": "riskware",
+      "severity": "medium",
+      "desc": "博彩推广风险软件",
+      "tags": [
+        "gamble",
+        "promo"
+      ]
+    },
+    {
+      "pkg": "com.gamble.promo",
+      "sha256": "2c2f68afd58d9589362aa0b874927f9e02d907b4fb7e88b3d6be6cab266f2814",
+      "family": "RiskPromo",
+      "type": "riskware",
+      "severity": "medium",
+      "desc": "博彩推广风险软件",
+      "tags": [
+        "gamble",
+        "promo"
+      ]
+    },
+    {
+      "pkg": "com.szhk.dt",
+      "sha256": "809bb3f51d17d7e3ce258236726d976c0a96af1df40d819c19da76f5a155a533",
+      "family": "RiskPromo",
+      "type": "riskware",
+      "severity": "medium",
+      "desc": "色情推广风险软件",
+      "tags": [
+        "adult",
+        "promo"
+      ]
+    },
+    {
+      "pkg": "com.android.enhancer",
+      "sha256": "cf5a8bcb5162a4f0d23445c466982382929b754ab2a5d941cab2fdf7effb1b2c",
+      "family": "RiskTool",
+      "type": "riskware",
+      "severity": "medium",
+      "desc": "伪装系统增强工具的风险软件",
+      "tags": [
+        "risk",
+        "fake"
+      ]
+    },
+    {
+      "pkg": "com.battery.saver.pro",
+      "sha256": "adc54b88a5ddbcb34655fdf21339ed48901fa907475b76d1fdfb6d5e9dd41e71",
+      "family": "RiskTool",
+      "type": "riskware",
+      "severity": "medium",
+      "desc": "伪装省电工具的风险软件",
+      "tags": [
+        "risk",
+        "fake"
+      ]
+    },
+    {
+      "pkg": "com.cleanmaster.master",
+      "sha256": "aef4225f8c30654cf1033598730d942699b68a2c4de4d52bbfc23c7af8a26dee",
+      "family": "RiskTool",
+      "type": "riskware",
+      "severity": "low",
+      "desc": "捆绑推广风险软件（Clean Master 仿冒）",
+      "tags": [
+        "risk",
+        "bundle"
+      ]
+    },
+    {
+      "pkg": "com.launcher.cleaner",
+      "sha256": "385afd0405dca87ba89e5f62fe35ba372415f1ff5837a129815c384fa42ad508",
+      "family": "RiskTool",
+      "type": "riskware",
+      "severity": "medium",
+      "desc": "伪装桌面清理的风险软件",
+      "tags": [
+        "risk",
+        "fake"
+      ]
+    },
+    {
+      "pkg": "com.system.optimizer",
+      "sha256": "6806d03355d83fc1403491e1c65b055ac084a374fa916b8d81745e0990df8624",
+      "family": "RiskTool",
+      "type": "riskware",
+      "severity": "medium",
+      "desc": "伪装系统优化工具的风险软件",
+      "tags": [
+        "risk",
+        "fake"
+      ]
+    },
+    {
+      "pkg": "com.rottensys.ad",
+      "sha256": "ad6ed161b1c5bee937bf3f081ab204a2f65331d2f35ff0657dfa832f0bf59d05",
+      "family": "RottenSys",
+      "type": "adware",
+      "severity": "high",
+      "desc": "RottenSys 大规模广告欺诈",
+      "tags": [
+        "ad",
+        "fraud"
+      ]
+    },
+    {
+      "pkg": "com.abc.callback",
+      "sha256": "4076fc2033c299ea6a3248ad6babc168b0a31a021ac85919d033aeb3eabb255f",
+      "family": "SMStealer",
+      "type": "spyware",
+      "severity": "high",
+      "desc": "短信拦截回传木马",
+      "tags": [
+        "sms",
+        "intercept"
+      ]
+    },
+    {
+      "pkg": "com.daemon.sms",
+      "sha256": "88258cc2e3022b9a6b92bee709c510750b7c0776bba878ad7870ece1e90a4fe5",
+      "family": "SMStealer",
+      "type": "spyware",
+      "severity": "high",
+      "desc": "短信窃取木马",
+      "tags": [
+        "sms",
+        "stealer"
+      ]
+    },
+    {
+      "pkg": "com.gold.sms",
+      "sha256": "9db034ffba00bf2eb81a8193770e9a0dc409e14db82f3b55e6eef7343ce1c6c9",
+      "family": "SMStealer",
+      "type": "spyware",
+      "severity": "high",
+      "desc": "短信窃取木马",
+      "tags": [
+        "sms",
+        "stealer"
+      ]
+    },
+    {
+      "pkg": "com.mm.sms.collect",
+      "sha256": "c309fe15385281af57009637f6a6c9189928658a370233d9fb2ac1e51f8c5154",
+      "family": "SMStealer",
+      "type": "spyware",
+      "severity": "high",
+      "desc": "短信窃取木马",
+      "tags": [
+        "sms",
+        "stealer"
+      ]
+    },
+    {
+      "pkg": "com.zhang.sms.receiver",
+      "sha256": "f320ebc23db737d4c5b91eb63426959860020628d77c8aa5749271f023538d2d",
+      "family": "SMStealer",
+      "type": "spyware",
+      "severity": "high",
+      "desc": "短信窃取木马",
+      "tags": [
+        "sms",
+        "stealer"
+      ]
+    },
+    {
+      "pkg": "com.sova.bank",
+      "sha256": "0d2224fd0452e1f633d5a9bbcf42c55411a9d37ff6fd8dc5e03a64db70b4b527",
+      "family": "SOVA",
+      "type": "trojan",
+      "severity": "critical",
+      "desc": "SOVA 银行木马（含勒索模块）",
+      "tags": [
+        "banking",
+        "ransom"
+      ]
+    },
+    {
+      "pkg": "com.sharkbot.bank",
+      "sha256": "0ea1ed84d8cc969a50e2f98ceb19b4c75216801d8ed51396a5617bdeacf8dc4d",
+      "family": "SharkBot",
+      "type": "trojan",
+      "severity": "critical",
+      "desc": "SharkBot 银行木马",
+      "tags": [
+        "banking",
+        "stealer"
+      ]
+    },
+    {
+      "pkg": "com.android.monitor.service",
+      "sha256": "f4ce6dc468a2ea9ebaec471a028b4474b47d78e115ef1305eebb1f76895d44ab",
+      "family": "SpyAgent",
+      "type": "spyware",
+      "severity": "high",
+      "desc": "远控/监控木马",
+      "tags": [
+        "spy",
+        "monitor"
+      ]
+    },
+    {
+      "pkg": "com.tangletbot.sms",
+      "sha256": "bfe4155a0b3b53cce376b49fd52706a6c8b25a40bae605861dc84c69375e048f",
+      "family": "TangleBot",
+      "type": "spyware",
+      "severity": "critical",
+      "desc": "TangleBot 短信/通知拦截木马",
+      "tags": [
+        "sms",
+        "notification",
+        "stealer"
+      ]
+    },
+    {
+      "pkg": "com.teabot.bank",
+      "sha256": "81abbbb072a2d23cd3eaf8111255b4772f0a712454cf4b58734607e0e4da3cd8",
+      "family": "TeaBot",
+      "type": "trojan",
+      "severity": "critical",
+      "desc": "TeaBot 银行木马（覆盖攻击）",
+      "tags": [
+        "banking",
+        "overlay"
+      ]
+    },
+    {
+      "pkg": "com.triada.trojan",
+      "sha256": "3492e21d35b94c2a1a6f350b88927a4bc836d11478781978ec15985010b09467",
+      "family": "Triada",
+      "type": "trojan",
+      "severity": "high",
+      "desc": "Triada 系统级木马",
+      "tags": [
+        "trojan",
+        "system"
+      ]
+    },
+    {
+      "pkg": "com.xenomorph.bank",
+      "sha256": "553c943069a88f777fffc93dd0e68dc60c95fe8f4969a6183f8d4addcd685ce3",
+      "family": "Xenomorph",
+      "type": "trojan",
+      "severity": "critical",
+      "desc": "Xenomorph 银行木马",
+      "tags": [
+        "banking",
+        "overlay"
+      ]
+    }
+  ]
+}
