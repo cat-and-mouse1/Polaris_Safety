@@ -1,4 +1,0 @@
-// Top-level build file. AGP plugins are applied in the modules.
-tasks.register('clean') {
-    delete rootProject.buildDir
-}
