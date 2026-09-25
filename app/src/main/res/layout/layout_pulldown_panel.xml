@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  下拉面板：全屏承载「工具箱」（权限使用 / 最近文件 / 单文件扫描）。
+  由 MainActivity 的全局下拉手势展开，内容逻辑见 ToolsPanelView。
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/pullOverlay"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:visibility="gone">
+
+    <com.polaris.app.view.ToolsPanelView
+        android:id="@+id/pullSheet"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?attr/colorSurface"
+        android:clickable="true"
+        android:focusable="true" />
+
+</FrameLayout>

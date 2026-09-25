@@ -23,7 +23,7 @@ Polaris/
 │       ├── java/com/polaris/app/   # Activity / Service / 扫描引擎
 │       ├── res/                    # 布局、字符串（values / values-en / values-ja）、资源
 │       └── assets/iodb_seed.json   # Polar Region 病毒库种子
-├── polar-region/           # Polar Region IOC 病毒库（独立维护）
+├── polar-region/           # Polar Region IOC 病毒库 v14（大 · 全量 ~357MB）
 │   ├── iodb.json           # IOC 清单（可托管于 GitHub raw 分发）
 │   └── build_ioc.py        # 种子库生成脚本
 ├── gradle/                 # Gradle wrapper
@@ -48,6 +48,8 @@ Polaris/
 
 ## Polar Region 病毒库
 
+> **⚠ 仓库现状（2026-09-13）**：文件名已交换并对齐版本标识。最终约定——**Polar Region = v14 · 大（全量 ~357 MB / 1,610,800 条）**，**Polar Point = v1 · 小（从 Region 筛选的命名家族集，74,771 条 / ~14.3 MB）**。
+
 Polar Region 是一个开源 Android 威胁情报（IOC）清单，用于给 Polaris Safety 提供云端可更新的恶意样本特征。
 
 - **字段**：`pkg`（包名）、`sha256`（样本哈希）、`family`（恶意家族）、`type`（类型）、`severity`（严重度）、`desc`、`tags`
@@ -56,6 +58,19 @@ Polar Region 是一个开源 Android 威胁情报（IOC）清单，用于给 Pol
 - **分发地址**：`https://raw.githubusercontent.com/cat-and-mouse1/Polaris_Safety/main/polar-region/iodb.json`
 
 详见 [polar-region/README.md](polar-region/README.md)。
+
+## ML Detection Engine
+
+Polaris Safety includes on-device ML malware detection trained on the MH-100K dataset.
+
+### Features
+- 24-feature analysis (permissions, API calls, intents)
+- Logistic Regression model (~87% accuracy)
+- Automatic daily model updates
+- Offline capable (no network required)
+
+### Architecture
+See `ml/README.md` for training pipeline details.
 
 ## 许可证
 

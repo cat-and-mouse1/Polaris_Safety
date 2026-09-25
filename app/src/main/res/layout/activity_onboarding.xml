@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/onboardingRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/md_theme_primary">
+
+    <!-- 应用图标 -->
+    <ImageView
+        android:id="@+id/welcomeIcon"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_launcher_foreground"
+        android:scaleX="0"
+        android:scaleY="0"
+        app:tint="@color/md_theme_onPrimary" />
+
+    <!-- 欢迎文字区域 -->
+    <LinearLayout
+        android:id="@+id/welcomeTextGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="200dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:alpha="0">
+
+        <TextView
+            android:id="@+id/welcomeTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tutorial_welcome_title"
+            android:textAppearance="?attr/textAppearanceHeadlineLarge"
+            android:textColor="@color/md_theme_onPrimary"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/welcomeSubtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/tutorial_welcome_subtitle"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textColor="@color/md_theme_onPrimary" />
+    </LinearLayout>
+
+    <!-- 底部面板：ML 引擎 → 病毒库 → 进入 -->
+    <LinearLayout
+        android:id="@+id/bottomPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginBottom="80dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <!-- ML 引擎卡片（是否开启 + 选择模型） -->
+        <LinearLayout
+            android:id="@+id/mlEngineCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:background="@drawable/bg_card_onboarding"
+            android:elevation="4dp"
+            android:layout_marginBottom="12dp"
+            android:alpha="0">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/ml_engine_title"
+                        android:textAppearance="?attr/textAppearanceLabelLarge"
+                        android:textColor="@color/md_theme_onSurface" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="@string/ml_engine_subtitle"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:textColor="@color/md_theme_onSurface" />
+                </LinearLayout>
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/mlEngineSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp" />
+            </LinearLayout>
+
+            <RadioGroup
+                android:id="@+id/mlModelRadioGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="vertical">
+
+                <RadioButton
+                    android:id="@+id/radioMh100k"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="4dp"
+                    android:text="@string/ml_model_mh100k"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="@color/md_theme_onSurface"
+                    app:buttonTint="@color/md_theme_onSurface" />
+
+                <RadioButton
+                    android:id="@+id/radioMh1m"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="4dp"
+                    android:text="@string/ml_model_mh1m"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="@color/md_theme_onSurface"
+                    app:buttonTint="@color/md_theme_onSurface" />
+            </RadioGroup>
+        </LinearLayout>
+
+        <!-- 病毒库选择卡片 -->
+        <LinearLayout
+            android:id="@+id/virusDbCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:background="@drawable/bg_card_onboarding"
+            android:elevation="4dp"
+            android:layout_marginBottom="12dp"
+            android:alpha="0">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/virusdb_select"
+                android:textAppearance="?attr/textAppearanceLabelLarge"
+                android:textColor="@color/md_theme_onSurface" />
+
+            <RadioGroup
+                android:id="@+id/virusDbRadioGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical">
+
+                <RadioButton
+                    android:id="@+id/radioRegion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="4dp"
+                    android:text="@string/virusdb_region_name"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="@color/md_theme_onSurface"
+                    app:buttonTint="@color/md_theme_onSurface" />
+
+                <RadioButton
+                    android:id="@+id/radioPoint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="4dp"
+                    android:text="@string/virusdb_point_name"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="@color/md_theme_onSurface"
+                    app:buttonTint="@color/md_theme_onSurface" />
+            </RadioGroup>
+        </LinearLayout>
+
+        <!-- 进入按钮 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnEnter"
+            style="@style/Widget.Material3.Button"
+            android:layout_width="200dp"
+            android:layout_height="56dp"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/tutorial_enter"
+            android:textColor="@color/md_theme_onPrimaryContainer"
+            android:alpha="0"
+            app:backgroundTint="@color/md_theme_primaryContainer"
+            app:cornerRadius="28dp" />
+
+    </LinearLayout>
+
+    <!-- 病毒库下载进度（选择 Polar Region 时显示） -->
+    <TextView
+        android:id="@+id/downloadStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginBottom="165dp"
+        android:gravity="center"
+        android:textColor="@color/md_theme_onPrimary"
+        android:textSize="14sp"
+        android:visibility="gone" />
+
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/downloadProgress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginBottom="138dp"
+        android:visibility="gone"
+        app:indicatorColor="@color/md_theme_onPrimary"
+        app:trackColor="@color/md_theme_onPrimaryContainer"
+        app:trackThickness="6dp" />
+
+    <!-- 下载中可随时中断 -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnCancelDownload"
+        style="@style/Widget.Material3.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="104dp"
+        android:text="@string/virusdb_cancel_download"
+        android:textColor="@color/md_theme_onPrimary"
+        android:visibility="gone"
+        app:backgroundTint="@android:color/transparent" />
+
+</FrameLayout>

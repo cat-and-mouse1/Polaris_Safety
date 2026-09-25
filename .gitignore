@@ -1,4 +1,4 @@
-# 安卓
+# Android
 *.iml
 .gradle/
 /local.properties
@@ -13,3 +13,21 @@
 *.keystore
 *.jks
 !gradle/wrapper/gradle-wrapper.jar
+# Gradle 构建缓存 (本地生成, 不应入库)
+app/build/
+
+# ---- 数据集 / 病毒库大文件（不入库, 2026-09-25）----
+ml/data/raw/
+ml/train/temp_data/
+data_extracted/iodb.json
+data_extracted/data/
+polar-point/data/
+polar-region/data/
+data(1).zip
+/backups/
+/_trash_gith_cleanup/
+/$
+.gradle_pc/
+
+# ---- 本地工作记忆（不入库）----
+/.workbuddy/

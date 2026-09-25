@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Polaris Safety — Fluent Design 1 Preview (直角版)</title>
+<style>
+/* ================================================================
+   FLUENT DESIGN SYSTEM 1 TOKENS — Polaris Safety 重绘预览
+   ================================================================ */
+:root {
+  --accent-darkest:  #003E73;
+  --accent-darker:   #004E8C;
+  --accent-dark:     #005A9E;
+  --accent:          #0078D4;
+  --accent-light:    #2B88D8;
+  --accent-lighter:  #71AFE5;
+  --accent-lightest: #C7E0F4;
+
+  --success:  #107C10;
+  --caution:  #FF8C00;
+  --critical: #D13438;
+
+  --text-primary:   #000000;
+  --text-secondary: #5C5C5C;
+  --text-disabled:  #A6A6A6;
+  --text-on-accent: #FFFFFF;
+
+  --bg-page:      #F3F3F3;
+  --bg-card:      #FFFFFF;
+  --bg-alt:       #EEEEEE;
+  --bg-control:   #FFFFFF;
+  --bg-smoke:     rgba(0,0,0,0.3);
+  --border-default: rgba(0,0,0,0.08);
+  --border-strong:  rgba(0,0,0,0.4);
+  --divider:        rgba(0,0,0,0.08);
+
+  --radius-control: 0px;
+  --radius-card:    0px;
+
+  --shadow-2:  0 1px 2px rgba(0,0,0,0.10);
+  --shadow-4:  0 2px 4px rgba(0,0,0,0.10);
+  --shadow-8:  0 4px 8px rgba(0,0,0,0.12);
+  --shadow-16: 0 8px 16px rgba(0,0,0,0.14);
+  --shadow-32: 0 16px 32px rgba(0,0,0,0.16);
+
+  --ease-decelerate: cubic-bezier(0.1, 0.9, 0.2, 1);
+  --ease-standard:   cubic-bezier(0.8, 0, 0.2, 1);
+  --dur-fast: 250ms;
+  --dur-normal: 300ms;
+
+  --sp-xs: 8px;  --sp-s: 12px;
+  --sp-m: 16px;  --sp-l: 24px;  --sp-xl: 32px;
+
+  --font-ui: 'Segoe UI', 'Microsoft YaHei UI', system-ui, sans-serif;
+}
+
+html[data-theme="dark"] {
+  --text-primary:   #FFFFFF;
+  --text-secondary: #C8C8C8;
+  --text-disabled:  #6E6E6E;
+  --bg-page:        #000000;
+  --bg-card:        #1C1C1E;
+  --bg-control:     #2B2B2B;
+  --bg-alt:         #262626;
+  --bg-smoke:       rgba(0,0,0,0.6);
+  --border-default: rgba(255,255,255,0.08);
+  --border-strong:  rgba(255,255,255,0.4);
+  --divider:        rgba(255,255,255,0.08);
+  --accent-light:   #4CC2FF;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-ui);
+  background: #1a1a2e;
+  color: var(--text-primary);
+  line-height: 1.4;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 24px 16px;
+}
+
+/* ===== Phone Frame ===== */
+.phone-frame {
+  width: 390px;
+  min-height: 844px;
+  background: var(--bg-page);
+  border-radius: 0px;
+  box-shadow: var(--shadow-32);
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* ===== Status Bar ===== */
+.status-bar {
+  height: 44px;
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--divider);
+}
+.status-bar .time { font-size: 15px; font-weight: 600; }
+.status-bar .icons { display: flex; gap: 6px; align-items: center; }
+
+/* ===== App Content ===== */
+.app-content {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* ===== Header ===== */
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.header-logo {
+  width: 56px;
+  height: 56px;
+  background: var(--accent-lightest);
+  border-radius: 0px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.header-logo svg { width: 30px; height: 30px; }
+.header-text { margin-left: 16px; flex: 1; }
+.header-text h1 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.header-text p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+.header-actions {
+  display: flex;
+  gap: 4px;
+}
+.header-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  border-radius: 0px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  transition: background var(--dur-fast);
+}
+.header-btn:hover { background: var(--bg-alt); }
+.header-btn svg { width: 20px; height: 20px; }
+
+/* ===== Guard Status Card ===== */
+.guard-status {
+  background: var(--accent);
+  border-radius: 0px;
+  padding: 16px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.guard-status .shield-icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+.guard-status .shield-icon svg { width: 100%; height: 100%; }
+.guard-status .status-label {
+  font-size: 12px;
+  color: rgba(255,255,255,0.9);
+}
+.guard-status .status-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* ===== Card Base ===== */
+.card {
+  background: var(--bg-card);
+  border-radius: 0px;
+  box-shadow: var(--shadow-4);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.card-inner {
+  padding: 14px 16px;
+}
+
+/* ===== AI Engine Card ===== */
+.ai-engine-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: box-shadow var(--dur-fast);
+}
+.ai-engine-card:hover { box-shadow: var(--shadow-8); }
+.ai-engine-badge {
+  width: 40px;
+  height: 40px;
+  background: var(--accent-lightest);
+  border-radius: 0px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.ai-engine-badge svg { width: 22px; height: 22px; color: var(--accent); }
+.ai-engine-info { flex: 1; }
+.ai-engine-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.ai-engine-status {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+.ai-badge {
+  background: var(--accent-lightest);
+  color: var(--accent-dark);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 0px;
+}
+
+/* ===== Section Header ===== */
+.section-header {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 20px 0 10px;
+}
+
+/* ===== Mode Card ===== */
+.mode-card {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: box-shadow var(--dur-fast);
+}
+.mode-card:hover { box-shadow: var(--shadow-8); }
+.mode-card-inner {
+  padding: 16px;
+}
+.mode-card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.mode-badge {
+  width: 44px;
+  height: 44px;
+  background: var(--accent-lightest);
+  border-radius: 0px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.mode-badge svg { width: 24px; height: 24px; color: var(--accent); }
+.mode-badge.root { background: #FFDAD6; }
+.mode-badge.root svg { color: var(--critical); }
+.mode-badge.shizuku { background: #FFF3E0; }
+.mode-badge.shizuku svg { color: var(--caution); }
+.mode-badge.accessibility { background: #E8F5E9; }
+.mode-badge.accessibility svg { color: var(--success); }
+.mode-info { flex: 1; }
+.mode-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.mode-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+.mode-status {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 0px;
+  white-space: nowrap;
+}
+.mode-status.ready { background: #E8F5E9; color: var(--success); }
+.mode-status.need-auth { background: #FFF3E0; color: var(--caution); }
+.mode-status.guarding { background: var(--accent-lightest); color: var(--accent); }
+
+/* Power Dots */
+.power-dots {
+  display: flex;
+  gap: 4px;
+  margin-top: 14px;
+  padding: 0 2px;
+}
+.power-dot {
+  flex: 1;
+  height: 6px;
+  border-radius: 0px;
+  background: var(--bg-alt);
+  transition: background var(--dur-fast);
+}
+.power-dot.active { background: var(--accent); }
+.power-dot.root-active { background: var(--critical); }
+
+/* ===== ML Engine Card ===== */
+.ml-engine-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ml-engine-info { flex: 1; }
+.ml-engine-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.ml-engine-subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+  position: relative;
+  width: 44px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: var(--border-strong);
+  border-radius: 0px;
+  transition: var(--dur-fast);
+}
+.toggle-slider::before {
+  content: "";
+  position: absolute;
+  height: 10px;
+  width: 10px;
+  left: 3px;
+  bottom: 3px;
+  background: var(--text-primary);
+  border-radius: 0px;
+  transition: var(--dur-fast);
+}
+.toggle-switch input:checked + .toggle-slider { background: var(--accent); }
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(24px);
+  background: #fff;
+  width: 12px;
+  height: 12px;
+  bottom: 2px;
+}
+
+/* Model Selector */
+.model-selector {
+  margin-top: 12px;
+}
+.model-selector-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+.model-selector-chips {
+  display: flex;
+  gap: 8px;
+}
+.model-chip {
+  padding: 8px 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: 0px;
+  background: var(--bg-control);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all var(--dur-fast);
+  font-family: var(--font-ui);
+  color: var(--text-primary);
+}
+.model-chip:hover { background: var(--bg-alt); }
+.model-chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-on-accent);
+}
+
+/* ML Scan Button */
+.ml-scan-btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 12px;
+  background: var(--accent-lightest);
+  border: none;
+  border-radius: 0px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-dark);
+  cursor: pointer;
+  font-family: var(--font-ui);
+  transition: background var(--dur-fast);
+}
+.ml-scan-btn:hover { background: var(--accent-lighter); }
+
+/* ===== Virus DB Card ===== */
+.virusdb-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.virusdb-shield {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+.virusdb-shield svg { width: 100%; height: 100%; color: var(--accent); }
+.virusdb-info { flex: 1; }
+.virusdb-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.virusdb-version {
+  font-size: 11px;
+  color: var(--accent);
+  background: var(--accent-lightest);
+  padding: 2px 8px;
+  border-radius: 0px;
+  font-weight: 600;
+  margin-left: 8px;
+}
+.virusdb-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  line-height: 1.5;
+}
+.virusdb-source {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+  padding: 8px;
+  background: var(--bg-alt);
+  border-radius: 0px;
+}
+.virusdb-update-btn {
+  width: 100%;
+  padding: 10px;
+  margin-top: 12px;
+  background: transparent;
+  border: 1px solid var(--accent);
+  border-radius: 0px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+  font-family: var(--font-ui);
+  transition: all var(--dur-fast);
+}
+.virusdb-update-btn:hover {
+  background: var(--accent);
+  color: var(--text-on-accent);
+}
+
+/* ===== Bottom Nav ===== */
+.bottom-nav {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: var(--bg-card);
+  border-top: 1px solid var(--divider);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 0px;
+  transition: background var(--dur-fast);
+}
+.nav-item:hover { background: var(--bg-alt); }
+.nav-item svg { width: 20px; height: 20px; color: var(--text-secondary); }
+.nav-item.active svg { color: var(--accent); }
+.nav-item span {
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+.nav-item.active span { color: var(--accent); font-weight: 600; }
+
+/* ===== Screens Container ===== */
+.screens {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+}
+.screen-label {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.8);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* ===== Page Title ===== */
+.page-title {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.page-title h1 {
+  font-size: 34px;
+  font-weight: 300;
+  color: #fff;
+}
+.page-title p {
+  font-size: 14px;
+  color: rgba(255,255,255,0.7);
+  margin-top: 8px;
+}
+
+/* ===== Theme Toggle ===== */
+.theme-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 100;
+}
+.theme-btn {
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.1);
+  border-radius: 0px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  backdrop-filter: blur(10px);
+  transition: background var(--dur-fast);
+}
+.theme-btn:hover { background: rgba(255,255,255,0.2); }
+.theme-btn svg { width: 20px; height: 20px; }
+
+/* ===== Settings Screen ===== */
+.settings-topbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--divider);
+}
+.settings-topbar .back-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  border-radius: 0px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+}
+.settings-topbar .back-btn svg { width: 20px; height: 20px; }
+.settings-topbar h2 {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.settings-content { padding: 16px; }
+.settings-section {
+  margin-bottom: 20px;
+}
+.settings-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+.settings-card {
+  background: var(--bg-card);
+  border-radius: 0px;
+  box-shadow: var(--shadow-2);
+  padding: 16px;
+}
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--divider);
+}
+.settings-row:last-child { border-bottom: none; }
+.settings-row-label {
+  font-size: 14px;
+  color: var(--text-primary);
+}
+.settings-row-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* ===== AI Setup Screen ===== */
+.ai-setup-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--divider);
+}
+.ai-setup-header .back-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  border-radius: 0px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+}
+.ai-setup-header .back-btn svg { width: 20px; height: 20px; }
+.ai-setup-header-text h2 {
+  font-size: 20px;
+  font-weight: 600;
+}
+.ai-setup-header-text p {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.ai-provider-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--divider);
+  cursor: pointer;
+  transition: background var(--dur-fast);
+}
+.ai-provider-card:hover { background: var(--bg-alt); }
+.ai-provider-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 0px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+.ai-provider-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.ai-provider-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+.ai-provider-arrow {
+  margin-left: auto;
+  color: var(--text-secondary);
+}
+
+/* ===== Strategy Card ===== */
+.strategy-card {
+  background: var(--bg-card);
+  border-radius: 0px;
+  box-shadow: var(--shadow-2);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.strategy-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+</style>
+</head>
+<body>
+
+<!-- Theme Toggle -->
+<div class="theme-toggle">
+  <button class="theme-btn" onclick="toggleTheme()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+  </button>
+</div>
+
+<div class="page-title">
+  <h1>Polaris Safety · Fluent Design 1 Preview</h1>
+  <p>基于 Fluent Design System 1 直角版设计规范的 UI 重绘预览（未修改实际代码）</p>
+</div>
+
+<div class="screens">
+
+<!-- ============ SCREEN 1: MAIN ============ -->
+<div>
+  <div class="screen-label">主界面</div>
+  <div class="phone-frame">
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <div class="icons">
+        <svg width="16" height="12" viewBox="0 0 16 12"><path d="M1 9h2v3H1zM5 6h2v6H5zM9 3h2v9H9zM13 0h2v12h-2z" fill="currentColor"/></svg>
+        <svg width="16" height="12" viewBox="0 0 16 12"><path d="M8 2C5.8 2 3.8 2.9 2.3 4.3L0 2C2.1 0 4.9-1 8-1s5.9 1 8 1l-2.3 2.3C12.2 2.9 10.2 2 8 2zm-4 5.2L2 5c1.5-1.3 3.5-2 6-2s4.5.7 6 2l-2 2.2c-1.1-1-2.5-1.5-4-1.5S5.1 6.2 4 7.2zM8 8c-1 0-2 .5-2.7 1.2L8 12l2.7-2.8C10 8.5 9 8 8 8z" fill="currentColor"/></svg>
+        <svg width="24" height="12" viewBox="0 0 24 12"><rect x="0" y="1" width="20" height="10" rx="2" stroke="currentColor" fill="none" stroke-width="1"/><rect x="21" y="4" width="2" height="4" rx="1" fill="currentColor"/><rect x="2" y="3" width="14" height="6" rx="1" fill="#107C10"/></svg>
+      </div>
+    </div>
+
+    <div class="app-content">
+      <!-- Header -->
+      <div class="header">
+        <div class="header-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5" stroke-linecap="round">
+            <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5Z"/>
+          </svg>
+        </div>
+        <div class="header-text">
+          <h1>Polaris Safety</h1>
+          <p>手机安全守护</p>
+        </div>
+        <div class="header-actions">
+          <button class="header-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          </button>
+          <button class="header-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Guard Status -->
+      <div class="guard-status">
+        <div class="shield-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div>
+          <div class="status-label">手机安全守护</div>
+          <div class="status-text">守护未激活</div>
+        </div>
+      </div>
+
+      <!-- AI Engine Card -->
+      <div class="card">
+        <div class="card-inner ai-engine-card">
+          <div class="ai-engine-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="2" y="6" width="20" height="12" rx="2"/>
+              <line x1="2" y1="10" x2="22" y2="10"/>
+              <line x1="2" y1="14" x2="22" y2="14"/>
+              <circle cx="6" cy="8" r="1" fill="currentColor"/>
+              <circle cx="6" cy="12" r="1" fill="currentColor"/>
+              <circle cx="6" cy="16" r="1" fill="currentColor"/>
+            </svg>
+          </div>
+          <div class="ai-engine-info">
+            <div class="ai-engine-title">AI 智能判定引擎</div>
+            <div class="ai-engine-status">已接入 2 个供应商 · 交叉检测模式</div>
+          </div>
+          <div class="ai-badge">AI 判定</div>
+        </div>
+      </div>
+
+      <!-- Mode List -->
+      <div class="section-header">守护模式</div>
+
+      <!-- Normal Mode -->
+      <div class="card mode-card">
+        <div class="mode-card-inner">
+          <div class="mode-card-top">
+            <div class="mode-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+            </div>
+            <div class="mode-info">
+              <div class="mode-name">Normal 模式</div>
+              <div class="mode-desc">定期浅层扫描，检测并提醒可疑应用</div>
+            </div>
+            <div class="mode-status ready">就绪</div>
+          </div>
+          <div class="power-dots">
+            <div class="power-dot active"></div>
+            <div class="power-dot"></div>
+            <div class="power-dot"></div>
+            <div class="power-dot"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Accessibility Mode -->
+      <div class="card mode-card">
+        <div class="mode-card-inner">
+          <div class="mode-card-top">
+            <div class="mode-badge accessibility">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="4" r="2"/><path d="M12 8v8M8 12h8M9 21l3-5 3 5"/></svg>
+            </div>
+            <div class="mode-info">
+              <div class="mode-name">Accessibility 模式</div>
+              <div class="mode-desc">请求无障碍权限，深层扫描并尝试直接处置</div>
+            </div>
+            <div class="mode-status need-auth">需授权</div>
+          </div>
+          <div class="power-dots">
+            <div class="power-dot active"></div>
+            <div class="power-dot active"></div>
+            <div class="power-dot"></div>
+            <div class="power-dot"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shizuku Mode -->
+      <div class="card mode-card">
+        <div class="mode-card-inner">
+          <div class="mode-card-top">
+            <div class="mode-badge shizuku">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+            </div>
+            <div class="mode-info">
+              <div class="mode-name">Shizuku 模式</div>
+              <div class="mode-desc">请求 Shizuku 权限，深度扫描并提前拦截恶意程序</div>
+            </div>
+            <div class="mode-status need-auth">需授权</div>
+          </div>
+          <div class="power-dots">
+            <div class="power-dot active"></div>
+            <div class="power-dot active"></div>
+            <div class="power-dot active"></div>
+            <div class="power-dot"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Root Mode -->
+      <div class="card mode-card">
+        <div class="mode-card-inner">
+          <div class="mode-card-top">
+            <div class="mode-badge root">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" transform="rotate(45 12 12)"><circle cx="12" cy="8" r="4"/><line x1="12" y1="12" x2="12" y2="20"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+            </div>
+            <div class="mode-info">
+              <div class="mode-name">Root 模式</div>
+              <div class="mode-desc">调用 Root 权限，全方位拦截与守护</div>
+            </div>
+            <div class="mode-status need-auth">需授权</div>
+          </div>
+          <div class="power-dots">
+            <div class="power-dot active"></div>
+            <div class="power-dot active"></div>
+            <div class="power-dot active"></div>
+            <div class="power-dot active root-active"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Spacer -->
+      <div style="height: 72px;"></div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav">
+      <div class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        <span>首页</span>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span>扫描</span>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span>遮断</span>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>行为</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SCREEN 2: SETTINGS ============ -->
+<div>
+  <div class="screen-label">设置</div>
+  <div class="phone-frame">
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <div class="icons">
+        <svg width="16" height="12" viewBox="0 0 16 12"><path d="M1 9h2v3H1zM5 6h2v6H5zM9 3h2v9H9zM13 0h2v12h-2z" fill="currentColor"/></svg>
+        <svg width="24" height="12" viewBox="0 0 24 12"><rect x="0" y="1" width="20" height="10" rx="2" stroke="currentColor" fill="none" stroke-width="1"/><rect x="21" y="4" width="2" height="4" rx="1" fill="currentColor"/><rect x="2" y="3" width="14" height="6" rx="1" fill="#107C10"/></svg>
+      </div>
+    </div>
+
+    <div class="settings-topbar">
+      <button class="back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <h2>设置</h2>
+    </div>
+
+    <div class="settings-content">
+      <!-- Default Engine -->
+      <div class="settings-section">
+        <div class="settings-section-title">点击模式后的默认引擎</div>
+        <div class="settings-card">
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Normal 扫描</div>
+              <div class="settings-row-desc">既定程序机械扫描，按预设规则快速检测</div>
+            </div>
+            <div class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">AI 智能判定</div>
+              <div class="settings-row-desc">接入大模型 API，由 AI 智能判断清除或保留</div>
+            </div>
+            <div class="toggle-switch">
+              <input type="checkbox">
+              <span class="toggle-slider"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Engine -->
+      <div class="settings-section">
+        <div class="settings-section-title">AI 智能判定引擎</div>
+        <div class="settings-card">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="ai-engine-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="2" y="6" width="20" height="12" rx="2"/>
+                <line x1="2" y1="10" x2="22" y2="10"/>
+                <line x1="2" y1="14" x2="22" y2="14"/>
+                <circle cx="6" cy="8" r="1" fill="currentColor"/>
+                <circle cx="6" cy="12" r="1" fill="currentColor"/>
+              </svg>
+            </div>
+            <div style="flex:1;">
+              <div class="settings-row-label">AI 智能判定引擎</div>
+              <div class="settings-row-desc">已接入 2 个供应商</div>
+            </div>
+            <div class="ai-badge">配置</div>
+          </div>
+        </div>
+
+        <!-- Multi-Model Strategy -->
+        <div class="settings-card" style="margin-top:12px;">
+          <div class="strategy-title">多模型策略</div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">交叉检测</div>
+              <div class="settings-row-desc">任一模型判定恶意即标记为恶意</div>
+            </div>
+            <div class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">最快优先</div>
+              <div class="settings-row-desc">采用最先返回的判定结果</div>
+            </div>
+            <div class="toggle-switch">
+              <input type="checkbox">
+              <span class="toggle-slider"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ML Engine -->
+      <div class="settings-section">
+        <div class="settings-section-title">ML 机器学习检测引擎</div>
+        <div class="settings-card">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="ai-engine-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="2" y="6" width="20" height="12" rx="2"/>
+                <line x1="2" y1="10" x2="22" y2="10"/>
+                <circle cx="6" cy="8" r="1" fill="currentColor"/>
+              </svg>
+            </div>
+            <div style="flex:1;">
+              <div class="settings-row-label">ML 机器学习检测引擎</div>
+              <div class="settings-row-desc">基于 MH 系列数据集训练的设备端模型</div>
+            </div>
+            <div class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </div>
+          </div>
+
+          <div class="model-selector">
+            <div class="model-selector-label">检测模型</div>
+            <div class="model-selector-chips">
+              <button class="model-chip active">轻量</button>
+              <button class="model-chip">强力</button>
+            </div>
+          </div>
+
+          <button class="ml-scan-btn">ML 扫描</button>
+        </div>
+      </div>
+
+      <!-- Virus DB -->
+      <div class="settings-section">
+        <div class="settings-section-title">病毒库 · Polar Region</div>
+        <div class="settings-card">
+          <div class="virusdb-header">
+            <div class="virusdb-shield">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div class="virusdb-info">
+              <div>
+                <span class="virusdb-title">Polar Region 开源威胁情报库</span>
+                <span class="virusdb-version">v16</span>
+              </div>
+              <div class="virusdb-meta">更新于 2026-09-06 · 11,620 条威胁情报</div>
+            </div>
+          </div>
+          <div class="virusdb-source">数据源：abuse.ch + URLhaus + TweetFeed + DataDog + pypi_malregistry + Blocklist.de</div>
+          <button class="virusdb-update-btn">立即更新</button>
+        </div>
+      </div>
+
+      <div style="height: 20px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SCREEN 3: AI SETUP ============ -->
+<div>
+  <div class="screen-label">AI 接入</div>
+  <div class="phone-frame">
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <div class="icons">
+        <svg width="16" height="12" viewBox="0 0 16 12"><path d="M1 9h2v3H1zM5 6h2v6H5zM9 3h2v9H9zM13 0h2v12h-2z" fill="currentColor"/></svg>
+        <svg width="24" height="12" viewBox="0 0 24 12"><rect x="0" y="1" width="20" height="10" rx="2" stroke="currentColor" fill="none" stroke-width="1"/><rect x="21" y="4" width="2" height="4" rx="1" fill="currentColor"/><rect x="2" y="3" width="14" height="6" rx="1" fill="#107C10"/></svg>
+      </div>
+    </div>
+
+    <div class="ai-setup-header">
+      <button class="back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="ai-setup-header-text">
+        <h2>AI 智能判定引擎</h2>
+        <p>选择服务商并接入 API</p>
+      </div>
+    </div>
+
+    <div class="settings-content">
+      <!-- Multi-Model Strategy -->
+      <div class="strategy-card">
+        <div class="strategy-title">多模型策略</div>
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-label">交叉检测</div>
+            <div class="settings-row-desc">任一模型判定恶意即标记为恶意</div>
+          </div>
+          <div class="toggle-switch">
+            <input type="checkbox" checked>
+            <span class="toggle-slider"></span>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-label">最快优先</div>
+            <div class="settings-row-desc">采用最先返回的判定结果</div>
+          </div>
+          <div class="toggle-switch">
+            <input type="checkbox">
+            <span class="toggle-slider"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Provider -->
+      <div class="section-header">服务商列表</div>
+
+      <div class="card" style="border: 2px dashed var(--accent-lighter);">
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;">
+          <div class="ai-engine-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </div>
+          <div style="flex:1;">
+            <div class="settings-row-label">添加服务商</div>
+            <div class="settings-row-desc">从预置服务商中选择或自定义配置</div>
+          </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+
+      <!-- Provider: DeepSeek -->
+      <div class="card">
+        <div class="ai-provider-card">
+          <div class="ai-provider-badge" style="background:#4D6BFE;">DS</div>
+          <div style="flex:1;">
+            <div class="ai-provider-name">DeepSeek</div>
+            <div class="ai-provider-desc">deepseek-chat · 已启用</div>
+          </div>
+          <div class="toggle-switch">
+            <input type="checkbox" checked>
+            <span class="toggle-slider"></span>
+          </div>
+        </div>
+        <div style="padding:8px 16px 12px;display:flex;gap:8px;">
+          <button class="model-chip active" style="font-size:11px;padding:4px 10px;">获取模型列表</button>
+          <button class="model-chip" style="font-size:11px;padding:4px 10px;">编辑配置</button>
+        </div>
+      </div>
+
+      <!-- Provider: Kimi -->
+      <div class="card">
+        <div class="ai-provider-card">
+          <div class="ai-provider-badge" style="background:#16181D;">Ki</div>
+          <div style="flex:1;">
+            <div class="ai-provider-name">Kimi</div>
+            <div class="ai-provider-desc">moonshot-v1-8k · 已启用</div>
+          </div>
+          <div class="toggle-switch">
+            <input type="checkbox" checked>
+            <span class="toggle-slider"></span>
+          </div>
+        </div>
+        <div style="padding:8px 16px 12px;display:flex;gap:8px;">
+          <button class="model-chip active" style="font-size:11px;padding:4px 10px;">获取模型列表</button>
+          <button class="model-chip" style="font-size:11px;padding:4px 10px;">编辑配置</button>
+        </div>
+      </div>
+
+      <!-- Provider: GLM -->
+      <div class="card">
+        <div class="ai-provider-card">
+          <div class="ai-provider-badge" style="background:#3859FF;">GL</div>
+          <div style="flex:1;">
+            <div class="ai-provider-name">GLM</div>
+            <div class="ai-provider-desc">glm-4-flash · 已启用</div>
+          </div>
+          <div class="toggle-switch">
+            <input type="checkbox" checked>
+            <span class="toggle-slider"></span>
+          </div>
+        </div>
+        <div style="padding:8px 16px 12px;display:flex;gap:8px;">
+          <button class="model-chip active" style="font-size:11px;padding:4px 10px;">获取模型列表</button>
+          <button class="model-chip" style="font-size:11px;padding:4px 10px;">编辑配置</button>
+        </div>
+      </div>
+
+      <!-- Provider: Qwen -->
+      <div class="card">
+        <div class="ai-provider-card">
+          <div class="ai-provider-badge" style="background:#615EFC;">Qw</div>
+          <div style="flex:1;">
+            <div class="ai-provider-name">Qwen</div>
+            <div class="ai-provider-desc">qwen-turbo · 未启用</div>
+          </div>
+          <div class="toggle-switch">
+            <input type="checkbox">
+            <span class="toggle-slider"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Provider: OpenRouter -->
+      <div class="card">
+        <div class="ai-provider-card">
+          <div class="ai-provider-badge" style="background:#343541;">OR</div>
+          <div style="flex:1;">
+            <div class="ai-provider-name">OpenRouter</div>
+            <div class="ai-provider-desc">聚合多服务商模型 · 未启用</div>
+          </div>
+          <div class="toggle-switch">
+            <input type="checkbox">
+            <span class="toggle-slider"></span>
+          </div>
+        </div>
+      </div>
+
+      <div style="height: 20px;"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- screens -->
+
+<script>
+function toggleTheme() {
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme');
+  html.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
+}
+</script>
+</body>
+</html>

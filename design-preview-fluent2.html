@@ -1,0 +1,2602 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WinUI 3 · Fluent Design 2 完整规范预览</title>
+  <style>
+    /* ================================================================
+       FLUENT DESIGN 2 / WINUI 3 — 严格规范实现
+       参考: WinUI 3 Gallery · Fluent 2 Design System · Windows 11
+       ================================================================ */
+
+    /* ---------- 全局重置 ---------- */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ================================================================
+       1. DESIGN TOKENS — 完全遵循 Fluent 2 令牌体系
+       ================================================================ */
+    :root {
+      /* ----- 1.1 品牌色 (Fluent 2 16阶) ----- */
+      --brand-10: #050A14;
+      --brand-20: #0B162B;
+      --brand-30: #13223F;
+      --brand-40: #1B2E54;
+      --brand-50: #223A6A;
+      --brand-60: #2B4D85;
+      --brand-70: #3A5F9E;
+      --brand-80: #4F72B8;
+      --brand-90: #6B8EC9;
+      --brand-100: #8AAFE0;
+      --brand-110: #A6C4E8;
+      --brand-120: #B1CCF2;
+      --brand-130: #C7DCF5;
+      --brand-140: #D6E9FF;
+      --brand-150: #EBF3FE;
+      --brand-160: #FAFCFF;
+
+      /* ----- 1.2 品牌色别名 (Fluent 2 规范) ----- */
+      --color-brand-background: var(--brand-80);
+      --color-brand-background-hover: var(--brand-70);
+      --color-brand-background-pressed: var(--brand-60);
+      --color-brand-background-disabled: var(--brand-120);
+      --color-brand-foreground: var(--brand-80);
+      --color-brand-foreground-hover: var(--brand-70);
+      --color-brand-foreground-pressed: var(--brand-60);
+      --color-brand-foreground-disabled: var(--brand-120);
+      --color-brand-border: var(--brand-80);
+      --color-brand-border-hover: var(--brand-70);
+      --color-brand-border-pressed: var(--brand-60);
+      --color-brand-border-disabled: var(--brand-120);
+
+      /* ----- 1.3 中性色 (Fluent 2 28阶) ----- */
+      --neutral-1: #FFFFFF;
+      --neutral-2: #FAFAFA;
+      --neutral-3: #F5F5F5;
+      --neutral-4: #F0F0F0;
+      --neutral-5: #E8E8E8;
+      --neutral-6: #E0E0E0;
+      --neutral-7: #D1D1D1;
+      --neutral-8: #C2C2C2;
+      --neutral-9: #A8A8A8;
+      --neutral-10: #8A8A8A;
+      --neutral-11: #6E6E6E;
+      --neutral-12: #525252;
+      --neutral-13: #3D3D3D;
+      --neutral-14: #2E2E2E;
+      --neutral-15: #1F1F1F;
+      --neutral-16: #141414;
+      --neutral-17: #0D0D0D;
+
+      /* ----- 1.4 语义颜色 (Fluent 2 规范) ----- */
+      --color-success: #107C10;
+      --color-success-background: rgba(16, 124, 16, 0.08);
+      --color-success-border: rgba(16, 124, 16, 0.2);
+      --color-warning: #FF8C00;
+      --color-warning-background: rgba(255, 140, 0, 0.08);
+      --color-warning-border: rgba(255, 140, 0, 0.2);
+      --color-error: #D13438;
+      --color-error-background: rgba(209, 52, 56, 0.08);
+      --color-error-border: rgba(209, 52, 56, 0.2);
+      --color-info: #0078D4;
+      --color-info-background: rgba(0, 120, 212, 0.08);
+      --color-info-border: rgba(0, 120, 212, 0.2);
+
+      /* ----- 1.5 文本颜色 (Fluent 2 别名) ----- */
+      --color-text-primary: #1A1A1A;
+      --color-text-secondary: rgba(0, 0, 0, 0.60);
+      --color-text-tertiary: rgba(0, 0, 0, 0.45);
+      --color-text-disabled: rgba(0, 0, 0, 0.36);
+      --color-text-on-accent: #FFFFFF;
+      --color-text-on-accent-disabled: rgba(255, 255, 255, 0.36);
+
+      /* ----- 1.6 背景颜色 (Fluent 2 别名) ----- */
+      --color-background: #F3F3F3;
+      --color-background-card: rgba(255, 255, 255, 0.70);
+      --color-background-card-solid: #FFFFFF;
+      --color-background-alt: rgba(0, 0, 0, 0.04);
+      --color-background-control: #FFFFFF;
+      --color-background-smoke: rgba(0, 0, 0, 0.30);
+      --color-background-layer: rgba(255, 255, 255, 0.50);
+
+      /* ----- 1.7 边框颜色 (Fluent 2 别名) ----- */
+      --color-border-default: rgba(0, 0, 0, 0.06);
+      --color-border-strong: rgba(0, 0, 0, 0.12);
+      --color-border-divider: rgba(0, 0, 0, 0.08);
+
+      /* ----- 1.8 材质 (Fluent 2 Acrylic & Mica) ----- */
+      --acrylic-blur: 30px;
+      --acrylic-sat: 1.5;
+      --acrylic-opacity: 0.85;
+      --acrylic-tint: 243, 243, 243;
+      --acrylic-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+
+      --mica-opacity: 0.70;
+      --mica-tint: 248, 248, 248;
+
+      /* ----- 1.9 圆角 (Fluent 2 规范: 2/4/6/8) ----- */
+      --radius-none: 0;
+      --radius-small: 2px;
+      --radius-medium: 4px;
+      --radius-large: 6px;
+      --radius-xlarge: 8px;
+      --radius-full: 9999px;
+
+      /* ----- 1.10 阴影 (Fluent 2 Elevation) ----- */
+      --shadow-2: 0 1.6px 3.6px rgba(0, 0, 0, 0.132), 0 0.3px 0.9px rgba(0, 0, 0, 0.108);
+      --shadow-4: 0 3.2px 7.2px rgba(0, 0, 0, 0.132), 0 0.6px 1.8px rgba(0, 0, 0, 0.108);
+      --shadow-8: 0 6.4px 14.4px rgba(0, 0, 0, 0.132), 0 1.2px 3.6px rgba(0, 0, 0, 0.108);
+      --shadow-16: 0 12.8px 28.8px rgba(0, 0, 0, 0.132), 0 2.4px 7.2px rgba(0, 0, 0, 0.108);
+      --shadow-32: 0 25.6px 57.6px rgba(0, 0, 0, 0.132), 0 4.8px 14.4px rgba(0, 0, 0, 0.108);
+      --shadow-64: 0 51.2px 115.2px rgba(0, 0, 0, 0.132), 0 9.6px 28.8px rgba(0, 0, 0, 0.108);
+
+      /* ----- 1.11 动效 (Fluent 2 Motion) ----- */
+      --curve-decelerate: cubic-bezier(0.1, 0.9, 0.2, 1);
+      --curve-accelerate: cubic-bezier(0.7, 0, 1, 1);
+      --curve-standard: cubic-bezier(0.8, 0, 0.2, 1);
+      --dur-ultrafast: 100ms;
+      --dur-faster: 167ms;
+      --dur-fast: 250ms;
+      --dur-normal: 300ms;
+      --dur-slow: 500ms;
+
+      /* ----- 1.12 间距 (4px 网格) ----- */
+      --sp-xxs: 4px;
+      --sp-xs: 8px;
+      --sp-s: 12px;
+      --sp-m: 16px;
+      --sp-l: 24px;
+      --sp-xl: 32px;
+      --sp-xxl: 48px;
+      --sp-xxxl: 64px;
+
+      /* ----- 1.13 字体 (WinUI 3 默认) ----- */
+      --font-ui: 'Segoe UI Variable', 'Segoe UI', 'Microsoft YaHei UI', system-ui, sans-serif;
+      --font-icon: 'Segoe MDL2 Assets', 'Segoe Fluent Icons', sans-serif;
+      --font-mono: 'Consolas', 'Courier New', monospace;
+
+      /* ----- 1.14 组件默认值 (Fluent 2) ----- */
+      --control-corner-radius: var(--radius-small);
+      --card-corner-radius: var(--radius-medium);
+      --surface-corner-radius: var(--radius-large);
+    }
+
+    /* ================================================================
+       2. DARK THEME — 完全遵循 Fluent 2 暗色规范
+       ================================================================ */
+    html[data-theme="dark"] {
+      --color-text-primary: #FFFFFF;
+      --color-text-secondary: rgba(255, 255, 255, 0.79);
+      --color-text-tertiary: rgba(255, 255, 255, 0.54);
+      --color-text-disabled: rgba(255, 255, 255, 0.36);
+      --color-text-on-accent: #FFFFFF;
+
+      --color-background: #1A1A1A;
+      --color-background-card: rgba(255, 255, 255, 0.05);
+      --color-background-card-solid: #2E2E2E;
+      --color-background-alt: rgba(255, 255, 255, 0.06);
+      --color-background-control: #3D3D3D;
+      --color-background-smoke: rgba(0, 0, 0, 0.60);
+      --color-background-layer: rgba(58, 58, 58, 0.30);
+
+      --color-border-default: rgba(255, 255, 255, 0.07);
+      --color-border-strong: rgba(255, 255, 255, 0.12);
+      --color-border-divider: rgba(255, 255, 255, 0.08);
+
+      --acrylic-tint: 28, 28, 30;
+      --mica-tint: 35, 35, 38;
+
+      --color-brand-background: #4CC2FF;
+      --color-brand-background-hover: #62CDFF;
+      --color-brand-background-pressed: #0093F9;
+      --color-brand-foreground: #4CC2FF;
+      --color-brand-foreground-hover: #62CDFF;
+      --color-brand-foreground-pressed: #0093F9;
+      --color-brand-border: #4CC2FF;
+      --color-brand-border-hover: #62CDFF;
+      --color-brand-border-pressed: #0093F9;
+
+      --color-success: #6CCB6C;
+      --color-success-background: rgba(108, 203, 108, 0.12);
+      --color-warning: #FFB900;
+      --color-warning-background: rgba(255, 185, 0, 0.12);
+      --color-error: #F17070;
+      --color-error-background: rgba(241, 112, 112, 0.12);
+      --color-info: #4CC2FF;
+      --color-info-background: rgba(76, 194, 255, 0.12);
+    }
+
+    /* ================================================================
+       3. HIGH CONTRAST — 强制颜色模式
+       ================================================================ */
+    @media (forced-colors: active) {
+      :root {
+        --color-brand-background: Highlight;
+        --color-brand-foreground: Highlight;
+        --color-brand-border: Highlight;
+        --color-text-primary: CanvasText;
+        --color-text-secondary: GrayText;
+        --color-background-card: Canvas;
+        --color-background: Canvas;
+        --color-border-default: ButtonBorder;
+        --color-border-strong: ButtonBorder;
+        --shadow-2: none;
+        --shadow-4: none;
+        --shadow-8: none;
+        --shadow-16: none;
+        --shadow-32: none;
+        --shadow-64: none;
+      }
+    }
+
+    /* ================================================================
+       4. 全局基础样式
+       ================================================================ */
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 64px;
+    }
+
+    body {
+      font-family: var(--font-ui);
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      line-height: 1.5;
+      transition: background var(--dur-fast), color var(--dur-fast);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ================================================================
+       5. 排版层级 (Fluent 2 Type Ramp)
+       ================================================================ */
+    .fd-display {
+      font-size: 68px;
+      font-weight: 600;
+      line-height: 92px;
+      letter-spacing: -0.02em;
+    }
+    .fd-title-large {
+      font-size: 40px;
+      font-weight: 600;
+      line-height: 52px;
+      letter-spacing: -0.01em;
+    }
+    .fd-title {
+      font-size: 28px;
+      font-weight: 600;
+      line-height: 36px;
+    }
+    .fd-subtitle {
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 28px;
+    }
+    .fd-body-large {
+      font-size: 18px;
+      font-weight: 400;
+      line-height: 24px;
+    }
+    .fd-body {
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 20px;
+    }
+    .fd-body-strong {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 20px;
+    }
+    .fd-caption {
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 16px;
+    }
+    .fd-caption-strong {
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 16px;
+    }
+
+    /* ================================================================
+       6. 工具类 (Fluent 2 命名)
+       ================================================================ */
+    .text-primary {
+      color: var(--color-text-primary);
+    }
+    .text-secondary {
+      color: var(--color-text-secondary);
+    }
+    .text-tertiary {
+      color: var(--color-text-tertiary);
+    }
+    .text-disabled {
+      color: var(--color-text-disabled);
+    }
+
+    .flex-row {
+      display: flex;
+      gap: var(--sp-m);
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .flex-col {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-s);
+    }
+    .gap-s {
+      gap: var(--sp-s);
+    }
+    .gap-m {
+      gap: var(--sp-m);
+    }
+    .gap-l {
+      gap: var(--sp-l);
+    }
+    .mt-s {
+      margin-top: var(--sp-s);
+    }
+    .mt-m {
+      margin-top: var(--sp-m);
+    }
+    .mb-s {
+      margin-bottom: var(--sp-s);
+    }
+    .mb-m {
+      margin-bottom: var(--sp-m);
+    }
+    .w-full {
+      width: 100%;
+    }
+
+    .mdl2 {
+      font-family: var(--font-icon);
+      font-style: normal;
+      font-weight: normal;
+      speak: none;
+    }
+
+    /* ================================================================
+       7. Acrylic 材质 (Fluent 2)
+       ================================================================ */
+    .acrylic {
+      background: rgba(var(--acrylic-tint), var(--acrylic-opacity));
+      backdrop-filter: blur(var(--acrylic-blur)) saturate(var(--acrylic-sat));
+      -webkit-backdrop-filter: blur(var(--acrylic-blur)) saturate(var(--acrylic-sat));
+      position: relative;
+    }
+    .acrylic::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background: var(--acrylic-noise);
+      border-radius: inherit;
+    }
+    .acrylic>* {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ================================================================
+       8. Mica 材质 (Fluent 2)
+       ================================================================ */
+    .mica {
+      background: rgba(var(--mica-tint), var(--mica-opacity));
+      backdrop-filter: blur(20px) saturate(1.2);
+      -webkit-backdrop-filter: blur(20px) saturate(1.2);
+    }
+
+    /* ================================================================
+       9. Top Navigation (Acrylic 材质)
+       ================================================================ */
+    .topnav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      gap: var(--sp-s);
+      padding: 0 var(--sp-m);
+      border-bottom: 1px solid var(--color-border-divider);
+      background: rgba(var(--acrylic-tint), 0.85);
+      backdrop-filter: blur(var(--acrylic-blur)) saturate(1.5);
+      -webkit-backdrop-filter: blur(var(--acrylic-blur)) saturate(1.5);
+    }
+    .topnav .brand {
+      font-size: 15px;
+      font-weight: 600;
+      flex: 1;
+      white-space: nowrap;
+    }
+    .topnav a.navlink {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      font-size: 13px;
+      padding: 6px 10px;
+      border-radius: var(--control-corner-radius);
+      white-space: nowrap;
+      transition: color var(--dur-ultrafast), background var(--dur-ultrafast);
+    }
+    .topnav a.navlink:hover {
+      color: var(--color-text-primary);
+      background: var(--color-background-alt);
+    }
+    .topnav a.navlink.active {
+      color: var(--color-brand-foreground);
+      font-weight: 600;
+    }
+
+    /* ================================================================
+       10. 布局容器
+       ================================================================ */
+    main {
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 72px var(--sp-l) 80px;
+    }
+
+    section {
+      margin-bottom: 80px;
+      scroll-margin-top: 64px;
+    }
+
+    .sec-head {
+      margin-bottom: var(--sp-xs);
+    }
+    .sec-head h2 {
+      font-size: 34px;
+      font-weight: 300;
+      letter-spacing: -0.01em;
+    }
+    .sec-head p {
+      color: var(--color-text-secondary);
+      font-size: 15px;
+      margin-top: var(--sp-xxs);
+      max-width: 800px;
+    }
+    .sec-tag {
+      display: inline-block;
+      font-size: 11px;
+      color: var(--color-brand-foreground);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-weight: 700;
+      margin-bottom: var(--sp-xxs);
+    }
+
+    .divider-line {
+      height: 1px;
+      background: var(--color-border-divider);
+      margin: var(--sp-m) 0;
+    }
+
+    .grid-auto {
+      display: grid;
+      gap: var(--sp-l);
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+    .grid-2 {
+      display: grid;
+      gap: var(--sp-l);
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    }
+    .grid-3 {
+      display: grid;
+      gap: var(--sp-l);
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    /* ================================================================
+       11. Card (Fluent 2 规范)
+       ================================================================ */
+    .card {
+      position: relative;
+      background: var(--color-background-card);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: var(--card-corner-radius);
+      box-shadow: var(--shadow-4);
+      padding: var(--sp-l);
+      overflow: hidden;
+      transition: box-shadow var(--dur-fast) var(--curve-standard),
+        transform var(--dur-ultrafast) var(--curve-decelerate);
+      border: 1px solid var(--color-border-default);
+    }
+    .card:hover {
+      box-shadow: var(--shadow-16);
+    }
+    .card:active {
+      transform: scale(0.99);
+    }
+    .card h3 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: var(--sp-xs);
+    }
+    .card p {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+    }
+    .card.compact {
+      padding: var(--sp-m);
+    }
+    .card.compact h3 {
+      font-size: 16px;
+      margin-bottom: var(--sp-xxs);
+    }
+
+    /* ================================================================
+       12. Reveal Highlight (Fluent Light)
+       ================================================================ */
+    .reveal {
+      position: relative;
+      isolation: isolate;
+    }
+    .reveal::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      border-radius: inherit;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity var(--dur-fast);
+      background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%),
+          rgba(0, 120, 212, 0.22), transparent 70%);
+    }
+    .reveal:hover::before {
+      opacity: 1;
+    }
+    html[data-theme="dark"] .reveal::before {
+      background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%),
+          rgba(255, 255, 255, 0.12), transparent 70%);
+    }
+
+    /* ================================================================
+       13. Hero (Fluent 2 规范)
+       ================================================================ */
+    .hero {
+      border-radius: var(--card-corner-radius);
+      padding: var(--sp-xxl) var(--sp-xl);
+      margin-bottom: 80px;
+      background: linear-gradient(135deg, var(--brand-40), var(--color-brand-background) 55%, #00B7C3);
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .hero h1 {
+      font-size: 46px;
+      font-weight: 200;
+      letter-spacing: -0.02em;
+    }
+    .hero .sub {
+      font-size: 18px;
+      opacity: 0.9;
+      margin-top: var(--sp-s);
+      max-width: 680px;
+    }
+    .hero .pill-row {
+      margin-top: var(--sp-l);
+      display: flex;
+      gap: var(--sp-xs);
+      flex-wrap: wrap;
+    }
+    .hero .pill {
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      border-radius: var(--control-corner-radius);
+      padding: 5px 14px;
+      font-size: 12px;
+      background: rgba(255, 255, 255, 0.10);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    /* ================================================================
+       14. 控件 (WinUI 3 规范)
+       ================================================================ */
+
+    /* ----- 14.1 Button (Fluent 2) ----- */
+    .fd-btn {
+      position: relative;
+      font-family: var(--font-ui);
+      font-size: 14px;
+      padding: 5px 16px;
+      min-height: 32px;
+      border-radius: var(--control-corner-radius);
+      cursor: pointer;
+      border: 1px solid var(--color-border-strong);
+      background: var(--color-background-control);
+      color: var(--color-text-primary);
+      transition: background var(--dur-ultrafast), transform var(--dur-ultrafast) var(--curve-decelerate),
+        box-shadow var(--dur-ultrafast);
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-xs);
+      white-space: nowrap;
+      font-weight: 400;
+    }
+    .fd-btn:hover {
+      background: var(--color-background-alt);
+    }
+    .fd-btn:active {
+      transform: scale(0.97);
+    }
+    .fd-btn.accent {
+      background: var(--color-brand-background);
+      border-color: var(--color-brand-border);
+      color: var(--color-text-on-accent);
+    }
+    .fd-btn.accent:hover {
+      background: var(--color-brand-background-hover);
+      border-color: var(--color-brand-border-hover);
+    }
+    .fd-btn.accent:active {
+      background: var(--color-brand-background-pressed);
+      border-color: var(--color-brand-border-pressed);
+    }
+    .fd-btn.subtle {
+      border-color: transparent;
+      background: transparent;
+    }
+    .fd-btn.subtle:hover {
+      background: var(--color-background-alt);
+    }
+    .fd-btn:disabled {
+      color: var(--color-text-disabled);
+      border-color: var(--color-border-default);
+      background: var(--color-background-alt);
+      cursor: not-allowed;
+      transform: none;
+    }
+    .fd-btn.icon-only {
+      padding: var(--sp-xxs);
+      min-width: 32px;
+      justify-content: center;
+    }
+
+    /* ----- 14.2 Checkbox / Radio (WinUI 3) ----- */
+    .fd-check,
+    .fd-radio {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-xs);
+      font-size: 14px;
+      cursor: pointer;
+      color: var(--color-text-primary);
+    }
+    .fd-check input,
+    .fd-radio input {
+      accent-color: var(--color-brand-background);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      margin: 0;
+    }
+
+    /* ----- 14.3 Toggle Switch (WinUI 3) ----- */
+    .fd-toggle {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-s);
+      font-size: 14px;
+    }
+    .fd-toggle input {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 44px;
+      height: 20px;
+      border-radius: 10px;
+      border: 2px solid var(--color-border-strong);
+      background: transparent;
+      position: relative;
+      cursor: pointer;
+      transition: all var(--dur-fast) var(--curve-standard);
+      flex-shrink: 0;
+    }
+    .fd-toggle input::after {
+      content: "";
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--color-text-secondary);
+      top: 3px;
+      left: 3px;
+      transition: all var(--dur-fast) var(--curve-standard);
+    }
+    .fd-toggle input:checked {
+      background: var(--color-brand-background);
+      border-color: var(--color-brand-border);
+    }
+    .fd-toggle input:checked::after {
+      left: 27px;
+      background: #fff;
+      width: 12px;
+      height: 12px;
+      top: 2px;
+    }
+
+    /* ----- 14.4 Slider (WinUI 3) ----- */
+    .fd-slider {
+      width: 100%;
+      accent-color: var(--color-brand-background);
+      height: 4px;
+      cursor: pointer;
+    }
+
+    /* ----- 14.5 TextBox / ComboBox (WinUI 3) ----- */
+    .fd-input,
+    .fd-select {
+      font-family: var(--font-ui);
+      font-size: 14px;
+      padding: 6px 10px;
+      border: 1px solid var(--color-border-strong);
+      border-radius: var(--control-corner-radius);
+      background: var(--color-background-control);
+      color: var(--color-text-primary);
+      min-height: 32px;
+      transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+      width: 100%;
+    }
+    .fd-input:focus,
+    .fd-select:focus {
+      outline: none;
+      border-color: var(--color-brand-border);
+      box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
+    }
+    .fd-input::placeholder {
+      color: var(--color-text-tertiary);
+    }
+    .fd-input:disabled,
+    .fd-select:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-xxs);
+    }
+    .field label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+    .field .helper {
+      font-size: 12px;
+      color: var(--color-text-tertiary);
+    }
+    .field.error .fd-input {
+      border-color: var(--color-error);
+    }
+    .field.error .helper {
+      color: var(--color-error);
+    }
+
+    /* ----- 14.6 Progress (WinUI 3) ----- */
+    .fd-progress {
+      height: 4px;
+      background: var(--color-background-alt);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      width: 100%;
+    }
+    .fd-progress>div {
+      height: 100%;
+      background: var(--color-brand-background);
+      border-radius: var(--radius-full);
+    }
+    .fd-progress.indeterminate>div {
+      width: 60%;
+      animation: indeterminate 2s var(--curve-standard) infinite;
+    }
+    @keyframes indeterminate {
+      0% {
+        margin-left: -60%;
+      }
+      100% {
+        margin-left: 100%;
+      }
+    }
+    .fd-ring {
+      width: 28px;
+      height: 28px;
+      border: 3px solid var(--color-background-alt);
+      border-top-color: var(--color-brand-background);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ----- 14.7 Pivot (WinUI 3 Tabs) ----- */
+    .fd-pivot {
+      display: flex;
+      gap: var(--sp-l);
+      border-bottom: 1px solid var(--color-border-divider);
+      margin-bottom: var(--sp-m);
+    }
+    .fd-pivot button {
+      background: none;
+      border: none;
+      font-family: var(--font-ui);
+      font-size: 20px;
+      font-weight: 300;
+      color: var(--color-text-secondary);
+      padding: var(--sp-xs) 0;
+      cursor: pointer;
+      position: relative;
+      transition: color var(--dur-fast);
+    }
+    .fd-pivot button.active,
+    .fd-pivot button:hover {
+      color: var(--color-text-primary);
+    }
+    .fd-pivot button.active::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      height: 2px;
+      background: var(--color-brand-background);
+      animation: pivotIn var(--dur-fast) var(--curve-decelerate);
+    }
+    @keyframes pivotIn {
+      from {
+        transform: scaleX(0);
+      }
+      to {
+        transform: scaleX(1);
+      }
+    }
+    .pivot-pane {
+      display: none;
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      padding: var(--sp-xxs) 0;
+    }
+    .pivot-pane.active {
+      display: block;
+      animation: drillIn var(--dur-normal) var(--curve-decelerate);
+    }
+    @keyframes drillIn {
+      from {
+        opacity: 0;
+        transform: translateX(24px);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    /* ----- 14.8 CommandBar (WinUI 3) ----- */
+    .fd-commandbar {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-xxs);
+      padding: var(--sp-xxs) var(--sp-xs);
+      background: var(--color-background-card);
+      border-radius: var(--card-corner-radius);
+      box-shadow: var(--shadow-2);
+      overflow-x: auto;
+      border: 1px solid var(--color-border-default);
+    }
+    .cmd-btn {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-xs);
+      padding: var(--sp-xs) var(--sp-s);
+      border: none;
+      background: transparent;
+      border-radius: var(--control-corner-radius);
+      font-family: var(--font-ui);
+      font-size: 14px;
+      color: var(--color-text-primary);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background var(--dur-ultrafast);
+    }
+    .cmd-btn:hover {
+      background: var(--color-background-alt);
+    }
+    .cmd-btn.primary {
+      color: var(--color-brand-foreground);
+      font-weight: 600;
+    }
+    .cmd-sep {
+      width: 1px;
+      height: 24px;
+      background: var(--color-border-divider);
+      margin: 0 var(--sp-xxs);
+      flex-shrink: 0;
+    }
+
+    /* ----- 14.9 NavigationView (WinUI 3) ----- */
+    .fd-navview {
+      display: flex;
+      border: 1px solid var(--color-border-default);
+      border-radius: var(--card-corner-radius);
+      overflow: hidden;
+      min-height: 300px;
+    }
+    .fd-navpane {
+      width: 220px;
+      background: var(--color-background-alt);
+      padding: var(--sp-xs) var(--sp-xxs);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-s);
+      padding: 10px 12px;
+      font-size: 14px;
+      border-radius: var(--control-corner-radius);
+      cursor: pointer;
+      color: var(--color-text-primary);
+      position: relative;
+      transition: background var(--dur-ultrafast);
+    }
+    .nav-item:hover {
+      background: var(--color-background-card);
+    }
+    .nav-item.selected {
+      background: var(--color-background-card);
+      font-weight: 600;
+    }
+    .nav-item.selected::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 20%;
+      bottom: 20%;
+      width: 3px;
+      background: var(--color-brand-background);
+      border-radius: var(--radius-full);
+    }
+    .nav-item .mdl2 {
+      font-size: 16px;
+      width: 16px;
+      text-align: center;
+    }
+    .nav-section-label {
+      font-size: 12px;
+      color: var(--color-text-tertiary);
+      padding: var(--sp-m) var(--sp-s) var(--sp-xxs);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .fd-navcontent {
+      flex: 1;
+      padding: var(--sp-l);
+      background: var(--color-background-card);
+    }
+
+    /* ----- 14.10 InfoBar (WinUI 3) ----- */
+    .fd-infobar {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--sp-s);
+      padding: var(--sp-s) var(--sp-m);
+      border-radius: var(--card-corner-radius);
+      font-size: 14px;
+      margin-bottom: var(--sp-xs);
+      border: 1px solid transparent;
+    }
+    .fd-infobar .mdl2 {
+      font-size: 16px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+    .fd-infobar.info {
+      background: var(--color-info-background);
+      border-color: var(--color-info-border);
+    }
+    .fd-infobar.info .mdl2 {
+      color: var(--color-info);
+    }
+    .fd-infobar.success {
+      background: var(--color-success-background);
+      border-color: var(--color-success-border);
+    }
+    .fd-infobar.success .mdl2 {
+      color: var(--color-success);
+    }
+    .fd-infobar.warning {
+      background: var(--color-warning-background);
+      border-color: var(--color-warning-border);
+    }
+    .fd-infobar.warning .mdl2 {
+      color: var(--color-warning);
+    }
+    .fd-infobar.error {
+      background: var(--color-error-background);
+      border-color: var(--color-error-border);
+    }
+    .fd-infobar.error .mdl2 {
+      color: var(--color-error);
+    }
+    .fd-infobar b {
+      display: block;
+      margin-bottom: var(--sp-xxs);
+      color: var(--color-text-primary);
+    }
+    .fd-infobar .content {
+      flex: 1;
+      color: var(--color-text-secondary);
+    }
+
+    /* ----- 14.11 Flyout (WinUI 3) ----- */
+    .fd-flyout {
+      max-width: 300px;
+      background: var(--color-background-card);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: var(--card-corner-radius);
+      box-shadow: var(--shadow-32);
+      padding: var(--sp-m);
+      position: relative;
+      border: 1px solid var(--color-border-default);
+    }
+    .fd-flyout::after {
+      content: "";
+      position: absolute;
+      bottom: -8px;
+      left: 32px;
+      width: 16px;
+      height: 16px;
+      background: var(--color-background-card);
+      transform: rotate(45deg);
+      box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.06);
+      border-right: 1px solid var(--color-border-default);
+      border-bottom: 1px solid var(--color-border-default);
+    }
+
+    /* ----- 14.12 ListView Item (WinUI 3) ----- */
+    .fd-listitem {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-m);
+      padding: var(--sp-s) var(--sp-m);
+      border-radius: var(--card-corner-radius);
+      cursor: pointer;
+      position: relative;
+      transition: background var(--dur-ultrafast);
+    }
+    .fd-listitem:hover {
+      background: var(--color-background-alt);
+    }
+    .fd-listitem .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-full);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 600;
+      font-size: 16px;
+    }
+    .fd-listitem .meta b {
+      display: block;
+      font-size: 15px;
+    }
+    .fd-listitem .meta span {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+    }
+
+    /* ----- 14.13 ContentDialog (WinUI 3) ----- */
+    .dialog-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-background-smoke);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--dur-normal) var(--curve-standard);
+    }
+    .dialog-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .fd-dialog {
+      background: var(--color-background-card-solid);
+      border-radius: var(--card-corner-radius);
+      box-shadow: var(--shadow-64);
+      width: min(480px, 90vw);
+      padding: var(--sp-l);
+      transform: scale(0.95);
+      opacity: 0;
+      transition: transform var(--dur-normal) var(--curve-decelerate), opacity var(--dur-normal);
+      border: 1px solid var(--color-border-default);
+    }
+    .dialog-overlay.open .fd-dialog {
+      transform: scale(1);
+      opacity: 1;
+    }
+    .fd-dialog h3 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: var(--sp-s);
+    }
+    .fd-dialog p {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      margin-bottom: var(--sp-l);
+      line-height: 1.6;
+    }
+    .fd-dialog .dialog-actions {
+      display: flex;
+      gap: var(--sp-xs);
+      justify-content: flex-end;
+    }
+
+    /* ----- 14.14 TeachingTip (WinUI 3) ----- */
+    .fd-teachingtip {
+      position: relative;
+      max-width: 320px;
+      background: var(--color-background-card);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: var(--card-corner-radius);
+      box-shadow: var(--shadow-32);
+      padding: var(--sp-m);
+      border-left: 3px solid var(--color-brand-background);
+      border: 1px solid var(--color-border-default);
+    }
+    .fd-teachingtip .tt-header {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-xs);
+      margin-bottom: var(--sp-xs);
+    }
+    .fd-teachingtip .tt-header .mdl2 {
+      color: var(--color-brand-background);
+      font-size: 18px;
+    }
+    .fd-teachingtip .tt-header b {
+      font-size: 15px;
+    }
+    .fd-teachingtip p {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+    .fd-teachingtip .tt-actions {
+      margin-top: var(--sp-s);
+      display: flex;
+      gap: var(--sp-xs);
+    }
+
+    /* ----- 14.15 TreeView (WinUI 3) ----- */
+    .fd-tree {
+      font-size: 14px;
+    }
+    .tree-node {
+      padding-left: 20px;
+    }
+    .tree-toggle {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-xs);
+      padding: 6px 8px;
+      border-radius: var(--control-corner-radius);
+      cursor: pointer;
+      user-select: none;
+      transition: background var(--dur-ultrafast);
+    }
+    .tree-toggle:hover {
+      background: var(--color-background-alt);
+    }
+    .tree-toggle .chevron {
+      font-size: 12px;
+      transition: transform var(--dur-fast);
+      width: 16px;
+      text-align: center;
+    }
+    .tree-toggle .chevron.open {
+      transform: rotate(90deg);
+    }
+    .tree-children {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height var(--dur-normal) var(--curve-decelerate);
+    }
+    .tree-children.open {
+      max-height: 500px;
+    }
+
+    /* ----- 14.16 DataGrid (WinUI 3) ----- */
+    .fd-datagrid {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .fd-datagrid th {
+      text-align: left;
+      padding: 10px 12px;
+      font-weight: 600;
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      border-bottom: 2px solid var(--color-border-divider);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .fd-datagrid td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--color-border-divider);
+    }
+    .fd-datagrid tr:hover td {
+      background: var(--color-background-alt);
+    }
+    .fd-datagrid .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: var(--radius-full);
+      display: inline-block;
+      margin-right: var(--sp-xs);
+    }
+
+    /* ----- 14.17 SplitView (WinUI 3) ----- */
+    .fd-splitview {
+      display: flex;
+      border: 1px solid var(--color-border-default);
+      border-radius: var(--card-corner-radius);
+      overflow: hidden;
+      min-height: 240px;
+    }
+    .sv-pane {
+      width: 0;
+      overflow: hidden;
+      background: var(--color-background-alt);
+      padding: 0;
+      transition: width var(--dur-normal) var(--curve-decelerate), padding var(--dur-normal);
+      white-space: nowrap;
+    }
+    .sv-pane.open {
+      width: 200px;
+      padding: var(--sp-s) var(--sp-xs);
+    }
+    .sv-content {
+      flex: 1;
+      padding: var(--sp-l);
+      background: var(--color-background-card);
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-s);
+    }
+
+    /* ----- 14.18 DatePicker (WinUI 3) ----- */
+    .fd-datepick {
+      display: flex;
+      gap: var(--sp-xs);
+      align-items: center;
+    }
+    .fd-datepick select {
+      font-family: var(--font-ui);
+      font-size: 14px;
+      padding: 6px 8px;
+      border: 1px solid var(--color-border-strong);
+      border-radius: var(--control-corner-radius);
+      background: var(--color-background-control);
+      color: var(--color-text-primary);
+      min-height: 32px;
+      cursor: pointer;
+    }
+    .fd-datepick select:focus {
+      outline: none;
+      border-color: var(--color-brand-border);
+      box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
+    }
+
+    /* ----- 14.19 CalendarView (WinUI 3) ----- */
+    .fd-calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+      font-size: 13px;
+      max-width: 320px;
+    }
+    .cal-header {
+      text-align: center;
+      padding: var(--sp-xs) var(--sp-xxs);
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      font-size: 12px;
+    }
+    .cal-day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--control-corner-radius);
+      cursor: pointer;
+      transition: background var(--dur-ultrafast);
+    }
+    .cal-day:hover {
+      background: var(--color-background-alt);
+    }
+    .cal-day.today {
+      font-weight: 700;
+      color: var(--color-brand-foreground);
+    }
+    .cal-day.selected {
+      background: var(--color-brand-background);
+      color: #fff;
+    }
+    .cal-day.other-month {
+      color: var(--color-text-tertiary);
+    }
+
+    /* ----- 14.20 RichEditBox (WinUI 3) ----- */
+    .fd-richedit {
+      border: 1px solid var(--color-border-strong);
+      border-radius: var(--control-corner-radius);
+      background: var(--color-background-control);
+      overflow: hidden;
+    }
+    .re-toolbar {
+      display: flex;
+      gap: var(--sp-xxs);
+      padding: var(--sp-xxs) var(--sp-xs);
+      border-bottom: 1px solid var(--color-border-divider);
+    }
+    .re-toolbar button {
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: transparent;
+      border-radius: var(--control-corner-radius);
+      cursor: pointer;
+      font-family: var(--font-ui);
+      font-size: 13px;
+      color: var(--color-text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .re-toolbar button:hover {
+      background: var(--color-background-alt);
+    }
+    .re-toolbar button.active {
+      background: var(--color-brand-background);
+      color: var(--color-text-on-accent);
+    }
+    .re-body {
+      min-height: 100px;
+      padding: 10px;
+      font-size: 14px;
+      outline: none;
+      line-height: 1.6;
+    }
+
+    /* ----- 14.21 AutoSuggestBox (WinUI 3) ----- */
+    .autosuggest-wrap {
+      position: relative;
+    }
+    .autosuggest-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      background: var(--color-background-card);
+      border: 1px solid var(--color-border-default);
+      border-radius: var(--control-corner-radius);
+      box-shadow: var(--shadow-16);
+      max-height: 200px;
+      overflow-y: auto;
+      display: none;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .autosuggest-dropdown.open {
+      display: block;
+      animation: drillIn var(--dur-fast) var(--curve-decelerate);
+    }
+    .as-item {
+      padding: var(--sp-xs) var(--sp-s);
+      font-size: 14px;
+      cursor: pointer;
+      transition: background var(--dur-ultrafast);
+    }
+    .as-item:hover,
+    .as-item.highlighted {
+      background: var(--color-background-alt);
+    }
+    .as-item mark {
+      background: var(--color-brand-background);
+      color: var(--color-text-on-accent);
+      border-radius: var(--radius-small);
+      padding: 0 1px;
+    }
+
+    /* ================================================================
+       15. Connected Animation (WinUI 3)
+       ================================================================ */
+    .ca-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: var(--sp-s);
+    }
+    .ca-thumb {
+      aspect-ratio: 1;
+      border-radius: var(--card-corner-radius);
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+      transition: transform var(--dur-fast) var(--curve-decelerate);
+    }
+    .ca-thumb:hover {
+      transform: scale(1.03);
+    }
+    .ca-detail {
+      position: fixed;
+      inset: 0;
+      z-index: 1500;
+      background: var(--color-background-smoke);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--dur-normal);
+    }
+    .ca-detail.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .ca-detail-card {
+      background: var(--color-background-card-solid);
+      border-radius: var(--card-corner-radius);
+      box-shadow: var(--shadow-64);
+      width: min(600px, 90vw);
+      overflow: hidden;
+      transform: scale(0.9);
+      opacity: 0;
+      transition: transform var(--dur-normal) var(--curve-decelerate), opacity var(--dur-normal);
+      border: 1px solid var(--color-border-default);
+    }
+    .ca-detail.open .ca-detail-card {
+      transform: scale(1);
+      opacity: 1;
+    }
+    .ca-detail-img {
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+    }
+    .ca-detail-body {
+      padding: var(--sp-l);
+    }
+    .ca-detail-body h3 {
+      font-size: 24px;
+      font-weight: 300;
+      margin-bottom: var(--sp-xs);
+    }
+    .ca-detail-body p {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ================================================================
+       16. Entrance Stagger (WinUI 3)
+       ================================================================ */
+    .stagger-container {
+      display: flex;
+      gap: var(--sp-s);
+      flex-wrap: wrap;
+    }
+    .stagger-item {
+      width: 80px;
+      height: 80px;
+      border-radius: var(--card-corner-radius);
+      background: var(--color-brand-background);
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    .stagger-item.animate {
+      animation: staggerIn var(--dur-normal) var(--curve-decelerate) forwards;
+    }
+    @keyframes staggerIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ================================================================
+       17. Acrylic Playground
+       ================================================================ */
+    .playground-panel {
+      background: var(--color-background-card);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: var(--card-corner-radius);
+      box-shadow: var(--shadow-8);
+      padding: var(--sp-l);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-l);
+      border: 1px solid var(--color-border-default);
+    }
+    .pg-controls {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-m);
+    }
+    .pg-preview {
+      border-radius: var(--card-corner-radius);
+      min-height: 200px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+      background: linear-gradient(135deg, #8764B8, var(--color-brand-background), #00B7C3);
+    }
+    .pg-preview .acrylic-layer {
+      position: absolute;
+      inset: 20px;
+      border-radius: var(--card-corner-radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .pg-range {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-xxs);
+    }
+    .pg-range label {
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+    }
+    .pg-range input[type=range] {
+      width: 100%;
+      accent-color: var(--color-brand-background);
+      height: 4px;
+      cursor: pointer;
+    }
+    .pg-value {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-brand-foreground);
+    }
+
+    /* ================================================================
+       18. 设计模式 (WinUI 3)
+       ================================================================ */
+    .pattern-card {
+      padding: 0;
+      overflow: hidden;
+    }
+    .pattern-preview {
+      background: var(--color-background-alt);
+      min-height: 200px;
+      position: relative;
+      overflow: hidden;
+    }
+    .pattern-info {
+      padding: var(--sp-m) var(--sp-l);
+    }
+
+    /* Master-Detail */
+    .md-layout {
+      display: flex;
+      height: 260px;
+    }
+    .md-master {
+      width: 180px;
+      border-right: 1px solid var(--color-border-divider);
+      overflow-y: auto;
+    }
+    .md-master-item {
+      padding: 10px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: all var(--dur-ultrafast);
+    }
+    .md-master-item:hover {
+      background: var(--color-background-card);
+    }
+    .md-master-item.active {
+      border-left-color: var(--color-brand-background);
+      background: var(--color-background-card);
+      font-weight: 600;
+    }
+    .md-detail {
+      flex: 1;
+      padding: var(--sp-m);
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-xs);
+    }
+
+    /* Hub */
+    .hub-layout {
+      padding: var(--sp-m);
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-m);
+      height: 260px;
+      overflow-y: auto;
+    }
+    .hub-section h4 {
+      font-size: 18px;
+      font-weight: 300;
+      margin-bottom: var(--sp-xs);
+      padding-bottom: var(--sp-xxs);
+      border-bottom: 1px solid var(--color-border-divider);
+    }
+    .hub-cards {
+      display: flex;
+      gap: var(--sp-xs);
+      overflow-x: auto;
+      padding-bottom: var(--sp-xxs);
+    }
+    .hub-card {
+      min-width: 140px;
+      height: 80px;
+      border-radius: var(--control-corner-radius);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* Settings */
+    .settings-layout {
+      padding: var(--sp-m);
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-m);
+      height: 260px;
+    }
+    .settings-group h4 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: var(--sp-xs);
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--sp-xs) 0;
+      border-bottom: 1px solid var(--color-border-divider);
+      font-size: 14px;
+    }
+
+    /* ================================================================
+       19. 无障碍 (Focus Visual)
+       ================================================================ */
+    .a11y-focus-demo {
+      display: flex;
+      gap: var(--sp-m);
+      flex-wrap: wrap;
+    }
+    .focus-target {
+      padding: var(--sp-s) var(--sp-m);
+      border-radius: var(--control-corner-radius);
+      background: var(--color-background-alt);
+      font-size: 14px;
+      cursor: pointer;
+      outline: none;
+      border: 1px solid transparent;
+    }
+    .focus-target:focus-visible {
+      outline: 2px solid var(--color-brand-background);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(0, 120, 212, 0.2);
+    }
+
+    /* ================================================================
+       20. Footer
+       ================================================================ */
+    footer {
+      border-top: 1px solid var(--color-border-divider);
+      padding: 40px 24px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--color-text-secondary);
+    }
+
+    /* ================================================================
+       21. 响应式 (Fluent 2 断点)
+       ================================================================ */
+    @media (max-width: 720px) {
+      .hero {
+        padding: var(--sp-xl) var(--sp-m);
+      }
+      .hero h1 {
+        font-size: 34px;
+      }
+      .fd-navpane,
+      .sv-pane {
+        width: 48px !important;
+      }
+      .nav-item span.txt,
+      .sv-pane .txt {
+        display: none;
+      }
+      .playground-panel {
+        grid-template-columns: 1fr;
+      }
+      .topnav a.navlink {
+        font-size: 11px;
+        padding: 4px 6px;
+      }
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ================================================================
+       TOP NAVIGATION (Acrylic)
+       ================================================================ -->
+  <nav class="topnav">
+    <button class="fd-btn icon-only subtle reveal" aria-label="Menu"><i class="mdl2">&#xE700;</i></button>
+    <div class="brand">WinUI 3 · Fluent 2</div>
+    <a class="navlink active" href="#tokens">Tokens</a>
+    <a class="navlink" href="#controls">Controls</a>
+    <a class="navlink" href="#advanced">Advanced</a>
+    <a class="navlink" href="#patterns">Patterns</a>
+    <a class="navlink" href="#motion">Motion</a>
+    <a class="navlink" href="#playground">Playground</a>
+    <a class="navlink" href="#a11y">A11y</a>
+    <button class="fd-btn icon-only subtle" id="themeToggle" style="border:none;"><i class="mdl2" id="themeIcon">&#xE708;</i></button>
+  </nav>
+
+  <main>
+
+    <!-- ================================================================
+         HERO
+         ================================================================ -->
+    <div class="hero">
+      <h1 class="fd-title-large">WinUI 3 · Fluent Design 2</h1>
+      <p class="sub">严格遵循 <strong>WinUI 3 Gallery</strong> 与 <strong>Fluent 2 Design System</strong> 官方规范的完整预览。<br>包含设计令牌、Acrylic/Mica 材质、全部控件、布局模式、动效系统及无障碍。</p>
+      <div class="pill-row">
+        <span class="pill"><i class="mdl2">&#xE781;</i> Light</span>
+        <span class="pill"><i class="mdl2">&#xE809;</i> Depth</span>
+        <span class="pill"><i class="mdl2">&#xE768;</i> Motion</span>
+        <span class="pill"><i class="mdl2">&#xE7C4;</i> Acrylic</span>
+        <span class="pill"><i class="mdl2">&#xE740;</i> Mica</span>
+        <span class="pill"><i class="mdl2">&#xED5F;</i> A11y</span>
+        <span class="pill"><i class="mdl2">&#xE943;</i> Tokens</span>
+      </div>
+    </div>
+
+    <!-- ================================================================
+         SECTION: DESIGN TOKENS (Fluent 2)
+         ================================================================ -->
+    <section id="tokens">
+      <div class="sec-head">
+        <span class="sec-tag">Foundation</span>
+        <h2 class="fd-title">Design Tokens</h2>
+        <p>Fluent 2 三层令牌体系：<strong>Global → Alias → Component</strong>。品牌色 16 阶，中性色 28 阶，确保 WCAG AA 对比度。</p>
+      </div>
+      <div class="divider-line"></div>
+
+      <div class="card" style="margin-bottom:var(--sp-l);">
+        <h3 class="fd-body-strong">品牌色 Ramp (16阶)</h3>
+        <div class="divider-line"></div>
+        <div style="display:flex;border-radius:var(--radius-small);overflow:hidden;margin-bottom:var(--sp-m);">
+          <div style="flex:1;height:48px;display:flex;align-items:flex-end;padding:4px 6px;font-size:8px;font-family:var(--font-mono);color:#fff;background:var(--brand-10);">10</div>
+          <div style="flex:1;height:48px;display:flex;align-items:flex-end;padding:4px 6px;font-size:8px;font-family:var(--font-mono);color:#fff;background:var(--brand-20);">20</div>
+          <div style="flex:1;height:48px;display:flex;align-items:flex-end;padding:4px 6px;font-size:8px;font-family:var(--font-mono);color:#fff;background:var(--brand-30);">30</div>
+          <div style="flex:1;height:48px;display:flex;align-items:flex-end;padding:4px 6px;font-size:8px;font-family:var(--font-mono);color:#fff;background:var(--brand-40);">40</div>
+          <div style="flex:1;height:48px;display:flex;align-items:flex-end;padding:4px 6px;font-size:8px;font-family:var(--font-mono);color:#fff;background:var(--brand-50);">50</div>
+          <div style="flex:1;height:48px;display:flex;align-items:flex-end;padding:4px 6px;font-size:8px;font-family:var(--font-mono);color:#fff;background:var(--brand-60);">60</div>
+          <div style="flex:1;height:48px;display:flex;align-items:flex-end;padding:4px 6px;font-size:8px;font-family:var(--font-mono);color:#fff;background:var(--brand-70);">70</div>
+          <div style="flex:1;height:48px;display:flex;align-items:flex-end;padding:4px 6px;font-size:8px;font-family:var(--font-mono);color:#fff;background:var(--brand-80);">80</div>
+          <div style="flex:1;height:48px;display:flex;align-items:flex-end;padding:4px 6px;font-size:8px;font-family:var(--font-mono);color:rgba(0,0,0,0.7);background:var(--brand-90);">90</div>
+          <div style="flex:1;height:48px;display:flex;align-items:flex-end;padding:4px 6px;font-size:8px;font-family:var(--font-mono);color:rgba(0,0,0,0.7);background:var(--brand-100);">100</div>
+          <div style="flex:1;height:48px;display:flex;align-items:flex-end;padding:4px 6px;font-size:8px;font-family:var(--font-mono);color:rgba(0,0,0,0.7);background:var(--brand-110);">110</div>
+          <div style="flex:1;height:48px;display:flex;align-items:flex-end;padding:4px 6px;font-size:8px;font-family:var(--font-mono);color:rgba(0,0,0,0.7);background:var(--brand-120);">120</div>
+          <div style="flex:1;height:48px;display:flex;align-items:flex-end;padding:4px 6px;font-size:8px;font-family:var(--font-mono);color:rgba(0,0,0,0.7);background:var(--brand-130);">130</div>
+          <div style="flex:1;height:48px;display:flex;align-items:flex-end;padding:4px 6px;font-size:8px;font-family:var(--font-mono);color:rgba(0,0,0,0.7);background:var(--brand-140);">140</div>
+          <div style="flex:1;height:48px;display:flex;align-items:flex-end;padding:4px 6px;font-size:8px;font-family:var(--font-mono);color:rgba(0,0,0,0.7);background:var(--brand-150);">150</div>
+          <div style="flex:1;height:48px;display:flex;align-items:flex-end;padding:4px 6px;font-size:8px;font-family:var(--font-mono);color:rgba(0,0,0,0.7);background:var(--brand-160);">160</div>
+        </div>
+        <p class="fd-caption text-secondary">品牌色别名：<code>colorBrandBackground: brand[80]</code> · <code>colorBrandBackgroundHover: brand[70]</code></p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3 class="fd-body-strong">中性色 (28阶)</h3>
+          <div class="divider-line"></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:var(--sp-xs);">
+            <div style="display:flex;align-items:center;gap:var(--sp-xs);font-size:11px;"><span style="width:18px;height:18px;border-radius:var(--radius-small);background:var(--neutral-1);border:1px solid var(--color-border-default);"></span> N1</div>
+            <div style="display:flex;align-items:center;gap:var(--sp-xs);font-size:11px;"><span style="width:18px;height:18px;border-radius:var(--radius-small);background:var(--neutral-3);border:1px solid var(--color-border-default);"></span> N3</div>
+            <div style="display:flex;align-items:center;gap:var(--sp-xs);font-size:11px;"><span style="width:18px;height:18px;border-radius:var(--radius-small);background:var(--neutral-5);border:1px solid var(--color-border-default);"></span> N5</div>
+            <div style="display:flex;align-items:center;gap:var(--sp-xs);font-size:11px;"><span style="width:18px;height:18px;border-radius:var(--radius-small);background:var(--neutral-7);border:1px solid var(--color-border-default);"></span> N7</div>
+            <div style="display:flex;align-items:center;gap:var(--sp-xs);font-size:11px;"><span style="width:18px;height:18px;border-radius:var(--radius-small);background:var(--neutral-9);border:1px solid var(--color-border-default);"></span> N9</div>
+            <div style="display:flex;align-items:center;gap:var(--sp-xs);font-size:11px;"><span style="width:18px;height:18px;border-radius:var(--radius-small);background:var(--neutral-11);border:1px solid var(--color-border-default);"></span> N11</div>
+            <div style="display:flex;align-items:center;gap:var(--sp-xs);font-size:11px;"><span style="width:18px;height:18px;border-radius:var(--radius-small);background:var(--neutral-13);border:1px solid var(--color-border-default);"></span> N13</div>
+            <div style="display:flex;align-items:center;gap:var(--sp-xs);font-size:11px;"><span style="width:18px;height:18px;border-radius:var(--radius-small);background:var(--neutral-15);border:1px solid var(--color-border-default);"></span> N15</div>
+            <div style="display:flex;align-items:center;gap:var(--sp-xs);font-size:11px;"><span style="width:18px;height:18px;border-radius:var(--radius-small);background:var(--neutral-17);border:1px solid var(--color-border-default);"></span> N17</div>
+          </div>
+        </div>
+        <div class="card">
+          <h3 class="fd-body-strong">语义别名</h3>
+          <div class="divider-line"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-xs);font-size:13px;">
+            <div><span class="token-swatch" style="background:var(--color-text-primary);"></span> text-primary</div>
+            <div><span class="token-swatch" style="background:var(--color-text-secondary);"></span> text-secondary</div>
+            <div><span class="token-swatch" style="background:var(--color-text-tertiary);"></span> text-tertiary</div>
+            <div><span class="token-swatch" style="background:var(--color-background-card);border-color:var(--color-border-strong);"></span> bg-card</div>
+            <div><span class="token-swatch" style="background:var(--color-background-alt);"></span> bg-alt</div>
+            <div><span class="token-swatch" style="background:var(--color-border-default);"></span> border-default</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         SECTION: CONTROLS (WinUI 3)
+         ================================================================ -->
+    <section id="controls">
+      <div class="sec-head">
+        <span class="sec-tag">Controls</span>
+        <h2 class="fd-title">标准控件</h2>
+        <p>WinUI 3 控件库的 Fluent 2 视觉呈现。圆角：<code>--control-corner-radius: 2px</code> · <code>--card-corner-radius: 4px</code></p>
+      </div>
+      <div class="divider-line"></div>
+
+      <div class="grid-2">
+        <!-- Buttons -->
+        <div class="card reveal">
+          <h3 class="fd-body-strong">Buttons</h3>
+          <div class="divider-line"></div>
+          <div class="flex-row">
+            <button class="fd-btn accent reveal">Accent</button>
+            <button class="fd-btn reveal">Default</button>
+            <button class="fd-btn subtle reveal">Subtle</button>
+            <button class="fd-btn" disabled>Disabled</button>
+            <button class="fd-btn icon-only subtle reveal"><i class="mdl2">&#xE710;</i></button>
+          </div>
+        </div>
+
+        <!-- Selection -->
+        <div class="card reveal">
+          <h3 class="fd-body-strong">Selection</h3>
+          <div class="divider-line"></div>
+          <div class="flex-col">
+            <label class="fd-check"><input type="checkbox" checked> CheckBox</label>
+            <label class="fd-check"><input type="checkbox"> Unchecked</label>
+            <label class="fd-radio"><input type="radio" name="r1" checked> Radio A</label>
+            <label class="fd-radio"><input type="radio" name="r1"> Radio B</label>
+            <label class="fd-toggle"><input type="checkbox" checked> Toggle On</label>
+            <label class="fd-toggle"><input type="checkbox"> Toggle Off</label>
+          </div>
+        </div>
+
+        <!-- Text Inputs -->
+        <div class="card reveal">
+          <h3 class="fd-body-strong">Text Inputs</h3>
+          <div class="divider-line"></div>
+          <div class="flex-col">
+            <div class="field"><label>TextBox</label><input class="fd-input" placeholder="Enter text…"><span class="helper">Helper text</span></div>
+            <div class="field error"><label>Error</label><input class="fd-input" value="Invalid"><span class="helper">Error message</span></div>
+            <div class="field"><label>ComboBox</label><select class="fd-select"><option>Option 1</option><option>Option 2</option><option>Option 3</option></select></div>
+          </div>
+        </div>
+
+        <!-- Slider & Progress -->
+        <div class="card reveal">
+          <h3 class="fd-body-strong">Slider & Progress</h3>
+          <div class="divider-line"></div>
+          <div class="flex-col">
+            <div><label class="fd-caption-strong">Slider</label><input type="range" class="fd-slider" value="65"></div>
+            <div><label class="fd-caption-strong">Progress (60%)</label><div class="fd-progress"><div style="width:60%"></div></div></div>
+            <div><label class="fd-caption-strong">Indeterminate</label><div class="fd-progress indeterminate"><div></div></div></div>
+            <div class="flex-row"><label class="fd-caption-strong">ProgressRing</label><div class="fd-ring"></div></div>
+          </div>
+        </div>
+
+        <!-- Pivot -->
+        <div class="card reveal" style="grid-column:1/-1;">
+          <h3 class="fd-body-strong">Pivot (Tabs)</h3>
+          <div class="divider-line"></div>
+          <div class="fd-pivot" id="pivot">
+            <button class="active" data-pane="p1">All</button>
+            <button data-pane="p2">Unread</button>
+            <button data-pane="p3">Flagged</button>
+          </div>
+          <div class="pivot-pane active" id="p1">All items — Drill-in 300ms Decelerate.</div>
+          <div class="pivot-pane" id="p2">Unread items only.</div>
+          <div class="pivot-pane" id="p3">Flagged items.</div>
+        </div>
+
+        <!-- CommandBar -->
+        <div class="card reveal" style="grid-column:1/-1;">
+          <h3 class="fd-body-strong">CommandBar</h3>
+          <div class="divider-line"></div>
+          <div class="fd-commandbar">
+            <button class="cmd-btn primary reveal"><i class="mdl2">&#xE710;</i> New</button>
+            <button class="cmd-btn reveal"><i class="mdl2">&#xE896;</i> Share</button>
+            <button class="cmd-btn reveal"><i class="mdl2">&#xE74D;</i> Delete</button>
+            <div class="cmd-sep"></div>
+            <button class="cmd-btn reveal"><i class="mdl2">&#xE8AB;</i> Copy</button>
+            <button class="cmd-btn reveal" style="margin-left:auto;"><i class="mdl2">&#xE712;</i> More</button>
+          </div>
+        </div>
+
+        <!-- NavigationView -->
+        <div class="card reveal" style="grid-column:1/-1;padding:0;overflow:hidden;">
+          <div style="padding:var(--sp-l) var(--sp-l) 0;"><h3 class="fd-body-strong">NavigationView</h3></div>
+          <div class="divider-line" style="margin:var(--sp-m) var(--sp-l);"></div>
+          <div class="fd-navview" style="border-radius:0;border:none;">
+            <div class="fd-navpane">
+              <div class="nav-item selected reveal"><i class="mdl2">&#xE80F;</i><span class="txt">Home</span></div>
+              <div class="nav-item reveal"><i class="mdl2">&#xE8F1;</i><span class="txt">Apps</span></div>
+              <div class="nav-item reveal"><i class="mdl2">&#xE8A5;</i><span class="txt">Games</span></div>
+              <div class="nav-section-label txt">System</div>
+              <div class="nav-item reveal"><i class="mdl2">&#xE713;</i><span class="txt">Settings</span></div>
+            </div>
+            <div class="fd-navcontent">
+              <b class="fd-subtitle">Home</b>
+              <p class="fd-body text-secondary">NavigationView: 选中项左侧 3px Accent 指示条。窄屏自动折叠为图标栏。</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- InfoBar -->
+        <div class="card reveal">
+          <h3 class="fd-body-strong">InfoBar</h3>
+          <div class="divider-line"></div>
+          <div class="fd-infobar info"><i class="mdl2">&#xEA37;</i><div class="content"><b>Informational</b>General message.</div></div>
+          <div class="fd-infobar success"><i class="mdl2">&#xE73E;</i><div class="content"><b>Success</b>Completed.</div></div>
+          <div class="fd-infobar warning"><i class="mdl2">&#xE7BA;</i><div class="content"><b>Warning</b>Please review.</div></div>
+          <div class="fd-infobar error"><i class="mdl2">&#xE783;</i><div class="content"><b>Error</b>Operation failed.</div></div>
+        </div>
+
+        <!-- Flyout -->
+        <div class="card reveal">
+          <h3 class="fd-body-strong">Flyout</h3>
+          <div class="divider-line"></div>
+          <div class="fd-flyout">
+            <b class="fd-body-strong">Edit Options</b>
+            <p class="fd-caption text-secondary mt-s">Elevation 32 + Acrylic bg + pointer arrow.</p>
+            <div class="divider-line"></div>
+            <div class="flex-row">
+              <button class="fd-btn accent reveal" style="flex:1;">OK</button>
+              <button class="fd-btn reveal" style="flex:1;">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ListView -->
+        <div class="card reveal">
+          <h3 class="fd-body-strong">ListView</h3>
+          <div class="divider-line"></div>
+          <div class="fd-listitem reveal"><div class="avatar" style="background:var(--color-brand-background);">K</div><div class="meta"><b>Kendall Collins</b><span>Adatum</span></div></div>
+          <div class="fd-listitem reveal"><div class="avatar" style="background:#8764B8;">H</div><div class="meta"><b>Henry Ross</b><span>Adventure Works</span></div></div>
+          <div class="fd-listitem reveal"><div class="avatar" style="background:#D13438;">M</div><div class="meta"><b>Margie Zambrano</b><span>Woodgrove</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         SECTION: ADVANCED CONTROLS
+         ================================================================ -->
+    <section id="advanced">
+      <div class="sec-head">
+        <span class="sec-tag">Advanced</span>
+        <h2 class="fd-title">高级控件</h2>
+        <p>ContentDialog、TeachingTip、AutoSuggestBox、TreeView、DataGrid、SplitView、CalendarView、RichEditBox。</p>
+      </div>
+      <div class="divider-line"></div>
+
+      <div class="grid-2">
+        <!-- ContentDialog -->
+        <div class="card reveal">
+          <h3 class="fd-body-strong">ContentDialog</h3>
+          <div class="divider-line"></div>
+          <p class="fd-body text-secondary mb-s">Smoke 遮罩 + Elevation 64 + Scale 0.95→1 入场 (300ms Decelerate)</p>
+          <button class="fd-btn accent reveal" onclick="openDialog()">Open Dialog</button>
+        </div>
+
+        <!-- TeachingTip -->
+        <div class="card reveal">
+          <h3 class="fd-body-strong">TeachingTip</h3>
+          <div class="divider-line"></div>
+          <div class="fd-teachingtip">
+            <div class="tt-header"><i class="mdl2">&#xE7C4;</i><b>New Theme Available</b></div>
+            <p>Customize accent color and switch between light/dark modes.</p>
+            <div class="tt-actions">
+              <button class="fd-btn accent reveal" style="font-size:12px;padding:4px 12px;min-height:28px;">Got it</button>
+              <button class="fd-btn subtle reveal" style="font-size:12px;padding:4px 12px;min-height:28px;">Dismiss</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- AutoSuggestBox -->
+        <div class="card reveal">
+          <h3 class="fd-body-strong">AutoSuggestBox</h3>
+          <div class="divider-line"></div>
+          <div class="autosuggest-wrap">
+            <input class="fd-input" id="autoInput" placeholder="Search controls…" autocomplete="off">
+            <div class="autosuggest-dropdown" id="autoDropdown">
+              <div class="as-item" data-val="Button">Button</div>
+              <div class="as-item" data-val="CheckBox">CheckBox</div>
+              <div class="as-item" data-val="ComboBox">ComboBox</div>
+              <div class="as-item" data-val="CalendarView">CalendarView</div>
+              <div class="as-item" data-val="ContentDialog">ContentDialog</div>
+            </div>
+          </div>
+          <p class="fd-caption text-secondary mt-s">输入文字查看下拉建议，匹配项高亮。</p>
+        </div>
+
+        <!-- TreeView -->
+        <div class="card reveal">
+          <h3 class="fd-body-strong">TreeView</h3>
+          <div class="divider-line"></div>
+          <div class="fd-tree" id="treeDemo">
+            <div>
+              <div class="tree-toggle" onclick="toggleTree(this)"><span class="chevron mdl2 open">&#xE76C;</span><i class="mdl2" style="margin-right:6px;color:#FF8C00;">&#xE8B7;</i> Documents</div>
+              <div class="tree-children open">
+                <div class="tree-node">
+                  <div class="tree-toggle" onclick="toggleTree(this)"><span class="chevron mdl2">&#xE76C;</span><i class="mdl2" style="margin-right:6px;color:var(--color-brand-background);">&#xE838;</i> Projects</div>
+                  <div class="tree-children">
+                    <div class="tree-node"><div class="tree-toggle"><span class="chevron mdl2" style="visibility:hidden;">&#xE76C;</span><i class="mdl2" style="margin-right:6px;color:var(--color-text-secondary);">&#xE8A5;</i> Alpha.docx</div></div>
+                    <div class="tree-node"><div class="tree-toggle"><span class="chevron mdl2" style="visibility:hidden;">&#xE76C;</span><i class="mdl2" style="margin-right:6px;color:var(--color-text-secondary);">&#xE8A5;</i> Beta.pptx</div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DataGrid -->
+        <div class="card reveal" style="grid-column:1/-1;">
+          <h3 class="fd-body-strong">DataGrid</h3>
+          <div class="divider-line"></div>
+          <div style="overflow-x:auto;">
+            <table class="fd-datagrid">
+              <thead><tr><th>Name</th><th>Status</th><th>Role</th></tr></thead>
+              <tbody>
+                <tr><td>Kendall Collins</td><td><span class="status-dot" style="background:var(--color-success);"></span>Online</td><td>Admin</td></tr>
+                <tr><td>Henry Ross</td><td><span class="status-dot" style="background:var(--color-warning);"></span>Away</td><td>Editor</td></tr>
+                <tr><td>Margie Zambrano</td><td><span class="status-dot" style="background:#6E6E6E;"></span>Offline</td><td>Viewer</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SplitView -->
+        <div class="card reveal" style="grid-column:1/-1;padding:0;overflow:hidden;">
+          <div style="padding:var(--sp-l) var(--sp-l) 0;"><h3 class="fd-body-strong">SplitView</h3></div>
+          <div class="divider-line" style="margin:var(--sp-m) var(--sp-l);"></div>
+          <div class="fd-splitview" style="border-radius:0;border:none;">
+            <div class="sv-pane" id="svPane">
+              <div class="nav-item reveal"><i class="mdl2">&#xE80F;</i><span class="txt">Home</span></div>
+              <div class="nav-item reveal"><i class="mdl2">&#xE8F1;</i><span class="txt">Browse</span></div>
+            </div>
+            <div class="sv-content">
+              <button class="fd-btn subtle reveal" onclick="document.getElementById('svPane').classList.toggle('open')" style="align-self:flex-start;"><i class="mdl2">&#xE700;</i> Toggle Pane</button>
+              <p class="fd-body text-secondary">SplitView: Inline/Overlay 模式。展开/收起 300ms Decelerate。</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- CalendarView -->
+        <div class="card reveal">
+          <h3 class="fd-body-strong">CalendarView</h3>
+          <div class="divider-line"></div>
+          <div class="fd-subtitle" style="margin-bottom:var(--sp-s);">September 2026</div>
+          <div class="fd-calendar">
+            <div class="cal-header">Su</div><div class="cal-header">Mo</div><div class="cal-header">Tu</div><div class="cal-header">We</div><div class="cal-header">Th</div><div class="cal-header">Fr</div><div class="cal-header">Sa</div>
+            <div class="cal-day other-month">30</div><div class="cal-day other-month">31</div><div class="cal-day">1</div><div class="cal-day">2</div><div class="cal-day">3</div><div class="cal-day">4</div><div class="cal-day">5</div>
+            <div class="cal-day">6</div><div class="cal-day">7</div><div class="cal-day">8</div><div class="cal-day">9</div><div class="cal-day">10</div><div class="cal-day">11</div><div class="cal-day">12</div>
+            <div class="cal-day">13</div><div class="cal-day">14</div><div class="cal-day">15</div><div class="cal-day">16</div><div class="cal-day">17</div><div class="cal-day">18</div><div class="cal-day">19</div>
+            <div class="cal-day">20</div><div class="cal-day selected">21</div><div class="cal-day">22</div><div class="cal-day">23</div><div class="cal-day">24</div><div class="cal-day">25</div><div class="cal-day">26</div>
+            <div class="cal-day">27</div><div class="cal-day">28</div><div class="cal-day">29</div><div class="cal-day">30</div><div class="cal-day other-month">1</div><div class="cal-day other-month">2</div><div class="cal-day other-month">3</div>
+          </div>
+        </div>
+
+        <!-- RichEditBox -->
+        <div class="card reveal">
+          <h3 class="fd-body-strong">RichEditBox</h3>
+          <div class="divider-line"></div>
+          <div class="fd-richedit">
+            <div class="re-toolbar">
+              <button class="active" title="Bold"><b>B</b></button>
+              <button title="Italic"><i>I</i></button>
+              <button title="Underline"><u>U</u></button>
+              <button title="Bullet List"><i class="mdl2" style="font-size:14px;">&#xE8FD;</i></button>
+            </div>
+            <div class="re-body" contenteditable="true"><b>Rich text editing</b> with inline formatting.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         SECTION: PATTERNS
+         ================================================================ -->
+    <section id="patterns">
+      <div class="sec-head">
+        <span class="sec-tag">Patterns</span>
+        <h2 class="fd-title">设计模式</h2>
+        <p>Master/Detail、Hub、Tabbed Navigation、Settings — WinUI 3 应用架构最佳实践。</p>
+      </div>
+      <div class="divider-line"></div>
+
+      <div class="grid-2">
+        <div class="card pattern-card reveal">
+          <div class="pattern-preview">
+            <div class="md-layout">
+              <div class="md-master">
+                <div class="md-master-item active">Inbox (12)</div>
+                <div class="md-master-item">Sent</div>
+                <div class="md-master-item">Drafts (3)</div>
+              </div>
+              <div class="md-detail">
+                <b class="fd-subtitle">Kendall Collins</b>
+                <span class="fd-caption text-secondary">Today, 10:30 AM</span>
+                <p class="fd-body text-secondary">Please review the attached design specs.</p>
+              </div>
+            </div>
+          </div>
+          <div class="pattern-info">
+            <h3 class="fd-body-strong">Master/Detail</h3>
+            <p class="fd-body text-secondary">列表 + 详情双栏布局。窄屏时 Detail 全屏覆盖 (Drill-in)。</p>
+          </div>
+        </div>
+
+        <div class="card pattern-card reveal">
+          <div class="pattern-preview">
+            <div class="hub-layout">
+              <div class="hub-section">
+                <h4>Featured</h4>
+                <div class="hub-cards">
+                  <div class="hub-card" style="background:linear-gradient(135deg,var(--color-brand-background),#00B7C3);">Hero</div>
+                  <div class="hub-card" style="background:linear-gradient(135deg,#8764B8,#B4A0FF);">Promo</div>
+                </div>
+              </div>
+              <div class="hub-section">
+                <h4>Recent</h4>
+                <div class="hub-cards">
+                  <div class="hub-card" style="background:var(--color-background-alt);color:var(--color-text-primary);">Item 1</div>
+                  <div class="hub-card" style="background:var(--color-background-alt);color:var(--color-text-primary);">Item 2</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="pattern-info">
+            <h3 class="fd-body-strong">Hub Pattern</h3>
+            <p class="fd-body text-secondary">水平分区 + 垂直滚动。适合内容聚合首页。</p>
+          </div>
+        </div>
+
+        <div class="card pattern-card reveal">
+          <div class="pattern-preview" style="padding:var(--sp-m);">
+            <div class="fd-pivot" id="patternPivot" style="margin-bottom:var(--sp-s);">
+              <button class="active" data-ppane="pp1">Overview</button>
+              <button data-ppane="pp2">Analytics</button>
+            </div>
+            <div class="pivot-pane active" id="pp1" class="fd-body">Dashboard overview with key metrics.</div>
+            <div class="pivot-pane" id="pp2" class="fd-body">Charts and real-time analytics.</div>
+          </div>
+          <div class="pattern-info">
+            <h3 class="fd-body-strong">Tabbed Navigation</h3>
+            <p class="fd-body text-secondary">Pivot / TabView 实现同级内容切换。</p>
+          </div>
+        </div>
+
+        <div class="card pattern-card reveal">
+          <div class="pattern-preview">
+            <div class="settings-layout">
+              <div class="settings-group">
+                <h4>Appearance</h4>
+                <div class="settings-row"><span>Theme</span><select class="fd-select" style="width:120px;min-height:28px;font-size:13px;"><option>Light</option><option>Dark</option></select></div>
+                <div class="settings-row"><span>Accent Color</span><div style="display:flex;gap:4px;"><div style="width:20px;height:20px;border-radius:50%;background:var(--color-brand-background);border:2px solid var(--color-text-primary);"></div><div style="width:20px;height:20px;border-radius:50%;background:#D13438;"></div></div></div>
+              </div>
+              <div class="settings-group">
+                <h4>Notifications</h4>
+                <div class="settings-row"><span>Email alerts</span><label class="fd-toggle"><input type="checkbox" checked style="width:36px;height:16px;"></label></div>
+              </div>
+            </div>
+          </div>
+          <div class="pattern-info">
+            <h3 class="fd-body-strong">Settings Pattern</h3>
+            <p class="fd-body text-secondary">分组标题 + 行内控件。行间 Divider 分隔。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         SECTION: MOTION
+         ================================================================ -->
+    <section id="motion">
+      <div class="sec-head">
+        <span class="sec-tag">Motion</span>
+        <h2 class="fd-title">动效系统</h2>
+        <p>Connected Animation、Entrance Stagger、Drill-in/out 页面切换、Popup 弹出序列。</p>
+      </div>
+      <div class="divider-line"></div>
+
+      <div class="grid-2">
+        <div class="card reveal">
+          <h3 class="fd-body-strong">Connected Animation</h3>
+          <div class="divider-line"></div>
+          <p class="fd-body text-secondary mb-s">点击缩略图查看元素从列表位置"飞入"详情页。</p>
+          <div class="ca-grid">
+            <div class="ca-thumb" onclick="openCADetail(0)" style="background:linear-gradient(135deg,var(--color-brand-background),#00B7C3);"></div>
+            <div class="ca-thumb" onclick="openCADetail(1)" style="background:linear-gradient(135deg,#8764B8,#B4A0FF);"></div>
+            <div class="ca-thumb" onclick="openCADetail(2)" style="background:linear-gradient(135deg,#D13438,#FF4343);"></div>
+          </div>
+        </div>
+
+        <div class="card reveal">
+          <h3 class="fd-body-strong">Entrance Stagger</h3>
+          <div class="divider-line"></div>
+          <p class="fd-body text-secondary mb-s">每项延迟 50ms，Y 轴位移 20px + 淡入，300ms Decelerate。</p>
+          <button class="fd-btn accent reveal" id="playStagger" style="margin-bottom:var(--sp-m);">▶ Play Stagger</button>
+          <div class="stagger-container" id="staggerContainer">
+            <div class="stagger-item" style="background:var(--color-brand-background);"></div>
+            <div class="stagger-item" style="background:var(--color-brand-background-hover);"></div>
+            <div class="stagger-item" style="background:var(--brand-100);"></div>
+            <div class="stagger-item" style="background:#8764B8;"></div>
+            <div class="stagger-item" style="background:#D13438;"></div>
+          </div>
+        </div>
+
+        <div class="card reveal" style="grid-column:1/-1;">
+          <h3 class="fd-body-strong">Motion Specifications</h3>
+          <div class="divider-line"></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:var(--sp-m);">
+            <div style="padding:var(--sp-m);background:var(--color-background-alt);border-radius:var(--card-corner-radius);">
+              <b class="fd-body-strong">Drill-in (Enter)</b>
+              <p class="fd-caption text-secondary">300ms · Decelerate · translateX(24px) → 0 · Opacity 0→1</p>
+            </div>
+            <div style="padding:var(--sp-m);background:var(--color-background-alt);border-radius:var(--card-corner-radius);">
+              <b class="fd-body-strong">Drill-out (Exit)</b>
+              <p class="fd-caption text-secondary">250ms · Accelerate · translateX(0) → -24px · Opacity 1→0</p>
+            </div>
+            <div style="padding:var(--sp-m);background:var(--color-background-alt);border-radius:var(--card-corner-radius);">
+              <b class="fd-body-strong">Popup Enter</b>
+              <p class="fd-caption text-secondary">300ms · Decelerate · scale(0.95)→1 · Opacity 0→1</p>
+            </div>
+            <div style="padding:var(--sp-m);background:var(--color-background-alt);border-radius:var(--card-corner-radius);">
+              <b class="fd-body-strong">Connected Animation</b>
+              <p class="fd-caption text-secondary">300ms · Standard · 元素位置 + 大小连续过渡</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         SECTION: ACRYLIC PLAYGROUND
+         ================================================================ -->
+    <section id="playground">
+      <div class="sec-head">
+        <span class="sec-tag">Playground</span>
+        <h2 class="fd-title">Acrylic 调试器</h2>
+        <p>实时调节 Acrylic 材质的模糊度、透明度、饱和度、色调。</p>
+      </div>
+      <div class="divider-line"></div>
+
+      <div class="playground-panel">
+        <div class="pg-controls">
+          <div class="pg-range">
+            <label>Blur <span class="pg-value" id="valBlur">30px</span></label>
+            <input type="range" min="0" max="60" value="30" id="rangeBlur">
+          </div>
+          <div class="pg-range">
+            <label>Opacity <span class="pg-value" id="valOpacity">0.85</span></label>
+            <input type="range" min="0" max="100" value="85" id="rangeOpacity">
+          </div>
+          <div class="pg-range">
+            <label>Saturation <span class="pg-value" id="valSat">1.5</span></label>
+            <input type="range" min="0" max="30" value="15" id="rangeSat">
+          </div>
+          <div class="pg-range">
+            <label>Tint R <span class="pg-value" id="valR">243</span></label>
+            <input type="range" min="0" max="255" value="243" id="rangeR">
+          </div>
+          <div class="pg-range">
+            <label>Tint G <span class="pg-value" id="valG">243</span></label>
+            <input type="range" min="0" max="255" value="243" id="rangeG">
+          </div>
+          <div class="pg-range">
+            <label>Tint B <span class="pg-value" id="valB">243</span></label>
+            <input type="range" min="0" max="255" value="243" id="rangeB">
+          </div>
+          <div class="divider-line"></div>
+          <div style="font-size:12px;color:var(--color-text-secondary);font-family:var(--font-mono);word-break:break-all;" id="cssOutput">backdrop-filter: blur(30px) saturate(1.5);<br>background: rgba(243,243,243,0.85);</div>
+        </div>
+        <div class="pg-preview">
+          <div class="acrylic-layer acrylic" id="pgAcrylic">Acrylic Preview</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         SECTION: ACCESSIBILITY
+         ================================================================ -->
+    <section id="a11y">
+      <div class="sec-head">
+        <span class="sec-tag">Accessibility</span>
+        <h2 class="fd-title">无障碍</h2>
+        <p>Fluent 2 无障碍规范：焦点指示器、高对比度支持、屏幕阅读器兼容。</p>
+      </div>
+      <div class="divider-line"></div>
+
+      <div class="card">
+        <h3 class="fd-body-strong">Focus Visual</h3>
+        <div class="divider-line"></div>
+        <p class="fd-body text-secondary mb-s">2px Accent 边框 + 2px offset + 外发光环。Tab 键遍历所有交互元素。</p>
+        <div class="a11y-focus-demo">
+          <button class="focus-target">Button</button>
+          <input class="focus-target fd-input" style="width:120px;" placeholder="TextBox">
+          <a href="#" class="focus-target" style="text-decoration:none;color:var(--color-text-primary);">Link</a>
+          <div class="focus-target" tabindex="0">Div (tabindex)</div>
+        </div>
+        <div class="divider-line"></div>
+        <div class="flex-row">
+          <div style="padding:12px 16px;border-radius:var(--control-corner-radius);background:var(--color-brand-background);color:var(--color-text-on-accent);font-size:13px;">Accent on White ✓ 4.5:1</div>
+          <div style="padding:12px 16px;border-radius:var(--control-corner-radius);background:#000;color:#fff;font-size:13px;">Dark BaseHigh ✓ 21:1</div>
+          <div style="padding:12px 16px;border-radius:var(--control-corner-radius);background:var(--brand-140);color:var(--brand-40);font-size:13px;">Lightest/Darkest ✓</div>
+        </div>
+        <p class="fd-caption text-secondary mt-s">Screen Reader：所有控件提供 aria-label / role / live-region。Narrator 兼容。</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================================================================
+       CONTENT DIALOG OVERLAY
+       ================================================================ -->
+  <div class="dialog-overlay" id="dialogOverlay" onclick="if(event.target===this)closeDialog()">
+    <div class="fd-dialog">
+      <h3>Confirm Action</h3>
+      <p>ContentDialog 遵循 Fluent 2 规范：Smoke 遮罩 (rgba(0,0,0,0.3))，Elevation 64，Scale 0.95→1 入场 (300ms Decelerate)。支持 Escape 键关闭。</p>
+      <div class="dialog-actions">
+        <button class="fd-btn reveal" onclick="closeDialog()">Cancel</button>
+        <button class="fd-btn accent reveal" onclick="closeDialog()">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       CONNECTED ANIMATION DETAIL
+       ================================================================ -->
+  <div class="ca-detail" id="caDetail" onclick="if(event.target===this)closeCADetail()">
+    <div class="ca-detail-card">
+      <div class="ca-detail-img" id="caDetailImg" style="background:linear-gradient(135deg,var(--color-brand-background),#00B7C3);"></div>
+      <div class="ca-detail-body">
+        <h3 id="caDetailTitle">Connected Animation</h3>
+        <p>元素从缩略图位置平滑过渡到详情视图。使用 ConnectedAnimationService，300ms Standard 曲线。</p>
+        <div style="margin-top:var(--sp-m);"><button class="fd-btn accent reveal" onclick="closeCADetail()">Close</button></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    WinUI 3 · Fluent Design 2 完整规范预览<br>
+    基于 WinUI 3 Gallery · Fluent 2 Design System · Windows App SDK<br>
+    Segoe UI Variable · Acrylic · Mica · Reveal Highlight
+  </footer>
+
+  <script>
+    /* ===== Reveal Highlight ===== */
+    document.addEventListener('mousemove', (e) => {
+      const el = e.target.closest('.reveal');
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      el.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    }, { passive: true });
+
+    /* ===== Theme Toggle ===== */
+    const html = document.documentElement;
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      const dark = html.getAttribute('data-theme') === 'dark';
+      html.setAttribute('data-theme', dark ? 'light' : 'dark');
+      document.getElementById('themeIcon').innerHTML = dark ? '&#xE708;' : '&#xE706;';
+    });
+
+    /* ===== Pivot ===== */
+    function initPivot(id) {
+      const pivot = document.getElementById(id);
+      if (!pivot) return;
+      pivot.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          pivot.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+          const paneId = btn.dataset.pane || btn.dataset.ppane;
+          const parent = pivot.parentElement;
+          parent.querySelectorAll('.pivot-pane').forEach(p => p.classList.remove('active'));
+          btn.classList.add('active');
+          const pane = document.getElementById(paneId);
+          if (pane) pane.classList.add('active');
+        });
+      });
+    }
+    initPivot('pivot');
+    initPivot('patternPivot');
+
+    /* ===== NavigationView Selection ===== */
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const pane = item.closest('.fd-navpane');
+        if (pane) pane.querySelectorAll('.nav-item').forEach(i => i.classList.remove('selected'));
+        item.classList.add('selected');
+      });
+    });
+
+    /* ===== ContentDialog ===== */
+    function openDialog() { document.getElementById('dialogOverlay').classList.add('open'); }
+
+    function closeDialog() { document.getElementById('dialogOverlay').classList.remove('open'); }
+
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeDialog();
+        closeCADetail(); } });
+
+    /* ===== TreeView ===== */
+    function toggleTree(el) {
+      const chevron = el.querySelector('.chevron');
+      const children = el.nextElementSibling;
+      if (!children || !children.classList.contains('tree-children')) return;
+      children.classList.toggle('open');
+      chevron.classList.toggle('open');
+    }
+
+    /* ===== AutoSuggestBox ===== */
+    const autoInput = document.getElementById('autoInput');
+    const autoDropdown = document.getElementById('autoDropdown');
+    const asItems = autoDropdown.querySelectorAll('.as-item');
+    autoInput.addEventListener('input', () => {
+      const q = autoInput.value.toLowerCase().trim();
+      let hasMatch = false;
+      asItems.forEach(item => {
+        const val = item.dataset.val.toLowerCase();
+        if (!q || val.includes(q)) {
+          item.style.display = '';
+          item.innerHTML = q ? item.dataset.val.replace(new RegExp(`(${q})`, 'gi'), '<mark>$1</mark>') : item
+            .dataset.val;
+          hasMatch = true;
+        } else {
+          item.style.display = 'none';
+        }
+      });
+      autoDropdown.classList.toggle('open', hasMatch && q.length > 0);
+    });
+    autoInput.addEventListener('focus', () => { if (autoInput.value.trim()) autoInput.dispatchEvent(new Event(
+        'input')); });
+    document.addEventListener('click', (e) => { if (!e.target.closest('.autosuggest-wrap')) autoDropdown.classList
+        .remove('open'); });
+    asItems.forEach(item => {
+      item.addEventListener('click', () => {
+        autoInput.value = item.dataset.val;
+        autoDropdown.classList.remove('open');
+      });
+    });
+
+    /* ===== Connected Animation ===== */
+    const caGradients = [
+      'linear-gradient(135deg,var(--color-brand-background),#00B7C3)',
+      'linear-gradient(135deg,#8764B8,#B4A0FF)',
+      'linear-gradient(135deg,#D13438,#FF4343)'
+    ];
+    const caTitles = ['Azure Stream', 'Purple Haze', 'Red Alert'];
+
+    function openCADetail(idx) {
+      const detail = document.getElementById('caDetail');
+      document.getElementById('caDetailImg').style.background = caGradients[idx] || caGradients[0];
+      document.getElementById('caDetailTitle').textContent = caTitles[idx] || 'Detail';
+      detail.classList.add('open');
+    }
+
+    function closeCADetail() { document.getElementById('caDetail').classList.remove('open'); }
+
+    /* ===== Entrance Stagger ===== */
+    document.getElementById('playStagger').addEventListener('click', () => {
+      const items = document.querySelectorAll('.stagger-item');
+      items.forEach(i => i.classList.remove('animate'));
+      void items[0].offsetWidth;
+      items.forEach((item, idx) => {
+        setTimeout(() => item.classList.add('animate'), idx * 50);
+      });
+    });
+
+    /* ===== Acrylic Playground ===== */
+    const pgAcrylic = document.getElementById('pgAcrylic');
+    const cssOutput = document.getElementById('cssOutput');
+    const ranges = {
+      blur: { el: document.getElementById('rangeBlur'), valEl: document.getElementById('valBlur'), fmt: v => v +
+          'px' },
+      opacity: { el: document.getElementById('rangeOpacity'), valEl: document.getElementById('valOpacity'),
+        fmt: v => (v / 100).toFixed(2) },
+      sat: { el: document.getElementById('rangeSat'), valEl: document.getElementById('valSat'), fmt: v => (v /
+          10).toFixed(1) },
+      r: { el: document.getElementById('rangeR'), valEl: document.getElementById('valR'), fmt: v => v },
+      g: { el: document.getElementById('rangeG'), valEl: document.getElementById('valG'), fmt: v => v },
+      b: { el: document.getElementById('rangeB'), valEl: document.getElementById('valB'), fmt: v => v },
+    };
+
+    function updatePlayground() {
+      const blur = ranges.blur.el.value;
+      const opacity = (ranges.opacity.el.value / 100).toFixed(2);
+      const sat = (ranges.sat.el.value / 10).toFixed(1);
+      const r = ranges.r.el.value;
+      const g = ranges.g.el.value;
+      const b = ranges.b.el.value;
+
+      ranges.blur.valEl.textContent = blur + 'px';
+      ranges.opacity.valEl.textContent = opacity;
+      ranges.sat.valEl.textContent = sat;
+      ranges.r.valEl.textContent = r;
+      ranges.g.valEl.textContent = g;
+      ranges.b.valEl.textContent = b;
+
+      pgAcrylic.style.backdropFilter = `blur(${blur}px) saturate(${sat})`;
+      pgAcrylic.style.webkitBackdropFilter = `blur(${blur}px) saturate(${sat})`;
+      pgAcrylic.style.background = `rgba(${r},${g},${b},${opacity})`;
+
+      cssOutput.innerHTML =
+        `backdrop-filter: blur(${blur}px) saturate(${sat});<br>background: rgba(${r},${g},${b},${opacity});`;
+    }
+
+    Object.values(ranges).forEach(r => r.el.addEventListener('input', updatePlayground));
+
+    /* ===== Active Nav Link on Scroll ===== */
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.topnav a.navlink');
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(s => {
+        if (window.scrollY >= s.offsetTop - 100) current = s.id;
+      });
+      navLinks.forEach(link => {
+        link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+      });
+    }, { passive: true });
+  </script>
+</body>
+</html>

@@ -1,0 +1,583 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Polaris Safety</string>
+    <string name="app_subtitle">Mobile Security Guard</string>
+    <string name="drawer_open">Open sidebar</string>
+    <string name="star_desc">Polaris four-pointed star logo</string>
+
+    <!-- Main screen -->
+    <string name="guard_status_idle">Guard inactive</string>
+    <string name="guard_status_normal">Light guard active · daily auto scan</string>
+    <string name="guard_status_accessibility">Deep guard active · accessibility monitoring</string>
+    <string name="guard_status_shizuku">Intercept guard active · Shizuku</string>
+    <string name="guard_status_root">Full guard active · Root</string>
+    <string name="mode_scan_now">Scan now</string>
+    <string name="mode_status_ready">Ready</string>
+    <string name="mode_status_need_auth">Authorization needed</string>
+    <string name="mode_status_no_permission">No usable permission found</string>
+    <string name="mode_status_active">Guarding</string>
+
+    <!-- Mode: Normal -->
+    <string name="mode_normal_name">Normal mode</string>
+    <string name="mode_normal_desc">Periodic light scans to detect and alert about suspicious apps</string>
+    <string name="mode_normal_detail">Performs periodic light scans of your phone, identifying suspicious apps based on permission combinations and behavior patterns, and alerts you the moment malware is found. No special permissions required.</string>
+    <string name="mode_level_1">Lv.1 Basic guard</string>
+
+    <!-- Mode: Accessibility -->
+    <string name="mode_accessibility_name">Accessibility mode</string>
+    <string name="mode_accessibility_desc">Requests accessibility permission for deep scans and direct handling</string>
+    <string name="mode_accessibility_detail">After granting Android accessibility permission, Polaris can run deeper scans (including accessibility-service abuse detection) and attempt to directly deal with obvious malware.</string>
+    <string name="mode_level_2">Lv.2 Deep guard</string>
+
+    <!-- Mode: Shizuku -->
+    <string name="mode_shizuku_name">Shizuku mode</string>
+    <string name="mode_shizuku_desc">Requests Shizuku permission for deep scans and early blocking</string>
+    <string name="mode_shizuku_detail">Uses Shizuku permission for even deeper scans, and can intercept malware before it starts running.</string>
+    <string name="mode_level_3">Lv.3 Intercept guard</string>
+
+    <!-- Mode: Root -->
+    <string name="mode_root_name">Root mode</string>
+    <string name="mode_root_desc">Uses Root permission for all-round blocking and guarding</string>
+    <string name="mode_root_detail">Directly uses the phone\'s Root permission for all-round interception and guarding: freeze malicious apps and block their auto-start and execution.</string>
+    <string name="mode_level_4">Lv.4 Full guard</string>
+
+    <!-- Accessibility service -->
+    <string name="accessibility_service_name">Polaris Guard Monitor</string>
+    <string name="accessibility_service_desc">Polaris uses this service to monitor foreground app changes and detect malware in Accessibility mode. Polaris never collects or uploads any personal data.</string>
+
+    <!-- Scan -->
+    <string name="scanning">Scanning…</string>
+    <string name="scan_done_clean">No malware found. Your phone is in good shape</string>
+    <string name="scan_done_risk">%1$d suspicious apps found</string>
+    <string name="scan_title">Scan results</string>
+    <string name="scan_deep_badge">Deep scan</string>
+    <string name="scan_shallow_badge">Light scan</string>
+    <string name="risk_high">High risk</string>
+    <string name="risk_medium">Medium risk</string>
+    <string name="risk_low">Low risk</string>
+    <string name="risk_safe">Safe</string>
+    <string name="action_handle">Handle</string>
+    <string name="action_app_details">App details</string>
+    <string name="action_force_stop">Force stop</string>
+    <string name="action_freeze">Freeze app</string>
+    <string name="action_unfreeze">Unfreeze</string>
+    <string name="action_uninstall">Uninstall</string>
+    <string name="no_risk_selected">No suspicious app selected</string>
+
+    <!-- Mode switching -->
+    <string name="toast_activate_normal">Normal mode activated: daily automatic light scan</string>
+    <string name="toast_activate_accessibility">Accessibility mode activated: deep guard</string>
+    <string name="toast_activate_shizuku">Shizuku mode activated: real-time intercept guard</string>
+    <string name="toast_activate_root">Root mode activated: full guard</string>
+    <string name="toast_no_shizuku_app">No usable permission found: please install and start the Shizuku app first</string>
+    <string name="toast_no_shizuku_running">No usable permission found: Shizuku service is not running</string>
+    <string name="toast_no_shizuku_permission">No usable permission found: Shizuku authorization denied</string>
+    <string name="toast_no_root">No usable permission found: Root access not detected</string>
+    <string name="toast_need_accessibility">Please enable the Polaris accessibility service first</string>
+    <string name="toast_guard_started">Guard service started</string>
+    <string name="toast_guard_stopped">Guard service stopped</string>
+    <string name="toast_scan_start">Scan started</string>
+    <string name="notification_channel_scan">Scan alerts</string>
+    <string name="notification_channel_guard">Guard interception</string>
+    <string name="notification_scan_title">Polaris found a suspicious app</string>
+    <string name="notification_blocked_title">Polaris blocked malware</string>
+    <string name="notification_blocked_text">Blocked %1$s from running</string>
+
+    <!-- Permission rationale -->
+    <string name="perm_rationale_title">Permission needed</string>
+    <string name="perm_notification_rationale">Enable notifications so Polaris can alert you when malware is found.</string>
+
+    <!-- ============ AI verdict engine ============ -->
+    <string name="ai_engine_title">AI Verdict Engine</string>
+    <string name="ai_engine_subtitle">Pick an LLM provider; once connected via API, the AI decides whether a malicious app should be removed or kept</string>
+    <string name="ai_choice_title">Choose scan engine</string>
+    <string name="ai_choice_normal">Normal</string>
+    <string name="ai_choice_normal_desc">Mechanical scan that checks quickly against preset rules</string>
+    <string name="ai_choice_ai">Artificial Intelligence</string>
+    <string name="ai_choice_ai_desc">Connects to an LLM API so AI decides remove or keep</string>
+    <string name="ai_connect_now">Connect</string>
+    <string name="ai_thinking_label">AI thinking</string>
+    <string name="ai_think_1">AI is reading file features and permissions…</string>
+    <string name="ai_think_2">Extracting file header and executable payload signatures…</string>
+    <string name="ai_think_3">Computing SHA-256 and matching against the Polar Region database…</string>
+    <string name="ai_think_4">Matching known malware families and IOC threat intelligence…</string>
+    <string name="ai_think_5">Analyzing naming disguise, ransom indicators and hidden traits…</string>
+    <string name="ai_think_6">Evaluating sensitive permission combinations and abnormal behaviors…</string>
+    <string name="ai_think_7">Weighing scores and false-positive risk…</string>
+    <string name="ai_think_8">Producing the verdict: remove or keep…</string>
+    <string name="ai_home_entry">AI engine</string>
+    <string name="ai_home_status_off">Not connected · tap to configure</string>
+    <string name="ai_home_status_on">Connected to %1$s</string>
+    <string name="ai_home_status_multi_provider">Connected to %1$d providers · %2$s mode</string>
+
+    <!-- 7 providers -->
+    <string name="ai_provider_hy3">Tencent Hunyuan Hy3</string>
+    <string name="ai_provider_glm">Zhipu GLM</string>
+    <string name="ai_provider_kimi">Kimi</string>
+    <string name="ai_provider_chatgpt">OpenAI ChatGPT</string>
+    <string name="ai_provider_gemini">Google Gemini</string>
+    <string name="ai_provider_claude">Anthropic Claude</string>
+    <string name="ai_provider_deepseek">DeepSeek</string>
+    <string name="ai_provider_model_default">Default model %1$s</string>
+    <string name="ai_configured_badge">Connected</string>
+
+    <string name="ai_custom_provider">Custom</string>
+    <string name="ai_custom_provider_dialog_title">Add Custom AI Provider</string>
+    <string name="ai_custom_name_hint">Provider name (e.g., MyAI)</string>
+    <string name="ai_custom_url_hint">API Base URL (e.g., https://api.example.com/v1)</string>
+    <string name="ai_custom_model_hint">Default model name (optional, default gpt-3.5-turbo)</string>
+    <string name="ai_custom_badge_hint">Badge text (optional, e.g., Custom)</string>
+    <string name="ai_custom_saved">Custom provider saved</string>
+    <string name="ai_custom_restart_hint">Please re-enter the AI setup page to display the new provider</string>
+
+    <!-- Config form -->
+    <string name="scan_scanning">Scanning: %1$s</string>
+    <string name="scan_scanning_n">Scanning (%1$d): %2$s</string>
+    <string name="scan_apps_scanning">Scanning installed apps…</string>
+    <string name="scan_apps_scanning_n">Scanning apps (%1$d/%2$d): %3$s</string>
+    <string name="ai_config_title">Connect %1$s</string>
+    <string name="ai_api_key_hint">API Key</string>
+    <string name="ai_api_key_help">Create it in the provider console; stored on this device only</string>
+    <string name="ai_model_hint">Model name (editable)</string>
+    <string name="ai_test_button">Test connection</string>
+    <string name="ai_save_button">Save and enable</string>
+    <string name="ai_testing">Testing connection…</string>
+    <string name="ai_test_ok">Connection OK ✓ model responds normally</string>
+    <string name="ai_test_fail">Connection failed: %1$s</string>
+    <string name="ai_key_empty">Please enter an API Key first</string>
+    <string name="ai_saved_toast">AI engine enabled: %1$s</string>
+    <string name="ai_scan_start">AI is analyzing, please wait…</string>
+    <string name="ai_judge_failed">AI analysis failed: %1$s</string>
+    <string name="ai_not_configured">AI engine not connected yet. Please configure the API first</string>
+
+    <!-- AI custom provider -->
+    <string name="ai_custom_provider_title">Custom LLM Provider</string>
+    <string name="ai_custom_provider_subtitle">Add DeepSeek, Kimi, GLM and 14 other providers or custom</string>
+    <string name="ai_select_provider_title">Select AI Provider</string>
+
+    <!-- AI multi-provider config -->
+    <string name="ai_add_provider_title">Add Provider</string>
+    <string name="ai_add_provider_subtitle">Select from preset providers or configure custom</string>
+    <string name="ai_no_provider_configured">No AI provider configured</string>
+    <string name="ai_add_provider_hint">Tap "Add Provider" above to start configuration</string>
+    <string name="ai_status_enabled">Enabled</string>
+    <string name="ai_status_disabled">Disabled</string>
+    <string name="ai_delete">Delete</string>
+    <string name="ai_delete_provider_title">Delete Provider</string>
+    <string name="ai_delete_provider_confirm">Are you sure you want to delete this provider configuration? This action cannot be undone.</string>
+    <string name="ai_provider_saved_toast">Saved: %1$s</string>
+    <string name="ai_no_provider_enabled">Please enable at least one AI provider</string>
+
+    <!-- Multi-model strategy -->
+    <string name="ai_multi_strategy_title">Multi-model Strategy</string>
+    <string name="ai_strategy_ensemble_title">Cross Detection</string>
+    <string name="ai_strategy_ensemble_desc">Any model detecting malware marks it as malicious; multiple models detecting it gets highlighted (more comprehensive)</string>
+    <string name="ai_strategy_fastest_title">Fastest First</string>
+    <string name="ai_strategy_fastest_desc">Request all models in parallel, use the first returned result (fastest response)</string>
+
+    <!-- Model list -->
+    <string name="ai_fetch_models">Fetch Model List</string>
+    <string name="ai_edit_config">Edit Config</string>
+    <string name="ai_fetching_models">Fetching model list…</string>
+    <string name="ai_models_fetched">Fetched %1$d models, %2$d enabled</string>
+    <string name="ai_models_fetch_fail">Failed to fetch model list: %1$s</string>
+    <string name="ai_no_models_fetched">No models fetched. Please enter an API Key and ensure network connectivity</string>
+    <string name="ai_model_enabled_count">%1$d / %2$d models enabled</string>
+
+    <!-- AI verdict results -->
+    <string name="ai_badge">AI verdict</string>
+    <string name="ai_verdict_remove">Remove recommended</string>
+    <string name="ai_verdict_keep">Keep recommended</string>
+    <string name="ai_verdict_pending">Not evaluated by AI</string>
+    <string name="ai_summary">AI verdict: %1$d remove · %2$d keep · average confidence %3$d%%</string>
+    <string name="ai_confidence">Confidence %1$d%%</string>
+    <string name="ai_reason_prefix">AI reason: %1$s</string>
+
+    <!-- AI prompts -->
+    <string name="ai_system_prompt">You are the AI security analysis engine of Polaris Safety (mobile security guard). You will receive an app scan report; each line contains: package name, app name, heuristic risk score (0-100), risk level and detection features (sensitive permissions, dangerous permission combinations, hidden icon, accessibility service abuse, device admin abuse, known malware signature hits, etc.).\n\nYour task: decide for each app whether it should be \"removed\" (remove) or \"kept\" (keep). Rules:\n1. Clear malicious features such as \"known malware signature hit\", \"non-system app registered accessibility service\", \"non-system app registered device admin\", or multiple high-risk features combined (e.g. SMS + network, overlay + accessibility) → recommend remove;\n2. System apps, well-known vendor apps, or apps with only isolated sensitive permissions and no combined abuse → recommend keep;\n3. When unsure, be conservative (keep) to avoid false positives.\n\nOutput only a JSON array, with no other text, comments or Markdown. Element format: {"package":"package name","action":"remove" or "keep","confidence":decimal from 0 to 1,"reason":"reason in no more than 20 characters"}. Output exactly one entry for every app in the report.</string>
+    <string name="ai_user_prompt">Below is this scan report (higher score means higher risk):\n%1$s\nOutput the JSON array as instructed.</string>
+    <string name="ai_system_prompt_files">You are the AI file security analysis engine of Polaris Safety (mobile security guard). You will receive a file scan report; each line contains: file identifier, file name, size, heuristic risk score (0-100), risk level and detection features (APK installer, file name matching a known malware family, risky keywords, disguised file, ransom note, hidden file, abnormal size, etc.).\n\nYour task: decide for each file whether it should be \"removed\" (remove, i.e. quarantined and deleted) or \"kept\" (keep). Rules:\n1. Clear malicious features such as \"known malware family\", \"disguised file\", \"ransom note file\", or multiple risk features combined → recommend remove;\n2. Normal APK installers, system files, files of well-known software, or only minor isolated features → recommend keep;\n3. When unsure, be conservative (keep) to avoid deleting user files.\n\nOutput only a JSON array, with no other text, comments or Markdown. Element format: {"package":"file identifier","action":"remove" or "keep","confidence":decimal from 0 to 1,"reason":"reason in no more than 20 characters"}. Output exactly one entry for every file in the report, and return file identifiers unchanged.</string>
+
+    <!-- ============ Scan Center (file scan / quarantine) ============ -->
+    <string name="back">Back</string>
+    <string name="navigate_next">Open</string>
+    <string name="reconfigure">Reconfigure</string>
+    <string name="scan_center_title">Scan Center</string>
+    <string name="scan_center_subtitle">%1$s · %2$s</string>
+    <string name="tab_scan">Scan</string>
+    <string name="tab_quarantine">Quarantine</string>
+
+    <string name="file_scan_folder">Scan a folder</string>
+    <string name="file_scan_folder_desc">Pick any folder on your phone for a targeted scan</string>
+    <string name="file_scan_global">Full scan</string>
+    <string name="file_scan_global_desc">Scan the entire storage for risky files</string>
+    <string name="file_scan_perm_hint">Full scan requires \"All files access\". Please allow it in system settings and return</string>
+    <string name="file_scan_no_file_manager">No file picker available</string>
+
+    <string name="file_result_count">%1$d risky files found</string>
+    <string name="file_meta">%1$s · risk index %2$d</string>
+    <string name="file_source_saf">From authorized folder · %1$s</string>
+
+    <string name="file_action_quarantine">Quarantine</string>
+    <string name="file_action_allow">Allow</string>
+    <string name="file_action_delete">Delete</string>
+    <string name="file_deleted_toast">File deleted</string>
+    <string name="file_action_restore">Restore</string>
+    <string name="file_action_unallow">Revoke allow</string>
+    <string name="file_quarantined_toast">Moved to secure quarantine</string>
+    <string name="file_allowed_toast">Allowed; will be skipped in future scans</string>
+    <string name="file_restored_toast">Original file restored</string>
+    <string name="file_action_failed">Action failed, please retry</string>
+
+    <string name="quarantine_title">Quarantine</string>
+    <string name="quarantine_intro">Quarantined files are stored safely here and can be restored or allowed at any time. Quarantined files cannot be executed, ensuring phone security.</string>
+    <string name="quarantine_empty">No quarantined files\nQuarantined files are kept safely here and can be restored or allowed anytime</string>
+    <string name="quarantine_count">%1$d files</string>
+    <string name="quarantine_meta">%1$s · risk %2$d · %3$s</string>
+
+    <string name="allowlist_title">Allowed list</string>
+    <string name="allowlist_intro">Allowed file paths will be skipped during scans. You can revoke allowance at any time if no longer trusted.</string>
+    <string name="allowlist_empty">No allowed files</string>
+    <string name="allow_count">%1$d items</string>
+
+    <!-- ============ Settings ============ -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_mode_section">Guard mode</string>
+    <string name="settings_engine_section">Default engine after tapping a mode</string>
+    <string name="settings_engine_hint">When set, every mode entry defaults to this engine (you can still change it temporarily in the sheet)</string>
+    <string name="settings_ai_configure">Configure</string>
+    <string name="detection_config_title">Detection Config</string>
+    <string name="detection_ai_on">AI connected</string>
+    <string name="detection_ai_off">AI not connected</string>
+    <string name="detection_ml_on">ML enabled</string>
+    <string name="detection_ml_off">ML disabled</string>
+
+    <!-- ============ Guide hint ============ -->
+    <string name="guide_select_mode">Choose a guard mode to get started</string>
+    <string name="guide_select_mode_sub">Once a mode is selected, the \"Scan now\" button will appear here</string>
+
+    <!-- ============ Appearance theme ============ -->
+    <string name="theme_title">Appearance</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_system">Follow system</string>
+    <string name="theme_toast_dark">Switched to dark theme</string>
+    <string name="theme_toast_light">Switched to light theme</string>
+    <string name="theme_toast_system">Switched to follow system</string>
+
+    <!-- ============ Custom theme color ============ -->
+    <string name="theme_mode_title">Display mode</string>
+    <string name="theme_color_section">Appearance</string>
+    <string name="appearance_entry_summary">Dark mode and theme color</string>
+    <string name="custom_theme_color_title">Custom theme color</string>
+    <string name="custom_theme_color_desc">Pick an accent color applied to the whole app (Android 12+).</string>
+    <string name="custom_theme_default">Default</string>
+    <string name="custom_theme_applied">Theme color applied</string>
+
+    <!-- ============ Language ============ -->
+    <string name="language_title">Language</string>
+    <string name="language_system">Follow system</string>
+
+    <!-- ============ About ============ -->
+    <string name="about_title">About</string>
+    <string name="about_version">Version %1$s (%2$d)</string>
+    <string name="about_changelog_title">Changelog</string>
+    <string name="about_check_update">Check for updates</string>
+    <string name="about_checking">Checking for updates…</string>
+    <string name="about_up_to_date">You are on the latest version</string>
+    <string name="about_tagline">Polaris · Mobile Security Guard</string>
+
+    <!-- ============ DeepSeek card ============ -->
+    <string name="ai_deepseek_hint">This app uses DeepSeek as its default AI. To use the API, get a key via the link below</string>
+    <string name="ai_deepseek_site">https://platform.deepseek.com</string>
+    <string name="ai_deepseek_badge">Recommended default</string>
+
+    <!-- ============ Changelog ============ -->
+    <string name="changelog_v1_title">v1.0.0 · Stable release</string>
+    <string name="changelog_v1_body">· Four guard levels (Normal / Accessibility / Shizuku / Root)\n· AI verdict engine with DeepSeek by default, 7 LLM providers supported\n· Scan Center: folder scan / full scan\n· Quarantine: quarantine · restore · allow management\n· API Key stored with Keystore encryption\n· Appearance themes (dark / light / follow system) and in-app language switching</string>
+    <string name="changelog_v20_title">v2.0.0 · Stable release</string>
+    <string name="changelog_v20_body">· Fixed crash when requesting notification permission after choosing a mode\n· App icon: centered four-pointed star, pure white background\n· Mode cards: removed level labels, line-style icons\n· Check for updates: GitHub Releases with CN mirror download</string>
+    <string name="changelog_v22_title">v2.2.0 · Stable release</string>
+    <string name="changelog_v22_body">· Guard logic: fixed deep guard not enabled in old versions; added ML model for auxiliary verdict\n· Virus database: updated built-in and full databases, switchable freely\n· AI verdict engine: supports 14 providers, custom providers allowed, added "Fetch model list" button\n· New Toolbox section: view app permissions, recent files and traffic management\n· New unified management screen: merges Activity, allowed files and quarantine into one place\n· UI: refined interaction and styling for mode selection, scan animation, side drawer, settings and theme switch; added landscape mode</string>
+    <string name="changelog_v21_title">v2.1.0 · Stable release</string>
+    <string name="changelog_v21_body">· Intercept notification: protection text + red turn-off + missing-permission prompt with grant\n· Fixed triple-volume-key emergency exit; direct uninstall to prevent revival\n· Fixed background guard persistence; usage access for foreground detection\n· Fixed version detection (no more false \"new version\")\n· Smoother animations; wave progress ball for update download\n· AI icon → server, Root icon → tilted key, star shrunk with margin\n· Expanded threat database\n· New \"App monitoring\" in Intercept: real-time abnormal behavior checks\n· New \"Activity\" tab: full protection log</string>
+    <string name="changelog_v13_title">v1.3.0 · Stable release</string>
+    <string name="changelog_v13_body">· New "Intercept" guard tab (red alert theme)\n· Real-time blocking of malicious lock-screen / screen takeover / notification theft / ransomware / usage-rights violations\n· Pinned system notification "Intercept mode on" when enabled, one-tap to turn off\n· Blocked apps managed centrally, with allow and delete\n· AI scan shows the full reasoning feedback</string>
+    <string name="changelog_v09_title">v0.9.0 · Beta</string>
+    <string name="changelog_v09_body">· Family-based malware signature library (~30 real families)\n· File-level heuristic scoring + AI verdict\n· Daily scheduled scans and guard-on-boot</string>
+
+    <!-- ============ Intercept guard (red alert) ============ -->
+    <string name="tab_block">Intercept</string>
+    <string name="block_mode_title">Intercept mode</string>
+    <string name="block_list_title">Blocked apps</string>
+    <string name="block_list_empty">No blocked apps yet\nOnce intercept mode is on, blocked malicious apps will appear here</string>
+    <string name="block_count">%1$d apps</string>
+    <string name="block_notification_title">Intercept mode on</string>
+    <string name="block_notification_text">The light of Polaris guards your storage — you are protected</string>
+    <string name="block_notification_missing_perm">Polaris is missing the %1$s permission</string>
+    <string name="block_action_off">Turn off</string>
+    <string name="block_action_grant">Grant</string>
+    <string name="block_on_toast">Intercept mode on; status is pinned in the notification bar</string>
+    <string name="block_off_toast">Intercept mode off</string>
+    <string name="block_need_notification">Notification permission is required to pin the intercept status</string>
+    <string name="block_guard_title">Malicious interception guard</string>
+    <string name="block_state_on">Intercept mode: on</string>
+    <string name="block_state_off">Intercept mode: off</string>
+    <string name="block_toggle_on">Enable intercept mode</string>
+    <string name="block_toggle_off">Disable intercept mode</string>
+    <string name="block_guard_desc">Guarding: lock-screen · screen takeover · notification theft · ransomware · usage-rights abuse</string>
+    <string name="block_pin">Pinned</string>
+
+    <!-- Intercept module · required permissions -->
+    <string name="perm_grant">Grant</string>
+    <string name="perm_name_accessibility">accessibility</string>
+    <string name="perm_name_overlay">overlay</string>
+    <string name="perm_name_usage">usage access</string>
+    <string name="perm_accessibility_title">Grant accessibility permission</string>
+    <string name="perm_accessibility_desc">Enables full-domain monitoring and patrol</string>
+    <string name="perm_overlay_title">Grant overlay permission</string>
+    <string name="perm_overlay_desc">Shows a rescue overlay on top when a lock-screen / ransomware takeover is detected</string>
+    <string name="perm_usage_title">Grant usage access</string>
+    <string name="perm_usage_desc">Identifies the foreground lock-screen app for precise interception</string>
+
+    <!-- Rescue overlay -->
+    <string name="rescue_title">Are you in trouble? Do you need help?</string>
+    <string name="rescue_clear">Remove</string>
+    <string name="rescue_allow">Allow</string>
+    <string name="rescue_cleared">Removed the takeover app</string>
+    <string name="rescue_allowed">Allowed this app</string>
+
+    <!-- Emergency mode -->
+    <string name="emergency_hint_title">Emergency mode</string>
+    <string name="emergency_hint_desc">If a malicious app takes over your screen and you cannot operate, press the volume-up key three times in a row to instantly stop and uninstall the takeover app, preventing it from restarting.</string>
+    <string name="emergency_no_target">No takeover app detected; returned to home screen</string>
+    <string name="emergency_log_stopped">Force-stopped the takeover app</string>
+    <string name="emergency_log_uninstalled">Silently uninstalled the takeover app</string>
+    <string name="emergency_log_uninstall_ask">Opened the system uninstaller; please confirm</string>
+
+    <!-- Rescue overlay · behavior log -->
+    <string name="rescue_log_shown">Rescue overlay shown (target %1$s)</string>
+    <string name="rescue_log_cleared">Removed the takeover app %1$s</string>
+    <string name="rescue_log_escaped">Escaped to home via accessibility</string>
+
+    <!-- Behavior log (generic) -->
+    <string name="behavior_detail_force_stop">Force-stopped %1$s</string>
+    <string name="behavior_detail_freeze">Froze %1$s to prevent auto-start</string>
+    <string name="behavior_detail_block">Matched malware list, blocked %1$s</string>
+
+    <!-- ============ App monitoring ============ -->
+    <string name="monitor_channel_name">App monitoring alerts</string>
+    <string name="monitor_title">App monitoring</string>
+    <string name="monitor_subtitle">Choose apps to monitor in real time</string>
+    <string name="monitor_entry_desc">View all apps and pick targets; abnormal behavior triggers instant alerts</string>
+    <string name="monitor_hint">Turn the switch on to monitor an app. Once abnormal behavior is detected (launching an activity in the background, posting notifications in the background, etc.), you will be notified immediately.</string>
+    <string name="monitor_empty">No monitorable apps found</string>
+    <string name="monitor_on_toast">Now monitoring \"%1$s\"</string>
+    <string name="monitor_off_toast">Stopped monitoring \"%1$s\"</string>
+    <string name="monitor_alert_title">Polaris · abnormal app behavior alert</string>
+    <string name="monitor_alert_text">\"%1$s\" is %2$s</string>
+    <string name="monitor_reason_notification">posting notifications in the background</string>
+    <string name="monitor_reason_background_activity">launching an activity in the background</string>
+
+    <!-- ============ Behavior tab ============ -->
+    <string name="tab_behavior">Activity</string>
+    <string name="behavior_hint">This logs all Polaris protection actions — force stops, blocking, quarantine, rescue and emergency mode — for easy review.</string>
+    <string name="behavior_log_intro">Records a timeline of all protection actions including force stops, blocking, rescue overlays, emergency mode, quarantine, monitor alerts, etc.</string>
+    <string name="behavior_empty">No protection records yet\nProtection actions will build a timeline here</string>
+    <string name="behavior_count">%1$d records</string>
+    <string name="behavior_clear">Clear</string>
+    <string name="behavior_clear_title">Clear activity log</string>
+    <string name="behavior_clear_confirm">Clear all protection records? This cannot be undone.</string>
+    <string name="behavior_clear_yes">Clear</string>
+    <string name="behavior_type_force_stop">Force stop</string>
+    <string name="behavior_type_block">Blocked</string>
+    <string name="behavior_type_rescue">Rescue</string>
+    <string name="behavior_type_emergency">Emergency</string>
+    <string name="behavior_type_quarantine">Quarantine</string>
+    <string name="behavior_type_monitor">Monitor alert</string>
+    <string name="behavior_type_uninstall">Uninstall</string>
+    <string name="behavior_type_freeze">Freeze</string>
+    <string name="behavior_type_other">Protection</string>
+
+    <!-- ============ Threat DB ============ -->
+    <string name="virusdb_section">Threat Intelligence</string>
+    <string name="virusdb_entry_summary">Manage cloud full DB and built-in lite DB</string>
+    <string name="virusdb_name">Polar Point open threat intelligence</string>
+    <string name="virusdb_card_title">Databases</string>
+    <string name="virusdb_status_not_downloaded">Version %1$s · not downloaded</string>
+    <string name="virusdb_status_partial">Version %1$s · %2$d%%</string>
+    <string name="virusdb_status_downloading">Version %1$s · downloading</string>
+    <string name="virusdb_status_downloaded">Version %1$s · downloaded</string>
+    <string name="virusdb_updated">Updated %1$s</string>
+    <string name="virusdb_source">Source: abuse.ch MalwareBazaar + URLhaus + PyPI/NPM malicious packages + community list</string>
+    <string name="virusdb_point_source">Source: derived from Polar Region v14 filtered named-family threats</string>
+    <string name="virusdb_auto">Auto update</string>
+    <string name="virusdb_update_now">Update now</string>
+    <string name="virusdb_updating">Updating threat DB…</string>
+    <string name="virusdb_progress">%1$.1f / %2$.1f MB (%3$d%%)</string>
+    <string name="virusdb_abort">Abort</string>
+    <string name="virusdb_aborted_toast">Download aborted. Progress kept — next update resumes from where it stopped.</string>
+    <string name="virusdb_updated_toast">Threat DB updated to v%1$d</string>
+    <string name="virusdb_update_failed">Threat DB update failed: %1$s</string>
+    <string name="virusdb_entries">%1$d indicators</string>
+    <string name="file_ioc_hit">Hit open threat DB: %1$s (%2$s)</string>
+    <string name="virusdb_select">Select threat database</string>
+    <string name="virusdb_region_name">Polar Region (Full · 1.61M entries)</string>
+    <string name="virusdb_point_name">Polar Point (Curated · ~75K entries)</string>
+    <string name="virusdb_region_desc">Full version, precise hash blocking (357 MB)</string>
+    <string name="virusdb_point_desc">Curated, lightweight built-in, works offline</string>
+
+    <!-- Onboarding Region download (cancellable / resumable) -->
+    <string name="virusdb_downloading">Downloading…</string>
+    <string name="virusdb_download_start">Downloading Polar Region DB (≈357 MB). You can cancel anytime…</string>
+    <string name="virusdb_download_done">Download complete, entering…</string>
+    <string name="virusdb_cancel_download">Cancel and enter</string>
+    <string name="virusdb_cancelled_toast">Download cancelled, using built-in DB (resume later in Settings)</string>
+    <string name="virusdb_download_failed_title">Download incomplete</string>
+    <string name="virusdb_download_failed_msg">Download issue: %1$s\n\nRetry, or enter with the built-in DB for now?</string>
+    <string name="virusdb_retry">Retry</string>
+    <string name="virusdb_enter_builtin">Enter with built-in DB</string>
+
+    <!-- ============ ML Machine Learning Detection ============ -->
+    <string name="ml_engine_title">ML Detection Engine</string>
+    <string name="ml_engine_subtitle">On-device local models — no network needed, adding extra detection dimensions</string>
+    <string name="ml_results_title">ML Detection Results</string>
+    <string name="ml_no_results">No ML detection results</string>
+    <string name="ml_results_empty">No ML detection results in this scan</string>
+    <string name="ml_detail_format">File: %1$s\n\nML Score: %2$d/100\n\nAnalysis: %3$s</string>
+    <string name="ml_unknown">Unknown</string>
+    <string name="ml_scan_now">ML Scan</string>
+    <string name="ml_scanning">ML scanning…</string>
+    <string name="ml_scan_done">ML scan complete, %1$d suspicious found</string>
+
+    <!-- ML Model Selector -->
+    <string name="ml_model_selector_title">Detection Model</string>
+    <string name="ml_model_selector_hint">Select detection model</string>
+    <string name="ml_model_mh100k">Light</string>
+    <string name="ml_model_mh1m">Powerful</string>
+    <string name="ml_model_changed">Switched to %1$s, restart scan to take effect</string>
+    <string name="ml_model_detail_toggle">Model Details</string>
+    <string name="ml_model_desc_mh100k">MH-100K · Logistic Regression\nDataset: MH-100K real samples (~100K Android apps)\nFeatures: 38 (15 permission combos + 3 context + 20 API categories)\nModel size: ~3 KB (pure weights, no dependencies)\nMeasured: ROC-AUC 0.95 on real data\nNotes: Tiny and extremely fast, ideal for real-time background monitoring</string>
+    <string name="ml_model_desc_mh1m">MH-1M · XGBoost\nDataset: MH-1M real samples (~1.34M Android apps)\nFeatures: 43 (20 permissions + 8 intents + 5 DEX opcodes + 10 API calls)\nModel size: ~4.5 MB (500 decision trees, pure Java inference)\nNotes: Richer features including DEX instruction level, for deep scanning</string>
+
+    <!-- ============ Check for updates (GitHub Releases) ============ -->
+    <string name="update_available_title">New version available</string>
+    <string name="update_available_body">Latest %1$s (current %2$s)</string>
+    <string name="update_download_github">GitHub download</string>
+    <string name="update_download_mirror">Mirror (CN)</string>
+    <string name="update_cancel">Cancel</string>
+    <string name="update_need_install_perm">Enable "Install unknown apps" to continue</string>
+    <string name="update_downloading">Downloading %1$d%%…</string>
+    <string name="update_downloading_init">Downloading…</string>
+    <string name="update_download_failed">Download failed: %1$s</string>
+    <string name="update_check_failed">Update check failed: %1$s</string>
+    <string name="update_timeout">GitHub timed out. Check your network or use the mirror.</string>
+    <string name="update_install_now">Downloaded. Opening installer…</string>
+
+    <!-- Permission Usage -->
+    <string name="perm_usage_screen_title">Permission Usage</string>
+    <string name="perm_usage_tab_installed">Installed Apps</string>
+    <string name="perm_usage_tab_running">Active Permissions</string>
+    <string name="perm_usage_empty">No data available</string>
+    <string name="perm_usage_granted">Granted</string>
+    <string name="perm_usage_not_granted">Not granted</string>
+    <string name="perm_usage_active">In use</string>
+    <string name="perm_usage_inactive">Not in use</string>
+    <string name="perm_usage_count">%1$d permissions</string>
+    <string name="perm_usage_search_hint">Search app name or package</string>
+
+    <!-- Management -->
+    <string name="management_title">Management</string>
+    <string name="management_tab_quarantine">Quarantine</string>
+    <string name="management_tab_allowlist">Allowlist</string>
+    <string name="management_tab_behavior">Behavior Log</string>
+    <string name="management_tab_permission">Permission Usage</string>
+    <string name="management_empty">No data</string>
+    <string name="quarantine_restore">Restore</string>
+    <string name="quarantine_allow">Allow</string>
+    <string name="quarantine_delete">Delete</string>
+    <string name="management_clear_log">Clear Log</string>
+    <string name="management_clear_log_confirm">Clear all behavior logs?</string>
+
+    <!-- Tools -->
+    <string name="tools_title">Tools</string>
+    <string name="tools_tab_permission">Permission Usage</string>
+    <string name="tools_tab_recent">Recent Files</string>
+    <string name="tools_tab_traffic">Traffic</string>
+    <string name="tools_empty">No data</string>
+    <string name="tools_search_hint">Search</string>
+    <string name="tools_scan_file">Scan this file</string>
+    <string name="tools_recent_files">Recent Files</string>
+    <string name="tools_file_modified">Modified %1$s</string>
+    <string name="tools_file_size">%1$s</string>
+    <string name="tools_scan_start">Scanning…</string>
+    <string name="tools_scan_done">Scan complete, %1$d risky files found</string>
+    <string name="tools_no_recent_files">No recent files</string>
+    <string name="tools_no_traffic">No traffic data</string>
+    <string name="tools_traffic_detail">Received %1$s · Sent %2$s</string>
+
+    <!-- Guard Dashboard -->
+    <string name="guard_dashboard_title">Guard Dashboard</string>
+    <string name="guard_dashboard_greeting">Hello!</string>
+    <string name="guard_dashboard_greeting_morning">Good Morning!</string>
+    <string name="guard_dashboard_greeting_afternoon">Good Afternoon!</string>
+    <string name="guard_dashboard_greeting_evening">Good Evening!</string>
+    <string name="guard_dashboard_status">Guard Status</string>
+    <string name="guard_dashboard_mode_none">No guard mode activated</string>
+    <string name="guard_dashboard_mode_active">Guarding · %1$s</string>
+    <string name="guard_dashboard_stats">Guard Statistics</string>
+    <string name="guard_dashboard_last_time">Last Guard</string>
+    <string name="guard_dashboard_total_count">Total Guards</string>
+    <string name="guard_dashboard_time_just_now">Just now</string>
+    <string name="guard_dashboard_time_minutes">%1$d min ago</string>
+    <string name="guard_dashboard_time_hours">%1$d hours ago</string>
+    <string name="guard_dashboard_time_days">%1$d days ago</string>
+    <string name="guard_dashboard_time_never">Never</string>
+    <string name="guard_dashboard_recent_scan">Recent Scan Results</string>
+    <string name="guard_dashboard_no_scan">No scan records</string>
+    <string name="guard_dashboard_no_scan_detail">No scans performed</string>
+    <string name="guard_dashboard_scan_total">Total scanned: %1$d</string>
+    <string name="guard_dashboard_scan_safe">Safe: %1$d</string>
+    <string name="guard_dashboard_scan_suspicious">Suspicious: %1$d</string>
+    <string name="guard_dashboard_scan_malicious">Malicious: %1$d</string>
+    <string name="guard_dashboard_recent_files">Recently Added Files</string>
+    <string name="guard_dashboard_no_files">No recent files</string>
+    <string name="guard_dashboard_sensitive_perms">Sensitive Permissions</string>
+    <string name="guard_dashboard_no_perms">No sensitive permissions used</string>
+    <string name="perm_read_contacts">Read contacts</string>
+    <string name="perm_write_contacts">Modify contacts</string>
+    <string name="perm_read_sms">Read SMS</string>
+    <string name="perm_send_sms">Send SMS</string>
+    <string name="perm_read_call_log">Read call log</string>
+    <string name="perm_write_call_log">Modify call log</string>
+    <string name="perm_camera">Camera</string>
+    <string name="perm_record_audio">Record audio</string>
+    <string name="perm_fine_location">Precise location</string>
+    <string name="perm_coarse_location">Approximate location</string>
+    <string name="perm_read_phone_state">Read phone state</string>
+    <string name="perm_call_phone">Make phone calls</string>
+    <string name="perm_read_storage">Read storage</string>
+    <string name="perm_write_storage">Write storage</string>
+    <string name="perm_read_media_images">Read images</string>
+    <string name="perm_read_media_video">Read videos</string>
+    <string name="perm_read_media_audio">Read audio files</string>
+
+    <!-- Tutorial -->
+    <string name="tutorial_welcome_title">Welcome to Polaris</string>
+    <string name="tutorial_welcome_subtitle">Protecting your device</string>
+    <string name="tutorial_enter">Get Started</string>
+    <string name="tutorial_scan_title">Full Scan</string>
+    <string name="tutorial_scan_desc">Scan all apps to detect malware</string>
+    <string name="tutorial_next">Next</string>
+    <string name="tutorial_guard_prompt">Swipe right to open Guard panel</string>
+    <string name="tutorial_guard_desc">Guard panel monitors device security</string>
+    <string name="tutorial_got_it">Got it</string>
+
+    <!-- Pull-down panel -->
+    <string name="pulldown_title">Quick view</string>
+    <string name="pulldown_perm_section">App permission usage</string>
+    <string name="pulldown_perm_see_all">See all</string>
+    <string name="pulldown_perm_empty">No permission records to show</string>
+    <string name="pulldown_recent_count">%1$d files</string>
+    <string name="pulldown_close">Close</string>
+</resources>

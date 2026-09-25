@@ -1,0 +1,583 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Polaris Safety</string>
+    <string name="app_subtitle">スマートフォンセキュリティガード</string>
+    <string name="drawer_open">サイドバーを開く</string>
+    <string name="star_desc">Polaris の四隅星ロゴ</string>
+
+    <!-- メイン画面 -->
+    <string name="guard_status_idle">ガード未起動</string>
+    <string name="guard_status_normal">ライトガード動作中 · 毎日自動スキャン</string>
+    <string name="guard_status_accessibility">ディープガード動作中 · アクセシビリティ監視</string>
+    <string name="guard_status_shizuku">インターセプトガード動作中 · Shizuku</string>
+    <string name="guard_status_root">フルガード動作中 · Root</string>
+    <string name="mode_scan_now">今すぐスキャン</string>
+    <string name="mode_status_ready">準備完了</string>
+    <string name="mode_status_need_auth">要認証</string>
+    <string name="mode_status_no_permission">利用可能な権限が見つかりません</string>
+    <string name="mode_status_active">ガード中</string>
+
+    <!-- モード：Normal -->
+    <string name="mode_normal_name">Normal モード</string>
+    <string name="mode_normal_desc">定期的な軽量スキャンで不審なアプリを検出・通知</string>
+    <string name="mode_normal_detail">端末を定期的に軽量スキャンし、権限の組み合わせや挙動の特徴から不審なアプリを識別。マルウェアを発見したらすぐに通知します。特別な権限は不要です。</string>
+    <string name="mode_level_1">Lv.1 ベーシックガード</string>
+
+    <!-- モード：Accessibility -->
+    <string name="mode_accessibility_name">Accessibility モード</string>
+    <string name="mode_accessibility_desc">アクセシビリティ権限でディープスキャンと直接対処</string>
+    <string name="mode_accessibility_detail">Android のアクセシビリティ権限を取得すると、より深いスキャン（アクセシビリティサービス悪用検出を含む）が可能になり、明白なマルウェアを直接対処できる場合もあります。</string>
+    <string name="mode_level_2">Lv.2 ディープガード</string>
+
+    <!-- モード：Shizuku -->
+    <string name="mode_shizuku_name">Shizuku モード</string>
+    <string name="mode_shizuku_desc">Shizuku 権限でディープスキャンと早期ブロック</string>
+    <string name="mode_shizuku_detail">Shizuku 権限を利用してさらに深いスキャンを行い、マルウェアの起動を事前にブロックすることもできます。</string>
+    <string name="mode_level_3">Lv.3 インターセプトガード</string>
+
+    <!-- モード：Root -->
+    <string name="mode_root_name">Root モード</string>
+    <string name="mode_root_desc">Root 権限で全方位のブロックとガード</string>
+    <string name="mode_root_detail">端末の Root 権限を直接利用し、全方位のインターセプトとガードを行います。マルウェアの凍結、自動起動と実行の阻止が可能です。</string>
+    <string name="mode_level_4">Lv.4 フルガード</string>
+
+    <!-- アクセシビリティサービス -->
+    <string name="accessibility_service_name">Polaris ガードモニター</string>
+    <string name="accessibility_service_desc">Polaris はこのサービスでフォアグラウンドアプリの変化を監視し、Accessibility モードでマルウェアを検出します。個人情報の収集やアップロードは一切行いません。</string>
+
+    <!-- スキャン -->
+    <string name="scanning">スキャン中…</string>
+    <string name="scan_done_clean">マルウェアは見つかりませんでした。端末の状態は良好です</string>
+    <string name="scan_done_risk">%1$d 件の不審なアプリを検出</string>
+    <string name="scan_title">スキャン結果</string>
+    <string name="scan_deep_badge">ディープスキャン</string>
+    <string name="scan_shallow_badge">ライトスキャン</string>
+    <string name="risk_high">高リスク</string>
+    <string name="risk_medium">中リスク</string>
+    <string name="risk_low">低リスク</string>
+    <string name="risk_safe">安全</string>
+    <string name="action_handle">対処</string>
+    <string name="action_app_details">アプリ詳細</string>
+    <string name="action_force_stop">強制停止</string>
+    <string name="action_freeze">アプリを凍結</string>
+    <string name="action_unfreeze">凍結解除</string>
+    <string name="action_uninstall">アンインストール</string>
+    <string name="no_risk_selected">不審なアプリが選択されていません</string>
+
+    <!-- モード切替 -->
+    <string name="toast_activate_normal">Normal モードを有効化：毎日自動の軽量スキャン</string>
+    <string name="toast_activate_accessibility">Accessibility モードを有効化：ディープガード</string>
+    <string name="toast_activate_shizuku">Shizuku モードを有効化：リアルタイムインターセプトガード</string>
+    <string name="toast_activate_root">Root モードを有効化：フルガード</string>
+    <string name="toast_no_shizuku_app">利用可能な権限が見つかりません：先に Shizuku アプリをインストールして起動してください</string>
+    <string name="toast_no_shizuku_running">利用可能な権限が見つかりません：Shizuku サービスが未実行です</string>
+    <string name="toast_no_shizuku_permission">利用可能な権限が見つかりません：Shizuku の認証が拒否されました</string>
+    <string name="toast_no_root">利用可能な権限が見つかりません：Root 権限が検出できません</string>
+    <string name="toast_need_accessibility">先に Polaris のアクセシビリティサービスを有効にしてください</string>
+    <string name="toast_guard_started">ガードサービスを開始しました</string>
+    <string name="toast_guard_stopped">ガードサービスを停止しました</string>
+    <string name="toast_scan_start">スキャンを開始</string>
+    <string name="notification_channel_scan">スキャン通知</string>
+    <string name="notification_channel_guard">ガードインターセプト</string>
+    <string name="notification_scan_title">Polaris が不審なアプリを検出</string>
+    <string name="notification_blocked_title">Polaris がマルウェアをブロック</string>
+    <string name="notification_blocked_text">%1$s の実行を阻止しました</string>
+
+    <!-- 権限の説明 -->
+    <string name="perm_rationale_title">権限が必要です</string>
+    <string name="perm_notification_rationale">通知権限を有効にすると、マルウェア検出時に Polaris が通知できます。</string>
+
+    <!-- ============ AI 判定エンジン ============ -->
+    <string name="ai_engine_title">AI 判定エンジン</string>
+    <string name="ai_engine_subtitle">LLM プロバイダーを選択し、API を接続すると、マルウェアアプリの削除・維持を AI が判断します</string>
+    <string name="ai_choice_title">スキャンエンジンを選択</string>
+    <string name="ai_choice_normal">Normal</string>
+    <string name="ai_choice_normal_desc">既定ルールに従った機械的スキャンで高速に検出</string>
+    <string name="ai_choice_ai">Artificial Intelligence</string>
+    <string name="ai_choice_ai_desc">LLM API を接続し、削除か維持かを AI が判断</string>
+    <string name="ai_connect_now">接続する</string>
+    <string name="ai_thinking_label">AI 思考フィードバック</string>
+    <string name="ai_think_1">AI がファイルの特徴と権限を読み取り中…</string>
+    <string name="ai_think_2">ファイルヘッダーと実行可能ペイロードの特徴を抽出中…</string>
+    <string name="ai_think_3">SHA-256 を計算し Polar Region データベースと照合中…</string>
+    <string name="ai_think_4">既知マルウェアファミリーと IOC 脅威情報を照合中…</string>
+    <string name="ai_think_5">命名の偽装・身代金の兆候・隠し特徴を分析中…</string>
+    <string name="ai_think_6">機密権限の組み合わせと異常挙動を評価中…</string>
+    <string name="ai_think_7">スコアと誤検出リスクを比較検討中…</string>
+    <string name="ai_think_8">判定結果を生成：削除か維持か…</string>
+    <string name="ai_home_entry">AI エンジン</string>
+    <string name="ai_home_status_off">未接続 · タップして設定</string>
+    <string name="ai_home_status_on">%1$s に接続済み</string>
+    <string name="ai_home_status_multi_provider">%1$d プロバイダーに接続済み · %2$s モード</string>
+
+    <!-- 7 社のプロバイダー -->
+    <string name="ai_provider_hy3">Tencent Hunyuan Hy3</string>
+    <string name="ai_provider_glm">Zhipu GLM</string>
+    <string name="ai_provider_kimi">Kimi</string>
+    <string name="ai_provider_chatgpt">OpenAI ChatGPT</string>
+    <string name="ai_provider_gemini">Google Gemini</string>
+    <string name="ai_provider_claude">Anthropic Claude</string>
+    <string name="ai_provider_deepseek">DeepSeek</string>
+    <string name="ai_provider_model_default">デフォルトモデル %1$s</string>
+    <string name="ai_configured_badge">接続済み</string>
+
+    <string name="ai_custom_provider">カスタム</string>
+    <string name="ai_custom_provider_dialog_title">カスタム AI プロバイダーを追加</string>
+    <string name="ai_custom_name_hint">プロバイダー名（例：MyAI）</string>
+    <string name="ai_custom_url_hint">API Base URL（例：https://api.example.com/v1）</string>
+    <string name="ai_custom_model_hint">デフォルトモデル名（オプション、デフォルト gpt-3.5-turbo）</string>
+    <string name="ai_custom_badge_hint">バッジテキスト（オプション、例：カスタム）</string>
+    <string name="ai_custom_saved">カスタムプロバイダーを保存しました</string>
+    <string name="ai_custom_restart_hint">新しいプロバイダーを表示するには、AI 設定ページを再入力してください</string>
+
+    <!-- 設定フォーム -->
+    <string name="scan_scanning">スキャン中：%1$s</string>
+    <string name="scan_scanning_n">スキャン中（%1$d）：%2$s</string>
+    <string name="scan_apps_scanning">インストール済みアプリをスキャン中…</string>
+    <string name="scan_apps_scanning_n">アプリをスキャン中（%1$d/%2$d）：%3$s</string>
+    <string name="ai_config_title">%1$s に接続</string>
+    <string name="ai_api_key_hint">API Key</string>
+    <string name="ai_api_key_help">プロバイダーのコンソールで作成します。本端末にのみ保存されます</string>
+    <string name="ai_model_hint">モデル名（変更可能）</string>
+    <string name="ai_test_button">接続テスト</string>
+    <string name="ai_save_button">保存して有効化</string>
+    <string name="ai_testing">接続をテスト中…</string>
+    <string name="ai_test_ok">接続成功 ✓ モデルは正常に応答しました</string>
+    <string name="ai_test_fail">接続失敗：%1$s</string>
+    <string name="ai_key_empty">先に API Key を入力してください</string>
+    <string name="ai_saved_toast">AI エンジンを有効化：%1$s</string>
+    <string name="ai_scan_start">AI が解析中です。お待ちください…</string>
+    <string name="ai_judge_failed">AI 解析に失敗：%1$s</string>
+    <string name="ai_not_configured">AI エンジンは未接続です。先に API を設定してください</string>
+
+    <!-- AI カスタムプロバイダー -->
+    <string name="ai_custom_provider_title">カスタム LLM プロバイダー</string>
+    <string name="ai_custom_provider_subtitle">DeepSeek、Kimi、GLM など 14 社のプロバイダーまたはカスタムを追加</string>
+    <string name="ai_select_provider_title">AI プロバイダーを選択</string>
+
+    <!-- AI マルチプロバイダー設定 -->
+    <string name="ai_add_provider_title">プロバイダーを追加</string>
+    <string name="ai_add_provider_subtitle">プリセットプロバイダーから選択またはカスタム設定</string>
+    <string name="ai_no_provider_configured">AI プロバイダーは未設定です</string>
+    <string name="ai_add_provider_hint">上の「プロバイダーを追加」をタップして設定を開始</string>
+    <string name="ai_status_enabled">有効</string>
+    <string name="ai_status_disabled">無効</string>
+    <string name="ai_delete">削除</string>
+    <string name="ai_delete_provider_title">プロバイダーを削除</string>
+    <string name="ai_delete_provider_confirm">このプロバイダー設定を削除しますか？この操作は元に戻せません。</string>
+    <string name="ai_provider_saved_toast">保存しました：%1$s</string>
+    <string name="ai_no_provider_enabled">少なくとも 1 つの AI プロバイダーを有効にしてください</string>
+
+    <!-- マルチモデル戦略 -->
+    <string name="ai_multi_strategy_title">マルチモデル戦略</string>
+    <string name="ai_strategy_ensemble_title">クロス検出</string>
+    <string name="ai_strategy_ensemble_desc">いずれかのモデルがマルウェアを検出したら悪性とマーク；複数のモデルが検出したら強調表示（より包括的）</string>
+    <string name="ai_strategy_fastest_title">最優先</string>
+    <string name="ai_strategy_fastest_desc">すべてのモデルを並列リクエストし、最初に返された結果を使用（最も高速な応答）</string>
+
+    <!-- モデルリスト -->
+    <string name="ai_fetch_models">モデルリストを取得</string>
+    <string name="ai_edit_config">設定を編集</string>
+    <string name="ai_fetching_models">モデルリストを取得中…</string>
+    <string name="ai_models_fetched">%1$d 個のモデルを取得、%2$d 個が有効</string>
+    <string name="ai_models_fetch_fail">モデルリストの取得に失敗：%1$s</string>
+    <string name="ai_no_models_fetched">モデルが取得できませんでした。API Key を入力し、ネットワーク接続を確認してください</string>
+    <string name="ai_model_enabled_count">%1$d / %2$d モデルが有効</string>
+
+    <!-- AI 判定結果 -->
+    <string name="ai_badge">AI 判定</string>
+    <string name="ai_verdict_remove">削除を推奨</string>
+    <string name="ai_verdict_keep">維持を推奨</string>
+    <string name="ai_verdict_pending">AI 未評価</string>
+    <string name="ai_summary">AI 判定：削除 %1$d 件 · 維持 %2$d 件 · 平均信頼度 %3$d%%</string>
+    <string name="ai_confidence">信頼度 %1$d%%</string>
+    <string name="ai_reason_prefix">AI の理由：%1$s</string>
+
+    <!-- AI プロンプト -->
+    <string name="ai_system_prompt">あなたは Polaris Safety（スマートフォンセキュリティガード）の AI セキュリティ解析エンジンです。アプリのスキャンレポートが与えられます。各行には：パッケージ名、アプリ名、ヒューリスティックリスクスコア（0-100）、リスクレベル、検出特徴（機密権限、危険な権限の組み合わせ、アイコンの隠蔽、アクセシビリティサービス悪用、デバイス管理者悪用、既知マルウェア署名の一致など）が含まれます。\n\nタスク：各アプリについて「削除」(remove) か「維持」(keep) かを判断してください。基準：\n1. 「既知マルウェア署名の一致」「非システムアプリによるアクセシビリティサービス登録」「非システムアプリによるデバイス管理者登録」など明確な悪性特徴、または複数の高リスク特徴の組み合わせ（SMS+ネットワーク、オーバーレイ+アクセシビリティなど）→ 削除を推奨；\n2. システムアプリ、有名ベンダーのアプリ、機密権限が少数あるだけで悪用がないもの → 維持を推奨；\n3. 判断に迷う場合は保守的に（維持）し、誤検出を避ける。\n\nJSON 配列のみを出力し、他の文字・コメント・Markdown は一切出力しないこと。要素の形式：{"package":"パッケージ名","action":"remove" または "keep","confidence":0から1の小数,"reason":"20字以内の理由"}。レポート内のすべてのアプリについて各1件を出力すること。</string>
+    <string name="ai_user_prompt">以下が今回のスキャンレポートです（スコアが高いほどリスク大）：\n%1$s\nルールに従って JSON 配列を出力してください。</string>
+    <string name="ai_system_prompt_files">あなたは Polaris Safety（スマートフォンセキュリティガード）の AI ファイルセキュリティ解析エンジンです。ファイルのスキャンレポートが与えられます。各行には：ファイル識別子、ファイル名、サイズ、ヒューリスティックリスクスコア（0-100）、リスクレベル、検出特徴（APK インストーラー、既知マルウェアファミリー名との一致、リスクキーワード、偽装ファイル、身代金要求メモ、隠しファイル、異常なサイズなど）が含まれます。\n\nタスク：各ファイルについて「削除」(remove、つまり隔離削除) か「維持」(keep) かを判断してください。基準：\n1. 「既知マルウェアファミリー」「偽装ファイル」「身代金要求メモ」など明確な悪性特徴、または複数のリスク特徴の組み合わせ → 削除を推奨；\n2. 通常の APK インストーラー、システムファイル、有名ソフトのファイル、軽微な特徴のみのもの → 維持を推奨；\n3. 判断に迷う場合は保守的に（維持）し、ユーザーファイルの誤削除を避ける。\n\nJSON 配列のみを出力し、他の文字・コメント・Markdown は一切出力しないこと。要素の形式：{"package":"ファイル識別子","action":"remove" または "keep","confidence":0から1の小数,"reason":"20字以内の理由"}。レポート内のすべてのファイルについて各1件を出力し、ファイル識別子はそのまま返すこと。</string>
+
+    <!-- ============ スキャンセンター（ファイルスキャン / 隔離エリア） ============ -->
+    <string name="back">戻る</string>
+    <string name="navigate_next">開く</string>
+    <string name="reconfigure">再設定</string>
+    <string name="scan_center_title">スキャンセンター</string>
+    <string name="scan_center_subtitle">%1$s · %2$s</string>
+    <string name="tab_scan">スキャン</string>
+    <string name="tab_quarantine">隔離エリア</string>
+
+    <string name="file_scan_folder">フォルダーを選んでスキャン</string>
+    <string name="file_scan_folder_desc">端末内の任意のフォルダーを対象にスキャン</string>
+    <string name="file_scan_global">全体スキャン</string>
+    <string name="file_scan_global_desc">ストレージ全体をスキャンしてリスクファイルを検出</string>
+    <string name="file_scan_perm_hint">全体スキャンには「すべてのファイルへのアクセス」権限が必要です。システム設定で許可してから戻ってください</string>
+    <string name="file_scan_no_file_manager">利用可能なファイル選択ツールが見つかりません</string>
+
+    <string name="file_result_count">%1$d 件のリスクファイルを検出</string>
+    <string name="file_meta">%1$s · リスク指数 %2$d</string>
+    <string name="file_source_saf">許可フォルダーから · %1$s</string>
+
+    <string name="file_action_quarantine">隔離</string>
+    <string name="file_action_allow">許可</string>
+    <string name="file_action_delete">削除</string>
+    <string name="file_deleted_toast">ファイルを削除しました</string>
+    <string name="file_action_restore">復元</string>
+    <string name="file_action_unallow">許可を取り消す</string>
+    <string name="file_quarantined_toast">セキュアエリアに隔離しました</string>
+    <string name="file_allowed_toast">許可しました。以後のスキャンでは表示されません</string>
+    <string name="file_restored_toast">元のファイルを復元しました</string>
+    <string name="file_action_failed">操作に失敗しました。再試行してください</string>
+
+    <string name="quarantine_title">隔離エリア</string>
+    <string name="quarantine_intro">隔離されたファイルはここに安全に保管され、いつでも復元・許可できます。隔離されたファイルは実行できず、スマホの安全を確保します。</string>
+    <string name="quarantine_empty">隔離ファイルはありません\n隔離されたファイルはここに安全保管され、いつでも復元・許可できます</string>
+    <string name="quarantine_count">%1$d 件</string>
+    <string name="quarantine_meta">%1$s · リスク %2$d · %3$s</string>
+
+    <string name="allowlist_title">許可リスト</string>
+    <string name="allowlist_intro">許可されたファイルパスはスキャン時にスキップされます。信頼できなくなった場合はいつでも許可を取り消できます。</string>
+    <string name="allowlist_empty">許可したファイルはありません</string>
+    <string name="allow_count">%1$d 件</string>
+
+    <!-- ============ 設定 ============ -->
+    <string name="settings_title">設定</string>
+    <string name="settings_mode_section">ガードモード</string>
+    <string name="settings_engine_section">モードタップ後のデフォルトエンジン</string>
+    <string name="settings_engine_hint">設定すると、モードに入るたびにこのエンジンがデフォルトになります（シートで一時変更も可能）</string>
+    <string name="settings_ai_configure">設定</string>
+    <string name="detection_config_title">検出設定</string>
+    <string name="detection_ai_on">AI 接続済み</string>
+    <string name="detection_ai_off">AI 未接続</string>
+    <string name="detection_ml_on">ML 有効</string>
+    <string name="detection_ml_off">ML 無効</string>
+
+    <!-- ============ ガイド表示 ============ -->
+    <string name="guide_select_mode">ガードモードを選択して始めましょう</string>
+    <string name="guide_select_mode_sub">モードを選ぶと、ここに「今すぐスキャン」ボタンが表示されます</string>
+
+    <!-- ============ 外観テーマ ============ -->
+    <string name="theme_title">外観テーマ</string>
+    <string name="theme_dark">ダーク</string>
+    <string name="theme_light">ライト</string>
+    <string name="theme_system">システムに従う</string>
+    <string name="theme_toast_dark">ダークテーマに切り替えました</string>
+    <string name="theme_toast_light">ライトテーマに切り替えました</string>
+    <string name="theme_toast_system">システムに従うに切り替えました</string>
+
+    <!-- ============ カスタムテーマカラー ============ -->
+    <string name="theme_mode_title">表示モード</string>
+    <string name="theme_color_section">外観</string>
+    <string name="appearance_entry_summary">ダークモードとテーマカラー</string>
+    <string name="custom_theme_color_title">カスタムテーマカラー</string>
+    <string name="custom_theme_color_desc">アクセントカラーを選ぶと全体に適用されます（Android 12 以降）。</string>
+    <string name="custom_theme_default">デフォルト</string>
+    <string name="custom_theme_applied">テーマカラーを適用しました</string>
+
+    <!-- ============ 言語 ============ -->
+    <string name="language_title">言語</string>
+    <string name="language_system">システムに従う</string>
+
+    <!-- ============ アプリ情報 ============ -->
+    <string name="about_title">アプリ情報</string>
+    <string name="about_version">バージョン %1$s（%2$d）</string>
+    <string name="about_changelog_title">更新履歴</string>
+    <string name="about_check_update">更新を確認</string>
+    <string name="about_checking">更新を確認中…</string>
+    <string name="about_up_to_date">最新バージョンです</string>
+    <string name="about_tagline">Polaris · スマートフォンセキュリティガード</string>
+
+    <!-- ============ DeepSeek カード ============ -->
+    <string name="ai_deepseek_hint">本アプリの AI はデフォルトで DeepSeek を使用します。API を利用するには下記リンクから取得してください</string>
+    <string name="ai_deepseek_site">https://platform.deepseek.com</string>
+    <string name="ai_deepseek_badge">デフォルト推奨</string>
+
+    <!-- ============ 更新履歴 ============ -->
+    <string name="changelog_v1_title">v1.0.0 · 正式版</string>
+    <string name="changelog_v1_body">· 4 段階のガードモード（Normal / Accessibility / Shizuku / Root）\n· AI 判定エンジン（DeepSeek をデフォルト、7 社の LLM に対応）\n· スキャンセンター：フォルダースキャン / 全体スキャン\n· 隔離エリア：隔離 · 復元 · 許可の管理\n· API Key の Keystore 暗号化保存\n· 外観テーマ（ダーク / ライト / システムに従う）とアプリ内言語切替</string>
+    <string name="changelog_v20_title">v2.0.0 · 正式版</string>
+    <string name="changelog_v20_body">· モード選択後の通知権限リクエストでクラッシュする問題を修正\n· アプリアイコン：四芒星を中央に、背景を純白に\n· モードカード：レベルラベル削除、ラインスタイルのアイコンに\n· 更新確認：GitHub Releases と国内ミラーに対応</string>
+    <string name="changelog_v22_title">v2.2.0 · 正式版</string>
+    <string name="changelog_v22_body">· ガードロジック：旧版で深層ガードが有効にならない問題を修正、機械学習モデルで補助判定を追加\n· ウイルスDB：内蔵DBと全量DBを更新、自由に切り替え可能に\n· AI 判定エンジン：14 社のプロバイダに対応、カスタムプロバイダを許可、「モデル一覧を取得」ボタンを追加\n· 新しい「ツールボックス」セクション：アプリ権限・最近のファイル・通信管理を表示\n· 新しい統合管理画面：行動・許可ファイル・隔離を一つの画面に統合\n· UI：モード選択・スキャンアニメ・サイドドロワー・設定画面・テーマ切替などの操作とスタイルを調整、横画面モードを追加</string>
+    <string name="changelog_v21_title">v2.1.0 · 正式版</string>
+    <string name="changelog_v21_body">· 遮断通知：加護メッセージ＋赤いオフ＋権限不足プロンプトと許可ボタン\n· 音量キー3回の緊急退出を修正、退出後に直接アンインストールして復活を防止\n· バックグラウンドガード維持を修正、利用状況アクセスで前台を識別\n· バージョン認識を修正（最新版で誤って新バージョン表示されない）\n· アニメーションを最適化、更新ダウンロードに波プログレスボール\n· AI アイコンをサーバーに、Root アイコンを斜めの鍵に、四芒星を縮小\n· 脅威 DB を拡充\n· 遮断タブに「アプリ監視」を追加：異常行動をリアルタイム検出\n· 「行動」タブを追加：全防護プロセスを記録</string>
+    <string name="changelog_v13_title">v1.3.0 · 正式版</string>
+    <string name="changelog_v13_body">· 新しい「遮断」ガードタブ（赤色警告テーマ）\n· 悪意ある画面ロック / 強制全画面 / 通知盗撮 / 身代金要求 / 利用権侵害アプリをリアルタイム遮断\n· 有効時は通知バーに「遮断モード作動中」を最上位に固定、ワンタップでオフ\n· 遮断されたアプリを集中管理、許可と削除に対応\n· AI スキャンで完全な推論フィードバックを表示</string>
+    <string name="changelog_v09_title">v0.9.0 · ベータ版</string>
+    <string name="changelog_v09_body">· マルウェア署名ライブラリのファミリー化（約 30 ファミリー）\n· ファイル単位のヒューリスティック評価 + AI 判定\n· 毎日の定期スキャンと起動時ガード</string>
+
+    <!-- ============ 遮断ガード（赤色警告） ============ -->
+    <string name="tab_block">遮断</string>
+    <string name="block_mode_title">遮断モード</string>
+    <string name="block_list_title">遮断されたアプリ</string>
+    <string name="block_list_empty">遮断されたアプリはまだありません\n遮断モードをオンにすると、遮断された悪意アプリがここに表示されます</string>
+    <string name="block_count">%1$d 件</string>
+    <string name="block_notification_title">遮断モード作動中</string>
+    <string name="block_notification_text">北極星の輝きがストレージを守る——加護を得ました</string>
+    <string name="block_notification_missing_perm">Polaris に %1$s 権限がありません</string>
+    <string name="block_action_off">オフ</string>
+    <string name="block_action_grant">権限を許可</string>
+    <string name="block_on_toast">遮断モードをオンにしました。通知バーに固定表示されます</string>
+    <string name="block_off_toast">遮断モードをオフにしました</string>
+    <string name="block_need_notification">遮断状態を固定表示するには通知権限が必要です</string>
+    <string name="block_guard_title">悪意遮断ガード</string>
+    <string name="block_state_on">遮断モード：オン</string>
+    <string name="block_state_off">遮断モード：オフ</string>
+    <string name="block_toggle_on">遮断モードをオン</string>
+    <string name="block_toggle_off">遮断モードをオフ</string>
+    <string name="block_guard_desc">ガード中：画面ロック · 強制全画面 · 通知盗撮 · 身代金要求 · 利用権侵害</string>
+    <string name="block_pin">固定</string>
+
+    <!-- 遮断モジュール · 必要な権限 -->
+    <string name="perm_grant">許可</string>
+    <string name="perm_name_accessibility">アクセシビリティ</string>
+    <string name="perm_name_overlay">オーバーレイ</string>
+    <string name="perm_name_usage">利用状況アクセス</string>
+    <string name="perm_accessibility_title">アクセシビリティ権限の許可</string>
+    <string name="perm_accessibility_desc">全域巡回・監視機能を有効にします</string>
+    <string name="perm_overlay_title">オーバーレイ権限の許可</string>
+    <string name="perm_overlay_desc">全画面ロック・身代金ウイルス検出時に救済オーバーレイを表示します</string>
+    <string name="perm_usage_title">利用状況アクセスの許可</string>
+    <string name="perm_usage_desc">前台のロックアプリを特定し、正確に遮断します</string>
+
+    <!-- 救済オーバーレイ -->
+    <string name="rescue_title">お困りですか？解決が必要ですか？</string>
+    <string name="rescue_clear">削除</string>
+    <string name="rescue_allow">許可</string>
+    <string name="rescue_cleared">全画面アプリを削除しました</string>
+    <string name="rescue_allowed">このアプリを許可しました</string>
+
+    <!-- 緊急モード -->
+    <string name="emergency_hint_title">緊急モード</string>
+    <string name="emergency_hint_desc">悪意のある全画面アプリに乗っ取られ操作できない場合、音量アップキーを3回連続で押すと、ただちに全画面アプリを停止・アンインストールし、再起動を防ぎます。</string>
+    <string name="emergency_no_target">全画面アプリを検出できませんでした。ホームに戻りました</string>
+    <string name="emergency_log_stopped">全画面アプリを強制停止しました</string>
+    <string name="emergency_log_uninstalled">全画面アプリをサイレントアンインストールしました</string>
+    <string name="emergency_log_uninstall_ask">システムのアンインストーラーを開きました。確認してください</string>
+
+    <!-- 救済オーバーレイ · 行動ログ -->
+    <string name="rescue_log_shown">救済オーバーレイを表示（対象 %1$s）</string>
+    <string name="rescue_log_cleared">全画面アプリ %1$s を削除しました</string>
+    <string name="rescue_log_escaped">アクセシビリティでホームに退避しました</string>
+
+    <!-- 行動ログ（汎用） -->
+    <string name="behavior_detail_force_stop">%1$s を強制停止しました</string>
+    <string name="behavior_detail_freeze">自動起動防止のため %1$s を凍結しました</string>
+    <string name="behavior_detail_block">悪意リストに一致し %1$s を遮断しました</string>
+
+    <!-- ============ アプリ監視 ============ -->
+    <string name="monitor_channel_name">アプリ監視アラート</string>
+    <string name="monitor_title">アプリ監視</string>
+    <string name="monitor_subtitle">アプリを選んでリアルタイム監視</string>
+    <string name="monitor_entry_desc">すべてのアプリを表示し、監視対象を選択。異常行動をリアルタイム通知</string>
+    <string name="monitor_hint">スイッチをオンにすると監視を開始します。異常行動（バックグラウンドでの画面起動、バックグラウンド通知など）を検出すると、すぐに通知します。</string>
+    <string name="monitor_empty">監視可能なアプリが見つかりません</string>
+    <string name="monitor_on_toast">「%1$s」の監視を開始しました</string>
+    <string name="monitor_off_toast">「%1$s」の監視を停止しました</string>
+    <string name="monitor_alert_title">Polaris · アプリ異常行動アラート</string>
+    <string name="monitor_alert_text">「%1$s」が%2$s</string>
+    <string name="monitor_reason_notification">バックグラウンドで通知を送信しています</string>
+    <string name="monitor_reason_background_activity">バックグラウンドで画面を起動しています</string>
+
+    <!-- ============ 行動タブ ============ -->
+    <string name="tab_behavior">行動</string>
+    <string name="behavior_hint">強制停止・遮断・隔離・救済・緊急モードなど、Polaris のすべての防護アクションを記録し、直感的に確認できます。</string>
+    <string name="behavior_log_intro">強制停止、遮断、救済オーバーレイ、緊急モード、隔離、モニターアラートなど、すべての防護アクションのタイムラインを記録します。</string>
+    <string name="behavior_empty">防護記録はまだありません\n防護アクションを行うと、ここにタイムラインが生成されます</string>
+    <string name="behavior_count">%1$d 件</string>
+    <string name="behavior_clear">クリア</string>
+    <string name="behavior_clear_title">行動記録をクリア</string>
+    <string name="behavior_clear_confirm">すべての防護記録をクリアしますか？この操作は元に戻せません。</string>
+    <string name="behavior_clear_yes">クリア</string>
+    <string name="behavior_type_force_stop">強制停止</string>
+    <string name="behavior_type_block">遮断</string>
+    <string name="behavior_type_rescue">救済</string>
+    <string name="behavior_type_emergency">緊急</string>
+    <string name="behavior_type_quarantine">隔離</string>
+    <string name="behavior_type_monitor">監視アラート</string>
+    <string name="behavior_type_uninstall">アンインストール</string>
+    <string name="behavior_type_freeze">凍結</string>
+    <string name="behavior_type_other">防護</string>
+
+    <!-- ============ 脅威 DB ============ -->
+    <string name="virusdb_section">脅威インテリジェンス</string>
+    <string name="virusdb_entry_summary">クラウド全量庫と内蔵選抜庫を管理</string>
+    <string name="virusdb_name">Polar Point オープン脅威インテリジェンス</string>
+    <string name="virusdb_card_title">データベース</string>
+    <string name="virusdb_status_not_downloaded">バージョン%1$s·未ダウンロード</string>
+    <string name="virusdb_status_partial">バージョン%1$s·%2$d%%</string>
+    <string name="virusdb_status_downloading">バージョン%1$s·ダウンロード中</string>
+    <string name="virusdb_status_downloaded">バージョン%1$s·ダウンロード済み</string>
+    <string name="virusdb_updated">更新：%1$s</string>
+    <string name="virusdb_source">ソース：abuse.ch MalwareBazaar + URLhaus + PyPI/NPM 悪意あるパッケージ + コミュニティリスト</string>
+    <string name="virusdb_point_source">ソース：Polar Region v14 から抽出した命名済みファミリー脅威</string>
+    <string name="virusdb_auto">自動更新</string>
+    <string name="virusdb_update_now">今すぐ更新</string>
+    <string name="virusdb_updating">脅威 DB を更新中…</string>
+    <string name="virusdb_progress">%1$.1f / %2$.1f MB（%3$d%%）</string>
+    <string name="virusdb_abort">中断</string>
+    <string name="virusdb_aborted_toast">ダウンロードを中断しました。進捗は保持され、次回は続きから再開します。</string>
+    <string name="virusdb_updated_toast">脅威 DB を v%1$d に更新しました</string>
+    <string name="virusdb_update_failed">脅威 DB の更新に失敗：%1$s</string>
+    <string name="virusdb_entries">%1$d 件のインディケーター</string>
+    <string name="file_ioc_hit">オープン脅威 DB に一致：%1$s（%2$s）</string>
+    <string name="virusdb_select">脅威データベースを選択</string>
+    <string name="virusdb_region_name">Polar Region（フル版 · 161 万件）</string>
+    <string name="virusdb_point_name">Polar Point（精选版 · 約 7.5 万件）</string>
+    <string name="virusdb_region_desc">フル版、ハッシュ精密遮断（357 MB）</string>
+    <string name="virusdb_point_desc">精选版、軽量内蔵、オフライン対応</string>
+
+    <!-- 欢迎画面 Region ダウンロード（中断可・再開可） -->
+    <string name="virusdb_downloading">ダウンロード中…</string>
+    <string name="virusdb_download_start">Polar Region データベースをダウンロード中（約 357 MB）。いつでもキャンセル可…</string>
+    <string name="virusdb_download_done">ダウンロード完了、移行中…</string>
+    <string name="virusdb_cancel_download">キャンセルして進む</string>
+    <string name="virusdb_cancelled_toast">ダウンロードをキャンセル。内蔵 DB を使用（設定で後から再開可）</string>
+    <string name="virusdb_download_failed_title">ダウンロード未完了</string>
+    <string name="virusdb_download_failed_msg">ダウンロードで問題が発生：%1$s\n\n再試行するか、内蔵 DB で進みますか？</string>
+    <string name="virusdb_retry">再試行</string>
+    <string name="virusdb_enter_builtin">内蔵 DB で進む</string>
+
+    <!-- ============ ML 機械学習検出 ============ -->
+    <string name="ml_engine_title">ML 検出エンジン</string>
+    <string name="ml_engine_subtitle">オンデバイスのローカルモデル。ネット不要で追加の検出次元を提供</string>
+    <string name="ml_results_title">ML 検出結果</string>
+    <string name="ml_no_results">ML 検出結果はありません</string>
+    <string name="ml_results_empty">今回のスキャンで ML 検出結果はありませんでした</string>
+    <string name="ml_detail_format">ファイル：%1$s\n\nML スコア：%2$d/100\n\n分析：%3$s</string>
+    <string name="ml_unknown">不明</string>
+    <string name="ml_scan_now">ML スキャン</string>
+    <string name="ml_scanning">ML スキャン中…</string>
+    <string name="ml_scan_done">ML スキャン完了、%1$d 件の疑わしいを検出</string>
+
+    <!-- ML モデルセレクター -->
+    <string name="ml_model_selector_title">検出モデル</string>
+    <string name="ml_model_selector_hint">検出モデルを選択</string>
+    <string name="ml_model_mh100k">軽量</string>
+    <string name="ml_model_mh1m">高性能</string>
+    <string name="ml_model_changed">%1$s に切り替えました。スキャンを再開して有効にしてください</string>
+    <string name="ml_model_detail_toggle">モデル詳細</string>
+    <string name="ml_model_desc_mh100k">MH-100K · Logistic Regression（ロジスティック回帰）\nデータセット：MH-100K 実サンプル（約 10 万件の Android アプリ）\n特徴次元：38（15 権限組み合わせ + 3 コンテキスト + 20 API カテゴリ）\nモデルサイズ：約 3 KB（パラメータ重みのみ、依存なし）\n実測：実データで ROC-AUC 0.95\n特徴：超小型で推論が非常に高速、リアルタイム監視に最適</string>
+    <string name="ml_model_desc_mh1m">MH-1M · XGBoost（勾配ブースティング）\nデータセット：MH-1M 実サンプル（約 134 万件の Android アプリ）\n特徴次元：43（20 権限 + 8 Intent + 5 DEX opcode + 10 API 呼び出し）\nモデルサイズ：約 4.5 MB（決定木 500 本、純 Java 推論）\n特徴：DEX 命令レベルまで含む豊富な特徴、ディープスキャン向け</string>
+
+    <!-- ============ 更新確認（GitHub Releases） ============ -->
+    <string name="update_available_title">新しいバージョンがあります</string>
+    <string name="update_available_body">最新 %1$s（現在 %2$s）</string>
+    <string name="update_download_github">GitHub からダウンロード</string>
+    <string name="update_download_mirror">国内ミラーから</string>
+    <string name="update_cancel">キャンセル</string>
+    <string name="update_need_install_perm">「提供元不明のアプリ」を許可してください</string>
+    <string name="update_downloading">ダウンロード中 %1$d%%…</string>
+    <string name="update_downloading_init">ダウンロード中…</string>
+    <string name="update_download_failed">ダウンロード失敗：%1$s</string>
+    <string name="update_check_failed">更新確認に失敗：%1$s</string>
+    <string name="update_timeout">GitHub への接続がタイムアウトしました。ネットワークを確認するか、国内ミラーをご利用ください</string>
+    <string name="update_install_now">ダウンロード完了。インストーラーを開いています…</string>
+
+    <!-- 権限使用状況 -->
+    <string name="perm_usage_screen_title">権限使用状況</string>
+    <string name="perm_usage_tab_installed">インストール済みアプリ</string>
+    <string name="perm_usage_tab_running">使用中の権限</string>
+    <string name="perm_usage_empty">データがありません</string>
+    <string name="perm_usage_granted">許可済み</string>
+    <string name="perm_usage_not_granted">未許可</string>
+    <string name="perm_usage_active">使用中</string>
+    <string name="perm_usage_inactive">未使用</string>
+    <string name="perm_usage_count">%1$d 個の権限</string>
+    <string name="perm_usage_search_hint">アプリ名またはパッケージ名で検索</string>
+
+    <!-- 総合管理 -->
+    <string name="management_title">総合管理</string>
+    <string name="management_tab_quarantine">隔離区</string>
+    <string name="management_tab_allowlist">許可リスト</string>
+    <string name="management_tab_behavior">動作ログ</string>
+    <string name="management_tab_permission">権限使用状況</string>
+    <string name="management_empty">データがありません</string>
+    <string name="quarantine_restore">復元</string>
+    <string name="quarantine_allow">許可</string>
+    <string name="quarantine_delete">削除</string>
+    <string name="management_clear_log">ログをクリア</string>
+    <string name="management_clear_log_confirm">すべての動作ログをクリアしますか？</string>
+
+    <!-- ツールボックス -->
+    <string name="tools_title">ツールボックス</string>
+    <string name="tools_tab_permission">権限使用状況</string>
+    <string name="tools_tab_recent">最近のファイル</string>
+    <string name="tools_tab_traffic">トラフィック</string>
+    <string name="tools_empty">データがありません</string>
+    <string name="tools_search_hint">検索</string>
+    <string name="tools_scan_file">このファイルをスキャン</string>
+    <string name="tools_recent_files">最近のファイル</string>
+    <string name="tools_file_modified">%1$s に変更</string>
+    <string name="tools_file_size">%1$s</string>
+    <string name="tools_scan_start">スキャン中…</string>
+    <string name="tools_scan_done">スキャン完了、%1$d 件の风险ファイルを検出</string>
+    <string name="tools_no_recent_files">最近のファイルがありません</string>
+    <string name="tools_no_traffic">トラフィックデータなし</string>
+    <string name="tools_traffic_detail">受信 %1$s · 送信 %2$s</string>
+
+    <!-- 守護ダッシュボード -->
+    <string name="guard_dashboard_title">守護ダッシュボード</string>
+    <string name="guard_dashboard_greeting">こんにちは！</string>
+    <string name="guard_dashboard_greeting_morning">おはようございます！</string>
+    <string name="guard_dashboard_greeting_afternoon">こんにちは！</string>
+    <string name="guard_dashboard_greeting_evening">こんばんは！</string>
+    <string name="guard_dashboard_status">守護状況</string>
+    <string name="guard_dashboard_mode_none">守護モードが未アクティブ</string>
+    <string name="guard_dashboard_mode_active">守護中 · %1$s</string>
+    <string name="guard_dashboard_stats">守護統計</string>
+    <string name="guard_dashboard_last_time">前回の守護</string>
+    <string name="guard_dashboard_total_count">累計守護回数</string>
+    <string name="guard_dashboard_time_just_now">たった今</string>
+    <string name="guard_dashboard_time_minutes">%1$d 分前</string>
+    <string name="guard_dashboard_time_hours">%1$d 時間前</string>
+    <string name="guard_dashboard_time_days">%1$d 日前</string>
+    <string name="guard_dashboard_time_never">なし</string>
+    <string name="guard_dashboard_recent_scan">最近のスキャン結果</string>
+    <string name="guard_dashboard_no_scan">スキャン記録なし</string>
+    <string name="guard_dashboard_no_scan_detail">スキャン未実施</string>
+    <string name="guard_dashboard_scan_total">スキャン合計：%1$d 件</string>
+    <string name="guard_dashboard_scan_safe">安全：%1$d 件</string>
+    <string name="guard_dashboard_scan_suspicious">疑わしい：%1$d 件</string>
+    <string name="guard_dashboard_scan_malicious">悪意のある：%1$d 件</string>
+    <string name="guard_dashboard_recent_files">最近追加されたファイル</string>
+    <string name="guard_dashboard_no_files">最近のファイルがありません</string>
+    <string name="guard_dashboard_sensitive_perms">機密権限の使用</string>
+    <string name="guard_dashboard_no_perms">機密権限は使用されていません</string>
+    <string name="perm_read_contacts">連絡先の読み取り</string>
+    <string name="perm_write_contacts">連絡先の変更</string>
+    <string name="perm_read_sms">SMS の読み取り</string>
+    <string name="perm_send_sms">SMS の送信</string>
+    <string name="perm_read_call_log">通話記録の読み取り</string>
+    <string name="perm_write_call_log">通話記録の変更</string>
+    <string name="perm_camera">カメラ</string>
+    <string name="perm_record_audio">音声録音</string>
+    <string name="perm_fine_location">正確な位置情報</string>
+    <string name="perm_coarse_location">大まかな位置情報</string>
+    <string name="perm_read_phone_state">電話状態の読み取り</string>
+    <string name="perm_call_phone">電話発信</string>
+    <string name="perm_read_storage">ストレージの読み取り</string>
+    <string name="perm_write_storage">ストレージの書き込み</string>
+    <string name="perm_read_media_images">画像の読み取り</string>
+    <string name="perm_read_media_video">動画の読み取り</string>
+    <string name="perm_read_media_audio">音声ファイルの読み取り</string>
+
+    <!-- チュートリアル -->
+    <string name="tutorial_welcome_title">Polarisへようこそ</string>
+    <string name="tutorial_welcome_subtitle">デバイスを守ります</string>
+    <string name="tutorial_enter">始める</string>
+    <string name="tutorial_scan_title">全面スキャン</string>
+    <string name="tutorial_scan_desc">すべてのアプリをスキャンして悪意のあるプログラムを検出</string>
+    <string name="tutorial_next">次へ</string>
+    <string name="tutorial_guard_prompt">右にスワイプしてガードパネルを開く</string>
+    <string name="tutorial_guard_desc">ガードパネルはデバイスのセキュリティをリアルタイムで監視</string>
+    <string name="tutorial_got_it">了解</string>
+
+    <!-- プルダウンパネル -->
+    <string name="pulldown_title">クイック表示</string>
+    <string name="pulldown_perm_section">アプリが使用する権限</string>
+    <string name="pulldown_perm_see_all">すべて表示</string>
+    <string name="pulldown_perm_empty">表示できる権限記録がありません</string>
+    <string name="pulldown_recent_count">%1$d 個のファイル</string>
+    <string name="pulldown_close">閉じる</string>
+</resources>
