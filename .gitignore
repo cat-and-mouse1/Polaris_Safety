@@ -34,8 +34,6 @@ data(1).zip
 
 # ---- 非构建内容（仅本地保留, 2026-09-25）----
 /ml/
-/polar-point/
-/polar-region/
 /docs/
 /data_extracted/
 /icon/
