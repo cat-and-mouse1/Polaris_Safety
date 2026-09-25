@@ -14,18 +14,6 @@ import androidx.work.WorkerParameters;
 
 import com.polaris.app.util.Prefs;
 
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -40,11 +28,6 @@ public class IocRefreshWorker extends Worker {
 
     private static final String TAG = "IocRefreshWorker";
     public static final String WORK_NAME = "polaris_ioc_daily_refresh";
-
-    private static final String MODEL_VERSION_URL =
-            "https://raw.githubusercontent.com/cat-and-mouse1/Polaris_Safety/main/app/src/main/assets/ml_model_metadata.json";
-    private static final String MODEL_FILE_URL =
-            "https://raw.githubusercontent.com/cat-and-mouse1/Polaris_Safety/main/app/src/main/assets/malware_detector.tflite";
 
     public IocRefreshWorker(@NonNull Context context, @NonNull WorkerParameters params) {
         super(context, params);
@@ -90,9 +73,6 @@ public class IocRefreshWorker extends Worker {
                 lock.wait(60_000); // 等待回调，最多 60 秒
             }
 
-            // Check for ML model updates
-            checkModelUpdate(getApplicationContext());
-
             return resultHolder[0];
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -101,96 +81,6 @@ public class IocRefreshWorker extends Worker {
             Log.e(TAG, "Unexpected error during IOC refresh", e);
             return Result.retry();
         }
-    }
-
-    private void checkModelUpdate(Context context) {
-        try {
-            String metadata = downloadUrl(MODEL_VERSION_URL);
-            JSONObject remoteMeta = new JSONObject(metadata);
-
-            String localMeta = loadLocalMetadata(context);
-            JSONObject localMetaObj = new JSONObject(localMeta);
-
-            String remoteVersion = remoteMeta.getString("version");
-            String localVersion = localMetaObj.getString("version");
-
-            if (!remoteVersion.equals(localVersion)) {
-                Log.i(TAG, "ML model update available: " + remoteVersion);
-
-                byte[] modelData = downloadBytes(MODEL_FILE_URL);
-                saveToFile(context, "malware_detector.tflite", modelData);
-                saveToFile(context, "ml_model_metadata.json", metadata.getBytes());
-
-                Log.i(TAG, "ML model updated to " + remoteVersion);
-            } else {
-                Log.i(TAG, "ML model is up to date: " + localVersion);
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Model update check failed", e);
-        }
-    }
-
-    private String loadLocalMetadata(Context context) throws IOException {
-        File internalFile = new File(context.getFilesDir(), "ml_model_metadata.json");
-        if (internalFile.exists()) {
-            return readFileToString(internalFile);
-        }
-        try (InputStream is = context.getAssets().open("ml_model_metadata.json")) {
-            byte[] buffer = new byte[is.available()];
-            is.read(buffer);
-            return new String(buffer);
-        }
-    }
-
-    private String downloadUrl(String urlStr) throws IOException {
-        HttpURLConnection conn = (HttpURLConnection) new URL(urlStr).openConnection();
-        try {
-            conn.setConnectTimeout(15_000);
-            conn.setReadTimeout(15_000);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
-            }
-            reader.close();
-            return sb.toString();
-        } finally {
-            conn.disconnect();
-        }
-    }
-
-    private byte[] downloadBytes(String urlStr) throws IOException {
-        HttpURLConnection conn = (HttpURLConnection) new URL(urlStr).openConnection();
-        try {
-            conn.setConnectTimeout(15_000);
-            conn.setReadTimeout(30_000);
-            InputStream is = conn.getInputStream();
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            byte[] buffer = new byte[8192];
-            int len;
-            while ((len = is.read(buffer)) != -1) {
-                bos.write(buffer, 0, len);
-            }
-            is.close();
-            return bos.toByteArray();
-        } finally {
-            conn.disconnect();
-        }
-    }
-
-    private void saveToFile(Context context, String filename, byte[] data) throws IOException {
-        FileOutputStream fos = new FileOutputStream(new File(context.getFilesDir(), filename));
-        fos.write(data);
-        fos.close();
-    }
-
-    private String readFileToString(File file) throws IOException {
-        FileInputStream fis = new FileInputStream(file);
-        byte[] buffer = new byte[(int) file.length()];
-        fis.read(buffer);
-        fis.close();
-        return new String(buffer);
     }
 
     /** 在 Application 启动时调用，注册每日周期性任务。 */
