@@ -696,13 +696,17 @@ public final class IocDatabase {
                         silentCancel(cb);
                         return;
                     }
-                    if (binTotal > 0) break;
-                    // 该源不可用：清掉可能产生的空/坏 part，换下一个源从头下
+                    // 下完不等于拿到干货：CDN 可能回 LFS 指针文本或压缩流，校验 magic
+                    if (binTotal > 0 && looksLikeIocBin(binPart)) break;
+                    if (binTotal > 0) {
+                        Log.w(TAG, "bin from " + binUrl + " is not a valid iodb.bin, trying next source");
+                    }
+                    // 该源不可用：清掉空/坏 part，换下一个源从头下
                     if (binPart.exists()) binPart.delete();
                     deletePartMeta(binPart);
+                    binTotal = -1;
                 }
-                if (binTotal > 0 && binPart.exists() && binPart.length() > 128
-                        && binPart.renameTo(binTarget)) {
+                if (binTotal > 0 && binPart.exists() && binPart.renameTo(binTarget)) {
                     if (reloadBinary(binTarget)) {
                         deletePartMeta(binPart);
                         Log.i(TAG, "IOC bin [" + dbType + "] refreshed to v" + dbVersion);
@@ -851,6 +855,21 @@ public final class IocDatabase {
         }
     }
 
+    /**
+     * 校验文件是否为合法的 iodb.bin（前 8 字节 magic）。
+     * 用于在入库前拦截 CDN 错误响应、Git LFS 指针文本（132B）、压缩流等"看起来像文件"的垃圾数据。
+     */
+    private static boolean looksLikeIocBin(File f) {
+        if (f == null || !f.exists() || f.length() < 128) return false;
+        try (java.io.InputStream in = new java.io.FileInputStream(f)) {
+            byte[] m = new byte[8];
+            int r = in.read(m);
+            return r == 8 && "POLARISB".equals(new String(m, StandardCharsets.US_ASCII));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     /** 流式下载到 part 文件并支持断点续传，返回总字节数（无 Content-Length 则为 0；404 返回 -1）。 */
     private long downloadToFileResume(String urlStr, File part, ProgressCallback pc, DownloadToken token) throws IOException {
         return downloadToFileResume(urlStr, part, pc, token, false);
@@ -859,7 +878,14 @@ public final class IocDatabase {
     /** retried=true 表示已因 HTTP 416 重试过一次，避免死循环。 */
     private long downloadToFileResume(String urlStr, File part, ProgressCallback pc, DownloadToken token,
                                      boolean retried) throws IOException {
-        long existing = part.exists() ? part.length() : 0;
+        // jsDelivr 的 Range 请求会命中它自己的压缩缓存：<returns 206 但 Content-Range 总长是 gzip 后大小，
+        // 内容也是压缩流>，续传必然写坏。该源一律整份重下。
+        boolean resumeSupported = !urlStr.contains("cdn.jsdelivr.net");
+        if (!resumeSupported && part.exists()) {
+            part.delete();
+            deletePartMeta(part);
+        }
+        long existing = (resumeSupported && part.exists()) ? part.length() : 0;
         HttpURLConnection conn = null;
         try {
             conn = (HttpURLConnection) new URL(urlStr).openConnection();
