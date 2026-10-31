@@ -42,6 +42,7 @@ import com.polaris.app.util.QuarantineManager;
 import com.polaris.app.util.TextUtil;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -144,6 +145,10 @@ public class FileScanActivity extends BaseActivity {
         setupTabs();
         setupScanEntries();
         setupBlock();
+        // 主页快捷面板「拦截」按钮直达：带 open_tab=block 时初始落在拦截板块
+        if (blockEnabled && "block".equals(getIntent().getStringExtra("open_tab"))) {
+            switchTab(TAB_BLOCK);
+        }
         refreshQuarantine();
 
         blockStateReceiver = new BroadcastReceiver() {
@@ -392,7 +397,11 @@ public class FileScanActivity extends BaseActivity {
         progressSection.setVisibility(View.VISIBLE);
         showAiThinking();
 
+        final boolean independent = prefs.isAiIndependentMode();
+        final boolean onlyFlagged = !independent;
+
         new Thread(() -> {
+            List<AiClient.AiVerdict> allVerdicts = new ArrayList<>();
             try {
                 // 优先使用多供应商配置
                 List<Prefs.AiProviderConfig> enabledProviders = prefs.getEnabledProviders();
@@ -401,11 +410,10 @@ public class FileScanActivity extends BaseActivity {
                 if (enabledProviders != null && !enabledProviders.isEmpty()) {
                     // 多供应商扫描
                     List<AiClient.AiVerdict> verdicts =
-                            AiClient.judgeFilesMulti(this, enabledProviders, strategy, risks);
+                            AiClient.judgeFilesMulti(this, enabledProviders, strategy, risks, onlyFlagged);
                     Map<String, AiClient.AiVerdict> index = AiClient.indexOf(verdicts);
-                    for (FileRiskInfo r : risks) {
-                        r.verdict = index.get(r.path);
-                    }
+                    for (FileRiskInfo r : risks) AiClient.stamp(r, index.get(r.path), independent);
+                    allVerdicts.addAll(verdicts);
                     runOnUiThread(() -> {
                         hideProgress();
                         renderResult(risks);
@@ -424,15 +432,27 @@ public class FileScanActivity extends BaseActivity {
                     }
                     if (model == null || model.trim().isEmpty()) model = provider.defaultModel;
                     List<AiClient.AiVerdict> verdicts =
-                            AiClient.judgeFiles(this, provider, apiKey, model, risks);
+                            AiClient.judgeFiles(this, provider, apiKey, model, risks, onlyFlagged);
                     Map<String, AiClient.AiVerdict> index = AiClient.indexOf(verdicts);
-                    for (FileRiskInfo r : risks) {
-                        r.verdict = index.get(r.path);
-                    }
+                    for (FileRiskInfo r : risks) AiClient.stamp(r, index.get(r.path), independent);
+                    allVerdicts.addAll(verdicts);
                     runOnUiThread(() -> {
                         hideProgress();
                         renderResult(risks);
                     });
+                }
+                // 独立检测：AI 复核了全部候选但无新增风险时给出确认反馈
+                if (independent) {
+                    int aiFlagged = 0;
+                    for (AiClient.AiVerdict v : allVerdicts) {
+                        if (v.level >= FileRiskInfo.LEVEL_LOW) aiFlagged++;
+                    }
+                    if (aiFlagged == 0 && !allVerdicts.isEmpty()) {
+                        final int reviewed = risks.size();
+                        runOnUiThread(() -> Toast.makeText(this,
+                                getString(R.string.ai_independent_clean, reviewed),
+                                Toast.LENGTH_SHORT).show());
+                    }
                 }
             } catch (AiClient.AiException e) {
                 runOnUiThread(() -> {
@@ -891,7 +911,12 @@ public class FileScanActivity extends BaseActivity {
     }
 
     private void enableBlockMode() {
-        prefs.setBlockMode(true);
+        // 拦截依赖守护服务：仅 Accessibility / Shizuku / Root 模式可开启
+        if (!prefs.setBlockMode(true)) {
+            Toast.makeText(this, R.string.block_need_deep_mode, Toast.LENGTH_SHORT).show();
+            renderBlock();
+            return;
+        }
         Notifier.updateBlockNotification(this);
         Toast.makeText(this, R.string.block_on_toast, Toast.LENGTH_SHORT).show();
         renderBlock();
@@ -966,6 +991,7 @@ public class FileScanActivity extends BaseActivity {
 
     @Override
     protected void onDestroy() {
+        if (scanner != null) scanner.cancel();   // 停止后台遍历，避免回调已销毁页面
         super.onDestroy();
         if (blockStateReceiver != null) {
             try {

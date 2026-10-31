@@ -57,6 +57,8 @@ public final class AiClient {
         public boolean remove;          // true=建议清除, false=建议保留
         public float confidence;        // 0..1
         public String reason = "";
+        /** AI 独立赋出的风险等级：-1=未提供；否则 AppRiskInfo.LEVEL_*。仅独立检测模式使用。 */
+        public int level = -1;
     }
 
     private static final int CONNECT_TIMEOUT = 20000;
@@ -127,10 +129,17 @@ public final class AiClient {
      * 多供应商扫描入口：根据策略调用多个供应商并合并结果。
      * @param providers 启用的供应商配置列表
      * @param strategy "ensemble" 或 "fastest"
+     * @param onlyFlagged true=只送审本地已标记（≥低风险）的候选；false=送审全部候选（独立检测）
      * @return 合并后的判定列表
      */
     public static List<AiVerdict> judgeFilesMulti(Context context, List<Prefs.AiProviderConfig> providers,
                                                   String strategy, List<FileRiskInfo> risks) throws AiException {
+        return judgeFilesMulti(context, providers, strategy, risks, true);
+    }
+
+    public static List<AiVerdict> judgeFilesMulti(Context context, List<Prefs.AiProviderConfig> providers,
+                                                  String strategy, List<FileRiskInfo> risks,
+                                                  boolean onlyFlagged) throws AiException {
         if (providers == null || providers.isEmpty()) {
             throw new AiException("未配置任何供应商");
         }
@@ -139,7 +148,7 @@ public final class AiClient {
         StringBuilder report = new StringBuilder();
         int sent = 0;
         for (FileRiskInfo r : risks) {
-            if (r.level < FileRiskInfo.LEVEL_LOW) continue;
+            if (onlyFlagged && r.level < FileRiskInfo.LEVEL_LOW) continue;
             if (sent >= MAX_APPS_TO_AI) break;
             sent++;
             report.append("- ").append(r.path)
@@ -165,9 +174,16 @@ public final class AiClient {
 
     /**
      * 多供应商扫描入口（应用版本）。
+     * @param onlyFlagged true=只送审本地已标记（≥低风险）的候选；false=送审全部候选（独立检测）
      */
     public static List<AiVerdict> judgeMulti(Context context, List<Prefs.AiProviderConfig> providers,
                                              String strategy, List<AppRiskInfo> risks) throws AiException {
+        return judgeMulti(context, providers, strategy, risks, true);
+    }
+
+    public static List<AiVerdict> judgeMulti(Context context, List<Prefs.AiProviderConfig> providers,
+                                             String strategy, List<AppRiskInfo> risks,
+                                             boolean onlyFlagged) throws AiException {
         if (providers == null || providers.isEmpty()) {
             throw new AiException("未配置任何供应商");
         }
@@ -175,7 +191,7 @@ public final class AiClient {
         StringBuilder report = new StringBuilder();
         int sent = 0;
         for (AppRiskInfo r : risks) {
-            if (r.level < AppRiskInfo.LEVEL_LOW) continue;
+            if (onlyFlagged && r.level < AppRiskInfo.LEVEL_LOW) continue;
             if (sent >= MAX_APPS_TO_AI) break;
             sent++;
             report.append("- ").append(r.packageName)
@@ -368,13 +384,20 @@ public final class AiClient {
 
     /**
      * 用 AI 判断扫描报告中的应用「清除 / 保留」（单供应商兼容版本）。
+     * @param onlyFlagged true=只送审本地已标记（≥低风险）的候选；false=送审全部候选（独立检测）
      */
     public static List<AiVerdict> judge(Context context, AiProvider provider, String apiKey,
                                         String model, List<AppRiskInfo> risks) throws AiException {
+        return judge(context, provider, apiKey, model, risks, true);
+    }
+
+    public static List<AiVerdict> judge(Context context, AiProvider provider, String apiKey,
+                                        String model, List<AppRiskInfo> risks,
+                                        boolean onlyFlagged) throws AiException {
         StringBuilder report = new StringBuilder();
         int sent = 0;
         for (AppRiskInfo r : risks) {
-            if (r.level < AppRiskInfo.LEVEL_LOW) continue; // 安全应用不送审
+            if (onlyFlagged && r.level < AppRiskInfo.LEVEL_LOW) continue; // 安全应用不送审
             if (sent >= MAX_APPS_TO_AI) break;
             sent++;
             report.append("- ").append(r.packageName)
@@ -396,14 +419,20 @@ public final class AiClient {
     /**
      * 用 AI 判断文件扫描报告中的风险文件「清除(隔离) / 保留」。
      * 复用 {@link AiVerdict}，其中 packageName 字段承载文件标识（路径或 uri）。
-     * 只把达到低风险及以上的文件送入模型，并限制数量。
+     * @param onlyFlagged true=只送审本地已标记（≥低风险）的文件；false=送审全部候选（独立检测）
      */
     public static List<AiVerdict> judgeFiles(Context context, AiProvider provider, String apiKey,
                                              String model, List<FileRiskInfo> risks) throws AiException {
+        return judgeFiles(context, provider, apiKey, model, risks, true);
+    }
+
+    public static List<AiVerdict> judgeFiles(Context context, AiProvider provider, String apiKey,
+                                             String model, List<FileRiskInfo> risks,
+                                             boolean onlyFlagged) throws AiException {
         StringBuilder report = new StringBuilder();
         int sent = 0;
         for (FileRiskInfo r : risks) {
-            if (r.level < FileRiskInfo.LEVEL_LOW) continue;
+            if (onlyFlagged && r.level < FileRiskInfo.LEVEL_LOW) continue;
             if (sent >= MAX_APPS_TO_AI) break;
             sent++;
             report.append("- ").append(r.path)
@@ -522,6 +551,7 @@ public final class AiClient {
                 v.remove = "remove".equals(action) || "清除".equals(action);
                 v.confidence = (float) o.optDouble("confidence", 0.5);
                 v.reason = o.optString("reason");
+                v.level = levelFromString(o.optString("level"));
                 if (v.packageName == null || v.packageName.isEmpty()) continue;
                 out.add(v);
             }
@@ -601,5 +631,56 @@ public final class AiClient {
             }
         }
         return map;
+    }
+
+    /** 将模型返回的 level 文本映射为 LEVEL_* 常量；无法识别返回 -1。 */
+    public static int levelFromString(String s) {
+        if (s == null) return -1;
+        switch (s.trim().toLowerCase(java.util.Locale.US)) {
+            case "high":   return AppRiskInfo.LEVEL_HIGH;
+            case "medium": return AppRiskInfo.LEVEL_MEDIUM;
+            case "low":    return AppRiskInfo.LEVEL_LOW;
+            case "safe":   return AppRiskInfo.LEVEL_SAFE;
+            default:       return -1;
+        }
+    }
+
+    /** 由风险等级给出代表性分数（用于独立检测模式下重写 score）。 */
+    public static int scoreForLevel(int level) {
+        switch (level) {
+            case AppRiskInfo.LEVEL_HIGH:   return 85;
+            case AppRiskInfo.LEVEL_MEDIUM: return 55;
+            case AppRiskInfo.LEVEL_LOW:    return 30;
+            default:                       return 5;
+        }
+    }
+
+    /**
+     * 将 AI 判定并入应用扫描结果。
+     * @param independent 独立检测模式：用 AI 赋出的 level 重写最终风险等级/分数/理由，
+     *                   并据等级一致化 remove 标记；否则仅保留 verdict 供卡片展示。
+     */
+    public static void stamp(AppRiskInfo r, AiVerdict v, boolean independent) {
+        if (v == null) return;
+        if (independent && v.level >= 0) {
+            r.level = v.level;
+            r.score = scoreForLevel(v.level);
+            r.reasons.add("[AI 独立判定] " + v.reason);
+            v.remove = v.level >= AppRiskInfo.LEVEL_MEDIUM; // 与等级一致
+        }
+    }
+
+    /**
+     * 将 AI 判定并入文件扫描结果（同 stamp，但文件结果用 verdict 字段承载 AI 结论）。
+     */
+    public static void stamp(FileRiskInfo r, AiVerdict v, boolean independent) {
+        r.verdict = v;
+        if (v == null) return;
+        if (independent && v.level >= 0) {
+            r.level = v.level;
+            r.score = scoreForLevel(v.level);
+            r.reasons.add("[AI 独立判定] " + v.reason);
+            v.remove = v.level >= AppRiskInfo.LEVEL_MEDIUM;
+        }
     }
 }

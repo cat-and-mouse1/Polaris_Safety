@@ -560,14 +560,16 @@ public class AiSetupActivity extends BaseActivity {
                     throw new Exception("HTTP " + code);
                 }
 
-                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
+                try (BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(conn.getInputStream()))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        sb.append(line);
+                    }
+                } finally {
+                    conn.disconnect();
                 }
-                reader.close();
-                conn.disconnect();
 
                 JSONObject response = new JSONObject(sb.toString());
                 JSONArray data = response.optJSONArray("data");

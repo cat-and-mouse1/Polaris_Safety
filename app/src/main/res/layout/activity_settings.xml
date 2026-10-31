@@ -35,7 +35,7 @@
             android:textColor="?attr/colorOnSurface" />
     </LinearLayout>
 
-    <androidx.core.widget.NestedScrollView
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true">
@@ -43,36 +43,10 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingBottom="32dp">
+            android:orientation="vertical"
+            android:paddingBottom="32dp">
 
-            <!-- 默认引擎 -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="20dp"
-                android:text="@string/settings_engine_section"
-                android:textAppearance="?attr/textAppearanceLabelLarge"
-                android:textColor="?attr/colorPrimary" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="4dp"
-                android:text="@string/settings_engine_hint"
-                android:textAppearance="?attr/textAppearanceBodySmall"
-                android:textColor="?attr/colorOnSurfaceVariant" />
-
-            <LinearLayout
-                android:id="@+id/engineGroup"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:orientation="vertical" />
-
-            <!-- 检测配置：合并 AI 智能判定 与 ML 机器学习（子界面入口） -->
+            <!-- 检测配置：横幅状态区 + 三个独立模块卡（AI 引擎 / 默认引擎 / ML 引擎）两列排布 -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/detectionEntry"
                 android:layout_width="match_parent"
@@ -90,65 +64,397 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:padding="16dp">
+                    android:orientation="vertical">
 
-                    <ImageView
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:contentDescription="@string/detection_config_title"
-                        android:src="@drawable/ic_ai_star"
-                        app:tint="?attr/colorPrimary" />
-
+                    <!-- 横幅状态区：标题 + AI/ML 状态胶囊，一眼读出整体状态（点击横幅折叠/展开） -->
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:id="@+id/detectionHeader"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:background="?attr/colorPrimaryContainer"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="16dp"
+                        android:paddingTop="14dp"
+                        android:paddingBottom="14dp">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:contentDescription="@string/detection_config_title"
+                            android:src="@drawable/ic_ai_star"
+                            app:tint="?attr/colorOnPrimaryContainer" />
 
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_weight="1"
                             android:text="@string/detection_config_title"
-                            android:textAppearance="?attr/textAppearanceTitleSmall"
-                            android:textColor="?attr/colorOnSurface" />
+                            android:textAppearance="?attr/textAppearanceTitleMedium"
+                            android:textColor="?attr/colorOnPrimaryContainer"
+                            android:textStyle="bold" />
 
                         <TextView
-                            android:id="@+id/detectionStatusText"
+                            android:id="@+id/detectionAiStatus"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:textAppearance="?attr/textAppearanceBodySmall"
+                            android:layout_marginEnd="6dp"
+                            android:background="@drawable/bg_status_chip"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="5dp"
+                            android:textAppearance="?attr/textAppearanceLabelMedium"
                             android:textColor="?attr/colorOnSurfaceVariant" />
+
+                        <TextView
+                            android:id="@+id/detectionMlStatus"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_status_chip"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="5dp"
+                            android:textAppearance="?attr/textAppearanceLabelMedium"
+                            android:textColor="?attr/colorOnSurfaceVariant" />
+
+                        <ImageView
+                            android:id="@+id/detectionChevron"
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_marginStart="8dp"
+                            android:contentDescription="@string/toggle_collapse"
+                            android:src="@drawable/ic_chevron_right"
+                            app:tint="?attr/colorOnPrimaryContainer" />
                     </LinearLayout>
 
-                    <ImageView
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:contentDescription="@string/navigate_next"
-                        android:src="@drawable/ic_chevron_right"
-                        app:tint="?attr/colorOnSurfaceVariant" />
+                    <!-- 模块卡网格：左列 AI 引擎，右列 默认引擎 + ML 引擎 -->
+                    <LinearLayout
+                        android:id="@+id/detectionBody"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="12dp">
+
+                        <!-- 左列：AI 智能引擎（与右列等高、底边对齐） -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <com.google.android.material.card.MaterialCardView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                app:cardBackgroundColor="?attr/colorSurface"
+                                app:cardCornerRadius="14dp"
+                                app:cardElevation="0dp"
+                                app:strokeColor="?attr/colorOutlineVariant"
+                                app:strokeWidth="1dp">
+
+                                    <LinearLayout
+                                        android:id="@+id/aiCardInner"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="match_parent"
+                                        android:orientation="vertical"
+                                        android:padding="12dp">
+
+                                    <!-- 顶部：居中图标 + 状态摘要，点击进入 AI 配置 -->
+                                    <LinearLayout
+                                        android:id="@+id/aiQuickStatusCard"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginTop="4dp"
+                                        android:background="?attr/selectableItemBackground"
+                                        android:gravity="center_horizontal"
+                                        android:orientation="vertical"
+                                        android:paddingVertical="10dp">
+
+                                        <FrameLayout
+                                            android:id="@+id/aiBadge"
+                                            android:layout_width="48dp"
+                                            android:layout_height="48dp"
+                                            android:background="@drawable/bg_mode_badge">
+
+                                            <ImageView
+                                                android:id="@+id/aiBadgeIcon"
+                                                android:layout_width="24dp"
+                                                android:layout_height="24dp"
+                                                android:layout_gravity="center"
+                                                android:contentDescription="@string/ai_engine_title"
+                                                android:src="@drawable/ic_ai_star"
+                                                app:tint="?attr/colorPrimary" />
+                                        </FrameLayout>
+
+                                        <TextView
+                                            android:id="@+id/aiQuickStatusTitle"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:layout_marginTop="8dp"
+                                            android:gravity="center"
+                                            android:textAppearance="?attr/textAppearanceTitleSmall"
+                                            android:textColor="?attr/colorOnSurface"
+                                            android:textStyle="bold" />
+
+                                        <TextView
+                                            android:id="@+id/aiQuickStatusDesc"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:layout_marginTop="2dp"
+                                            android:gravity="center"
+                                            android:textAppearance="?attr/textAppearanceBodySmall"
+                                            android:textColor="?attr/colorOnSurfaceVariant" />
+                                    </LinearLayout>
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginTop="10dp"
+                                        android:text="@string/ai_multi_strategy_title"
+                                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                                        android:textColor="?attr/colorOnSurface" />
+
+                                    <com.google.android.material.button.MaterialButtonToggleGroup
+                                        android:id="@+id/strategyQuickGroup"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginTop="6dp"
+                                        app:selectionRequired="true"
+                                        app:singleSelection="true"
+                                        app:strokeColor="@android:color/transparent"
+                                        app:strokeWidth="0dp">
+
+                                        <com.google.android.material.button.MaterialButton
+                                            android:id="@+id/strategyQuickEnsemble"
+                                            style="@style/PolarisSegmentButton"
+                                            android:layout_width="0dp"
+                                            android:layout_height="38dp"
+                                            android:layout_weight="1"
+                                            android:insetLeft="2dp"
+                                            android:insetRight="2dp"
+                                            android:text="@string/ai_strategy_ensemble_title"
+                                            android:textSize="12sp"
+                                            app:cornerRadius="10dp"
+                                            app:strokeWidth="0dp" />
+
+                                        <com.google.android.material.button.MaterialButton
+                                            android:id="@+id/strategyQuickFastest"
+                                            style="@style/PolarisSegmentButton"
+                                            android:layout_width="0dp"
+                                            android:layout_height="38dp"
+                                            android:layout_weight="1"
+                                            android:insetLeft="2dp"
+                                            android:insetRight="2dp"
+                                            android:text="@string/ai_strategy_fastest_title"
+                                            android:textSize="12sp"
+                                            app:cornerRadius="10dp"
+                                            app:strokeWidth="0dp" />
+                                    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+                                    <Space
+                                        android:layout_width="match_parent"
+                                        android:layout_height="0dp"
+                                        android:layout_weight="1" />
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginTop="10dp"
+                                        android:text="@string/ai_mode_title"
+                                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                                        android:textColor="?attr/colorOnSurface" />
+
+                                    <com.google.android.material.button.MaterialButtonToggleGroup
+                                        android:id="@+id/aiModeQuickGroup"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginTop="6dp"
+                                        app:selectionRequired="true"
+                                        app:singleSelection="true"
+                                        app:strokeColor="@android:color/transparent"
+                                        app:strokeWidth="0dp">
+
+                                        <com.google.android.material.button.MaterialButton
+                                            android:id="@+id/aiModeQuickReview"
+                                            style="@style/PolarisSegmentButton"
+                                            android:layout_width="0dp"
+                                            android:layout_height="38dp"
+                                            android:layout_weight="1"
+                                            android:insetLeft="2dp"
+                                            android:insetRight="2dp"
+                                            android:text="@string/ai_mode_review"
+                                            android:textSize="12sp"
+                                            app:cornerRadius="10dp"
+                                            app:strokeWidth="0dp" />
+
+                                        <com.google.android.material.button.MaterialButton
+                                            android:id="@+id/aiModeQuickIndependent"
+                                            style="@style/PolarisSegmentButton"
+                                            android:layout_width="0dp"
+                                            android:layout_height="38dp"
+                                            android:layout_weight="1"
+                                            android:insetLeft="2dp"
+                                            android:insetRight="2dp"
+                                            android:text="@string/ai_mode_independent"
+                                            android:textSize="12sp"
+                                            app:cornerRadius="10dp"
+                                            app:strokeWidth="0dp" />
+                                    </com.google.android.material.button.MaterialButtonToggleGroup>
+                                </LinearLayout>
+                            </com.google.android.material.card.MaterialCardView>
+                        </LinearLayout>
+
+                        <Space
+                            android:layout_width="10dp"
+                            android:layout_height="1dp" />
+
+                        <!-- 右列：默认引擎 + ML 引擎（驱动整行高度，左列 match_parent 跟随等高） -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <com.google.android.material.card.MaterialCardView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                app:cardBackgroundColor="?attr/colorSurface"
+                                app:cardCornerRadius="14dp"
+                                app:cardElevation="0dp"
+                                app:strokeColor="?attr/colorOutlineVariant"
+                                app:strokeWidth="1dp">
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="vertical"
+                                    android:padding="12dp">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="@string/detection_default_engine"
+                                        android:textAppearance="?attr/textAppearanceTitleSmall"
+                                        android:textColor="?attr/colorOnSurface"
+                                        android:textStyle="bold" />
+
+                                    <LinearLayout
+                                        android:id="@+id/engineQuickGroup"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginTop="4dp"
+                                        android:orientation="vertical" />
+                                </LinearLayout>
+                            </com.google.android.material.card.MaterialCardView>
+
+                            <Space
+                                android:layout_width="1dp"
+                                android:layout_height="10dp" />
+
+                            <com.google.android.material.card.MaterialCardView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                app:cardBackgroundColor="?attr/colorSurface"
+                                app:cardCornerRadius="14dp"
+                                app:cardElevation="0dp"
+                                app:strokeColor="?attr/colorOutlineVariant"
+                                app:strokeWidth="1dp">
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="vertical"
+                                    android:padding="12dp">
+
+                                    <LinearLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center_vertical"
+                                        android:orientation="horizontal">
+
+                                        <TextView
+                                            android:layout_width="0dp"
+                                            android:layout_height="wrap_content"
+                                            android:layout_weight="1"
+                                            android:text="@string/ml_engine_title"
+                                            android:textAppearance="?attr/textAppearanceTitleSmall"
+                                            android:textColor="?attr/colorOnSurface"
+                                            android:textStyle="bold" />
+
+                                        <com.google.android.material.materialswitch.MaterialSwitch
+                                            android:id="@+id/mlQuickSwitch"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content" />
+                                    </LinearLayout>
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginTop="10dp"
+                                        android:text="@string/ml_model_selector_title"
+                                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                                        android:textColor="?attr/colorOnSurface" />
+
+                                    <com.google.android.material.button.MaterialButtonToggleGroup
+                                        android:id="@+id/mlModelQuickGroup"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginTop="6dp"
+                                        app:selectionRequired="true"
+                                        app:singleSelection="true"
+                                        app:strokeColor="@android:color/transparent"
+                                        app:strokeWidth="0dp">
+
+                                        <com.google.android.material.button.MaterialButton
+                                            android:id="@+id/mlModelQuick100k"
+                                            style="@style/PolarisSegmentButton"
+                                            android:layout_width="0dp"
+                                            android:layout_height="38dp"
+                                            android:layout_weight="1"
+                                            android:insetLeft="2dp"
+                                            android:insetRight="2dp"
+                                            android:text="@string/ml_model_mh100k"
+                                            android:textSize="12sp"
+                                            app:cornerRadius="10dp"
+                                            app:strokeWidth="0dp" />
+
+                                        <com.google.android.material.button.MaterialButton
+                                            android:id="@+id/mlModelQuick1m"
+                                            style="@style/PolarisSegmentButton"
+                                            android:layout_width="0dp"
+                                            android:layout_height="38dp"
+                                            android:layout_weight="1"
+                                            android:insetLeft="2dp"
+                                            android:insetRight="2dp"
+                                            android:text="@string/ml_model_mh1m"
+                                            android:textSize="12sp"
+                                            app:cornerRadius="10dp"
+                                            app:strokeWidth="0dp" />
+                                    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+                                    <com.google.android.material.button.MaterialButton
+                                        android:id="@+id/btnQuickMlScan"
+                                        style="@style/Widget.Material3.Button"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="44dp"
+                                        android:layout_marginTop="12dp"
+                                        android:text="@string/ml_scan_now"
+                                        android:textSize="13sp"
+                                        app:cornerRadius="22dp" />
+                                </LinearLayout>
+                            </com.google.android.material.card.MaterialCardView>
+                        </LinearLayout>
+                    </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 病毒库 → 子界面入口 -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="20dp"
-                android:text="@string/virusdb_section"
-                android:textAppearance="?attr/textAppearanceLabelLarge"
-                android:textColor="?attr/colorPrimary" />
-
+            <!-- 威胁情报病毒库：横幅状态区 + 区域库/点库 双列网格 -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/virusDbEntry"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="12dp"
                 android:clickable="true"
                 android:focusable="true"
                 app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
@@ -160,56 +466,205 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:padding="16dp">
+                    android:orientation="vertical">
 
-                    <ImageView
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:contentDescription="@string/virusdb_section"
-                        android:src="@drawable/ic_shield"
-                        app:tint="?attr/colorPrimary" />
-
+                    <!-- 横幅状态区：标题 + 区域库/点库 状态胶囊（点击横幅折叠/展开） -->
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:id="@+id/virusDbHeader"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:background="?attr/colorPrimaryContainer"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="16dp"
+                        android:paddingTop="14dp"
+                        android:paddingBottom="14dp">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:contentDescription="@string/virusdb_section"
+                            android:src="@drawable/ic_shield"
+                            app:tint="?attr/colorOnPrimaryContainer" />
 
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_weight="1"
                             android:text="@string/virusdb_section"
-                            android:textAppearance="?attr/textAppearanceTitleSmall"
-                            android:textColor="?attr/colorOnSurface" />
+                            android:textAppearance="?attr/textAppearanceTitleMedium"
+                            android:textColor="?attr/colorOnPrimaryContainer"
+                            android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/virusDbRegionStatus"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:text="@string/virusdb_entry_summary"
-                            android:textAppearance="?attr/textAppearanceBodySmall"
+                            android:layout_marginEnd="6dp"
+                            android:background="@drawable/bg_status_chip"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="5dp"
+                            android:textAppearance="?attr/textAppearanceLabelMedium"
                             android:textColor="?attr/colorOnSurfaceVariant" />
+
+                        <TextView
+                            android:id="@+id/virusDbPointStatus"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_status_chip"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="5dp"
+                            android:textAppearance="?attr/textAppearanceLabelMedium"
+                            android:textColor="?attr/colorOnSurfaceVariant" />
+
+                        <ImageView
+                            android:id="@+id/virusDbChevron"
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_marginStart="8dp"
+                            android:contentDescription="@string/toggle_collapse"
+                            android:src="@drawable/ic_chevron_right"
+                            app:tint="?attr/colorOnPrimaryContainer" />
                     </LinearLayout>
 
-                    <ImageView
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:contentDescription="@string/navigate_next"
-                        android:src="@drawable/ic_chevron_right"
-                        app:tint="?attr/colorOnSurfaceVariant" />
+                    <!-- 模块卡网格：左 区域库 / 右 点库（等高、底边对齐，内框高度按文本自适应） -->
+                    <LinearLayout
+                        android:id="@+id/virusDbBody"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:measureWithLargestChild="true"
+                        android:padding="12dp">
+
+                        <!-- 区域库 -->
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="5dp"
+                            android:layout_weight="1"
+                            app:cardBackgroundColor="?attr/colorSurface"
+                            app:cardCornerRadius="14dp"
+                            app:cardElevation="0dp"
+                            app:strokeColor="?attr/colorOutlineVariant"
+                            app:strokeWidth="1dp">
+
+                            <LinearLayout
+                                android:id="@+id/regionCardInner"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:padding="12dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/virusdb_region_name"
+                                    android:textAppearance="?attr/textAppearanceTitleSmall"
+                                    android:textColor="?attr/colorOnSurface"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:text="@string/virusdb_region_desc"
+                                    android:textAppearance="?attr/textAppearanceBodySmall"
+                                    android:textColor="?attr/colorOnSurfaceVariant" />
+
+                                <Space
+                                    android:layout_width="match_parent"
+                                    android:layout_height="0dp"
+                                    android:layout_weight="1" />
+
+                                <TextView
+                                    android:id="@+id/regionUpdatedText"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="10dp"
+                                    android:textAppearance="?attr/textAppearanceBodySmall"
+                                    android:textColor="?attr/colorOnSurfaceVariant" />
+
+                                <TextView
+                                    android:id="@+id/regionStatusText"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="2dp"
+                                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                                    android:textColor="?attr/colorOnSurface" />
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <!-- 点库 -->
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="5dp"
+                            android:layout_weight="1"
+                            app:cardBackgroundColor="?attr/colorSurface"
+                            app:cardCornerRadius="14dp"
+                            app:cardElevation="0dp"
+                            app:strokeColor="?attr/colorOutlineVariant"
+                            app:strokeWidth="1dp">
+
+                            <LinearLayout
+                                android:id="@+id/pointCardInner"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:padding="12dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/virusdb_point_name"
+                                    android:textAppearance="?attr/textAppearanceTitleSmall"
+                                    android:textColor="?attr/colorOnSurface"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:text="@string/virusdb_point_desc"
+                                    android:textAppearance="?attr/textAppearanceBodySmall"
+                                    android:textColor="?attr/colorOnSurfaceVariant" />
+
+                                <Space
+                                    android:layout_width="match_parent"
+                                    android:layout_height="0dp"
+                                    android:layout_weight="1" />
+
+                                <TextView
+                                    android:id="@+id/pointUpdatedText"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="10dp"
+                                    android:textAppearance="?attr/textAppearanceBodySmall"
+                                    android:textColor="?attr/colorOnSurfaceVariant" />
+
+                                <TextView
+                                    android:id="@+id/pointStatusText"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="2dp"
+                                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                                    android:textColor="?attr/colorOnSurface" />
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+                    </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 语言 -->
+            <!-- 显示：语言 + 外观，归为同一类别 -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
                 android:layout_marginTop="20dp"
-                android:text="@string/language_title"
+                android:text="@string/display_section"
                 android:textAppearance="?attr/textAppearanceLabelLarge"
                 android:textColor="?attr/colorPrimary" />
 
@@ -241,44 +696,46 @@
                         android:src="@drawable/ic_language"
                         app:tint="?attr/colorPrimary" />
 
-                    <TextView
-                        android:id="@+id/languageCurrentText"
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
                         android:layout_weight="1"
-                        android:textAppearance="?attr/textAppearanceTitleSmall"
-                        android:textColor="?attr/colorOnSurface" />
+                        android:orientation="vertical">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:background="@drawable/bg_level_chip"
-                        android:paddingHorizontal="10dp"
-                        android:paddingVertical="4dp"
-                        android:text="@string/settings_ai_configure"
-                        android:textAppearance="?attr/textAppearanceLabelMedium"
-                        android:textColor="?attr/colorPrimary" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="language"
+                            android:textAppearance="?attr/textAppearanceTitleSmall"
+                            android:textColor="?attr/colorOnSurface"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/languageCurrentText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:textAppearance="?attr/textAppearanceBodySmall"
+                            android:textColor="?attr/colorOnSurfaceVariant" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:contentDescription="@string/navigate_next"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="?attr/colorOnSurfaceVariant" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 外观 → 子界面入口 -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="20dp"
-                android:text="@string/theme_color_section"
-                android:textAppearance="?attr/textAppearanceLabelLarge"
-                android:textColor="?attr/colorPrimary" />
-
+            <!-- 外观卡片（与语言卡片同属「显示」类别） -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/appearanceEntry"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="10dp"
                 android:clickable="true"
                 android:focusable="true"
                 app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
@@ -323,6 +780,62 @@
                             android:textAppearance="?attr/textAppearanceBodySmall"
                             android:textColor="?attr/colorOnSurfaceVariant" />
                     </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:contentDescription="@string/navigate_next"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="?attr/colorOnSurfaceVariant" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 通知：类别总览与独立开关 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="20dp"
+                android:text="@string/notification_section"
+                android:textAppearance="?attr/textAppearanceLabelLarge"
+                android:textColor="?attr/colorPrimary" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/notifyCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="4dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:contentDescription="@string/notification_section"
+                        android:src="@drawable/ic_monitor"
+                        app:tint="?attr/colorPrimary" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:text="@string/notification_section"
+                        android:textAppearance="?attr/textAppearanceTitleSmall"
+                        android:textColor="?attr/colorOnSurface" />
 
                     <ImageView
                         android:layout_width="22dp"
@@ -382,6 +895,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
+    </ScrollView>
 
 </LinearLayout>
