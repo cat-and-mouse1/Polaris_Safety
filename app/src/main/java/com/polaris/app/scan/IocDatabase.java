@@ -80,8 +80,84 @@ public final class IocDatabase {
     /** 单个库文件的解析上限：超过则不做全量解析（避免超大库必然 OOM）。 */
     private static final long MAX_PARSE_BYTES = 64L * 1024 * 1024;
 
-    /** 种子库内置密钥为 0；上线前应由服务端用同款 HMAC-SHA256 对 iodb.json 签名。 */
+    /** 种子库内置密钥为 0；已由 ECDSA P-256 签名方案取代（见 SIGNING_PUBKEY_B64）。 */
     private static final String HMAC_KEY = "";
+
+    /**
+     * 病毒库签名公钥（ECDSA P-256，SPKI DER，Base64）。
+     * 私钥只存在于发布机（tools/keys/，不入仓库）——客户端即使被反编译也只能验签，
+     * 无法伪造新签名。验签算法 SHA256withECDSA，与 tools/ioc_sign.py 对应。
+     * 置空可关闭强制验签（仅调试用；发布构建必须保留公钥）。
+     */
+    public static final String SIGNING_PUBKEY_B64 =
+            "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEfRSiv/WxW030iTtxrBb5TG6rUvELKTl1ALi/GNlkLP7+biH0BJ1U21dA30W4xhWBylXGQ3OMGdz1PtBJe1386Q==";
+
+    /**
+     * 验证库文件签名：<file> 对应 <file>.sig（hex 文本，DER 编码的 ECDSA 签名）。
+     * 签名对象是文件的 SHA-256 摘要。公钥非空时必须存在 .sig 且验签通过。
+     *
+     * @return true = 通过（或未配置公钥）；false = 缺 .sig / 验签失败 / 公钥格式错误
+     */
+    static boolean verifySigned(File f) {
+        if (SIGNING_PUBKEY_B64 == null || SIGNING_PUBKEY_B64.isEmpty()) return true;
+        File sigFile = new File(f.getParentFile(), f.getName() + ".sig");
+        if (!sigFile.exists()) {
+            Log.w(TAG, "signature missing: " + sigFile.getName());
+            return false;
+        }
+        try {
+            byte[] sig = bytesFromHex(new String(java.nio.file.Files.readAllBytes(sigFile.toPath()),
+                    StandardCharsets.UTF_8).trim());
+            byte[] pubDer = android.util.Base64.decode(SIGNING_PUBKEY_B64, android.util.Base64.DEFAULT);
+            java.security.KeyFactory kf = java.security.KeyFactory.getInstance("EC");
+            java.security.PublicKey pub = kf.generatePublic(
+                    new java.security.spec.X509EncodedKeySpec(pubDer));
+            java.security.Signature verifier = java.security.Signature.getInstance("SHA256withECDSA");
+            verifier.initVerify(pub);
+            java.io.InputStream in = new java.io.BufferedInputStream(new FileInputStream(f));
+            byte[] buf = new byte[65536];
+            int n;
+            while ((n = in.read(buf)) > 0) verifier.update(buf, 0, n);
+            in.close();
+            boolean ok = verifier.verify(sig);
+            if (!ok) Log.w(TAG, "signature verify FAILED: " + f.getName());
+            return ok;
+        } catch (Exception e) {
+            Log.w(TAG, "signature verify error: " + f.getName() + " " + e.getMessage());
+            return false;
+        }
+    }
+
+    private static byte[] bytesFromHex(String hex) {
+        byte[] out = new byte[hex.length() / 2];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = (byte) Integer.parseInt(hex.substring(i * 2, i * 2 + 2), 16);
+        }
+        return out;
+    }
+
+    /**
+     * 拉取 <url>.sig 并对已落地的 target 验签（target 内容与下载内容相同）。
+     * 严格模式：公钥已配置时，sig 缺失 / 下载失败 / 验签失败一律 false。
+     */
+    private boolean fetchAndVerifySignature(File target, String url) {
+        if (SIGNING_PUBKEY_B64 == null || SIGNING_PUBKEY_B64.isEmpty()) return true;
+        try {
+            String sigHex = download(url + ".sig");
+            if (sigHex == null || sigHex.trim().isEmpty()) {
+                Log.w(TAG, "signature missing on server: " + url + ".sig");
+                return false;
+            }
+            File sigFile = new File(target.getParentFile(), target.getName() + ".sig");
+            try (FileOutputStream fo = new FileOutputStream(sigFile)) {
+                fo.write(sigHex.trim().getBytes(StandardCharsets.UTF_8));
+            }
+            return verifySigned(target);
+        } catch (Exception e) {
+            Log.w(TAG, "signature fetch failed: " + url + ".sig " + e.getMessage());
+            return false;
+        }
+    }
 
     /** 连接超时（毫秒）：握手阶段等待上限，超时即提示用户。 */
     private static final int CONNECT_TIMEOUT = 15000;
@@ -896,6 +972,12 @@ public final class IocDatabase {
                     int[] vv = peekBinVersions(deltaPart);
                     if (vv != null && vv[1] == localVer && vv[0] == ri.version
                             && deltaPart.renameTo(deltaTarget)) {
+                        if (!fetchAndVerifySignature(deltaTarget, deltaUrl)) {
+                            deltaTarget.delete();   // 签名无效：换下一个源
+                            if (deltaPart.exists()) deltaPart.delete();
+                            deletePartMeta(deltaPart);
+                            continue;
+                        }
                         loadOverlays();
                         if (effectiveVersion() == ri.version) {
                             deletePartMeta(deltaPart);
@@ -959,6 +1041,7 @@ public final class IocDatabase {
                 // 0) 优先二进制索引：体积约为 JSON 的 1/3，且可 mmap 加载（161 万条也不 OOM）
                 //    多源依次尝试，任一源成功即止；全部失败才回退 JSON。
                 long binTotal = -1;
+                String okBinUrl = null;
                 for (String binUrl : binUrls) {
                     try {
                         binTotal = downloadToFileResume(binUrl, binPart, pc, token);
@@ -971,7 +1054,7 @@ public final class IocDatabase {
                         return;
                     }
                     // 下完不等于拿到干货：CDN 可能回 LFS 指针文本或压缩流，校验 magic
-                    if (binTotal > 0 && looksLikeIocBin(binPart)) break;
+                    if (binTotal > 0 && looksLikeIocBin(binPart)) { okBinUrl = binUrl; break; }
                     if (binTotal > 0) {
                         Log.w(TAG, "bin from " + binUrl + " is not a valid iodb.bin, trying next source");
                     }
@@ -981,6 +1064,12 @@ public final class IocDatabase {
                     binTotal = -1;
                 }
                 if (binTotal > 0 && binPart.exists() && binPart.renameTo(binTarget)) {
+                    if (!fetchAndVerifySignature(binTarget, okBinUrl)) {
+                        binTarget.delete();   // 签名无效：整体失败，不回退旧内容
+                        deletePartMeta(binPart);
+                        cb.onError("病毒库签名校验失败，已丢弃本次更新");
+                        return;
+                    }
                     if (reloadBinary(binTarget)) {
                         // 全量已是最新内容：旧增量包全部作废，删除以免叠加出错误版本
                         clearOverlayFiles();
