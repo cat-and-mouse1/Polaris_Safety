@@ -51,8 +51,8 @@ public final class VerifyIocV2 {
                 + " sha1=" + sha1Cnt);
 
         ok(fmt == 2, "formatVersion 应为 2，实际 " + fmt);
-        ok(entries == 1610800, "entryCount 应为 1610800，实际 " + entries);
-        ok(sha256Cnt == 94237, "sha256Count 应为 94237，实际 " + sha256Cnt);
+        ok(entries == 1627152, "entryCount 应为 1627152，实际 " + entries);
+        ok(sha256Cnt == 110589, "sha256Count 应为 110589，实际 " + sha256Cnt);
         ok(md5Cnt == 1441791, "md5Count 应为 1441791，实际 " + md5Cnt);
 
         IocBinaryIndex idx = IocBinaryIndex.open(bin);
@@ -83,6 +83,21 @@ public final class VerifyIocV2 {
                         "md5#" + k + " family 应为 Local Hash Database，实际 " + e.family);
                 ok("high".equals(e.severity), "md5#" + k + " severity=" + e.severity);
             }
+        }
+
+        // ---- MH-100K：Android 恶意包名 + 哈希（新增数据源，客户端首次能按包名命中）----
+        IocEntry mh = idx.matchByPkg("com.wuba.jiazheng");
+        ok(mh != null, "MH-100K 包名应命中");
+        if (mh != null) {
+            ok("MH-100K".equals(mh.family), "MH-100K family=" + mh.family);
+            ok("high".equals(mh.severity), "MH-100K severity=" + mh.severity);
+        }
+        IocEntry mhHash = idx.matchByHash(
+                "db802025f9ec474d79793ac2aac556d2b52162ebc493e2e70ad50b8f315eaa3f");
+        ok(mhHash != null, "MH-100K sha256 应命中");
+        if (mhHash != null) {
+            ok("MH-100K".equals(mhHash.family), "MH-100K(sha) family=" + mhHash.family);
+            ok("com.wuba.jiazheng".equals(mhHash.pkg), "MH-100K(sha) pkg=" + mhHash.pkg);
         }
 
         // ---- 跨表串扰 / 边界 ----

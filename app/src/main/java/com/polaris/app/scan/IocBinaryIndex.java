@@ -197,12 +197,15 @@ public final class IocBinaryIndex implements Closeable {
             int mid = (lo + hi) >>> 1;
             int base = pkgOff + mid * IDX_REC;
             long cur = buf.getLong(base);
-            if (cur == h) {
+            // 打包端（Python）按无符号 64 位排序，这里必须用无符号比较，
+            // 否则最高位为 1 的哈希（约占一半）二分方向相反、永远查不到。
+            int cmp = Long.compareUnsigned(cur, h);
+            if (cmp == 0) {
                 IocEntry e = entryAt(buf.getInt(base + 8));
                 if (e != null && e.pkg != null && e.pkg.equals(pkg)) return e;
                 return null;   // 哈希碰撞：不误报
             }
-            if (cur < h) lo = mid + 1;
+            if (cmp < 0) lo = mid + 1;
             else hi = mid - 1;
         }
         return null;
@@ -218,12 +221,13 @@ public final class IocBinaryIndex implements Closeable {
             int mid = (lo + hi) >>> 1;
             int base = urlOff + mid * IDX_REC;
             long cur = buf.getLong(base);
-            if (cur == h) {
+            int cmp = Long.compareUnsigned(cur, h);   // 与打包端的无符号排序一致
+            if (cmp == 0) {
                 IocEntry e = entryAt(buf.getInt(base + 8));
                 if (e != null && e.url != null && e.url.equalsIgnoreCase(lower)) return e;
                 return null;
             }
-            if (cur < h) lo = mid + 1;
+            if (cmp < 0) lo = mid + 1;
             else hi = mid - 1;
         }
         return null;
