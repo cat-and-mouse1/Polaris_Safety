@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 欢迎页设置卡：与应用其它页面一致的 M3 卡片（surfaceContainerLow + outlineVariant 细边） -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="@color/md_theme_surface" />
+    <solid android:color="@color/md_theme_surfaceContainerLow" />
+    <stroke
+        android:width="1dp"
+        android:color="@color/md_theme_outlineVariant" />
     <corners android:radius="16dp" />
 </shape>
