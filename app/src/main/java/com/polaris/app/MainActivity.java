@@ -275,9 +275,7 @@ public class MainActivity extends BaseActivity {
     private int homeIconSize = 0;
 
     /** 动画测试模式：进度与旋转按固定时长完整播放一遍，与实际扫描速度解耦。 */
-    private static final long ANIM_TEST_MS = 3200L;
-    private ValueAnimator animTestProgress;
-    private long animTestStartMs = 0;
+    private final com.polaris.app.util.AnimTestProgress animTest = new com.polaris.app.util.AnimTestProgress();
     private LinearLayout resultList;
     /** 应用段折叠组句柄，用于「先展开后自动收回」的微交互。 */
     private SectionHold appSectionHold;
@@ -3543,29 +3541,15 @@ public class MainActivity extends BaseActivity {
      */
     private void startAnimTestProgress() {
         if (!prefs.isAnimTestMode()) return;
-        if (animTestProgress != null) return;   // 本次扫描已启动过，组合扫描不重复触发
-
-        animTestStartMs = android.os.SystemClock.uptimeMillis();
-        animTestProgress = ValueAnimator.ofFloat(0f, 1f);
-        animTestProgress.setDuration(ANIM_TEST_MS);
-        animTestProgress.setInterpolator(new android.view.animation.LinearInterpolator());
-        animTestProgress.addUpdateListener(a ->
-                homeRings.setProgress((float) a.getAnimatedValue()));
-        animTestProgress.start();
+        animTest.start(homeRings);
     }
 
     /** 动画测试模式下，距离进度动画播完还剩多少毫秒（已播完返回 0）。 */
     private long animTestRemainingMs() {
-        long used = android.os.SystemClock.uptimeMillis() - animTestStartMs;
-        return Math.max(0L, ANIM_TEST_MS - used);
+        return animTest.remainingMs();
     }
 
-    private void cancelAnimTestProgress() {
-        if (animTestProgress != null) {
-            animTestProgress.cancel();
-            animTestProgress = null;
-        }
-    }
+    private void cancelAnimTestProgress() { animTest.cancel(); }
 
     private int countFiles(File dir) {
         folderTotals.clear();
