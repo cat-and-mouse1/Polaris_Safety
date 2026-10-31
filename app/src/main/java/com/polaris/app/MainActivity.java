@@ -478,7 +478,7 @@ public class MainActivity extends BaseActivity {
             homeStar.setScaleY(0.82f);
             homeStar.animate().alpha(1f).scaleX(1f).scaleY(1f)
                     .setStartDelay(80).setDuration(720)
-                    .setInterpolator(FADE_EASE).start();
+                    .setInterpolator(com.polaris.app.util.UiFx.FADE_EASE).start();
         }
         applyHomeStarGlow();
 
@@ -837,8 +837,8 @@ public class MainActivity extends BaseActivity {
             int pad = (int) (20 * dm.density + 0.5f);
             float tx = dm.widthPixels - btnPickMode.getWidth() - 2 * pad;
             btnPickMode.setTranslationX(tx - dm.widthPixels);
-            btnPickMode.animate().translationX(tx).setDuration(SLIDE_IN_MS)
-                    .setInterpolator(SLIDE_IN_EASE).start();
+            btnPickMode.animate().translationX(tx).setDuration(com.polaris.app.util.UiFx.SLIDE_IN_MS)
+                    .setInterpolator(com.polaris.app.util.UiFx.SLIDE_IN_EASE).start();
         });
         if (btnPickBack != null) {
             btnPickBack.post(() -> {
@@ -847,8 +847,8 @@ public class MainActivity extends BaseActivity {
                 // 返回按钮目标位：下一步按钮左侧 8dp（自身布局位与下一步同位，左移其宽度+间距）
                 float txBack = -(btnPickMode.getWidth() + 8 * dm.density);
                 btnPickBack.setTranslationX(txBack - dm.widthPixels);
-                btnPickBack.animate().translationX(txBack).setDuration(SLIDE_IN_MS)
-                        .setInterpolator(SLIDE_IN_EASE).start();
+                btnPickBack.animate().translationX(txBack).setDuration(com.polaris.app.util.UiFx.SLIDE_IN_MS)
+                        .setInterpolator(com.polaris.app.util.UiFx.SLIDE_IN_EASE).start();
             });
         }
     }
@@ -911,8 +911,8 @@ public class MainActivity extends BaseActivity {
             final int targetKey = key, targetIdx = idx;
             int w = getResources().getDisplayMetrics().widthPixels;
             detailCard.animate().cancel();
-            detailCard.animate().translationX(leftward ? -w : w).setDuration(SLIDE_OUT_MS)
-                    .setInterpolator(SLIDE_OUT_EASE)
+            detailCard.animate().translationX(leftward ? -w : w).setDuration(com.polaris.app.util.UiFx.SLIDE_OUT_MS)
+                    .setInterpolator(com.polaris.app.util.UiFx.SLIDE_OUT_EASE)
                     .withEndAction(() -> {
                         if (selectedModeKey != targetKey) return; // 期间又切换，由新调用接管
                         bindModeCardContent(detailCard, targetIdx);
@@ -921,8 +921,8 @@ public class MainActivity extends BaseActivity {
                         checkExpanded = false;
                         applyCheckExpanded(false);
                         detailCard.setTranslationX(leftward ? w : -w);
-                        detailCard.animate().translationX(0f).setDuration(SLIDE_IN_MS)
-                                .setInterpolator(SLIDE_IN_EASE)
+                        detailCard.animate().translationX(0f).setDuration(com.polaris.app.util.UiFx.SLIDE_IN_MS)
+                                .setInterpolator(com.polaris.app.util.UiFx.SLIDE_IN_EASE)
                                 .withEndAction(() -> {
                                     // 滑动停止后自动展开
                                     if (selectedModeKey != targetKey) return;
@@ -992,7 +992,7 @@ public class MainActivity extends BaseActivity {
                 checkSection.setAlpha(0f);
                 checkSection.setTranslationY(24f);
                 checkSection.animate().alpha(1f).translationY(0f)
-                        .setDuration(SLIDE_IN_MS).setInterpolator(SLIDE_IN_EASE).start();
+                        .setDuration(com.polaris.app.util.UiFx.SLIDE_IN_MS).setInterpolator(com.polaris.app.util.UiFx.SLIDE_IN_EASE).start();
             } else {
                 checkSection.setAlpha(1f);
                 checkSection.setTranslationY(0f);
@@ -1181,7 +1181,7 @@ public class MainActivity extends BaseActivity {
         interceptUnderground.setTranslationY(h);
         interceptUnderground.setAlpha(1f);
         interceptUnderground.setVisibility(View.VISIBLE);
-        interceptUnderground.animate().setInterpolator(FADE_EASE)
+        interceptUnderground.animate().setInterpolator(com.polaris.app.util.UiFx.FADE_EASE)
                 .setDuration(420).translationY(0f).start();
         interceptActive = true;
         // 应用列表折叠按钮在两种高度下都显示（拦截未开启时面板停在 560dp 也需可见）
@@ -1213,7 +1213,7 @@ public class MainActivity extends BaseActivity {
         // 面板关闭且拦截未开启 → 清理「发射动画」揭示的对接舱（拦截开启则保留常驻）
         if (starMap != null && !prefs.isBlockMode()) starMap.disableDockModule();
         int h = (int) (getResources().getDisplayMetrics().density * 560f + 0.5f);
-        interceptUnderground.animate().setInterpolator(FADE_EASE)
+        interceptUnderground.animate().setInterpolator(com.polaris.app.util.UiFx.FADE_EASE)
                 .setDuration(300).translationY(h)
                 .withEndAction(() -> {
                     interceptUnderground.setVisibility(View.GONE);
@@ -2064,7 +2064,7 @@ public class MainActivity extends BaseActivity {
                     ? starDetailPanel.getWidth() : starDetailPanel.getMeasuredWidth();
             starDetailPanel.setTranslationX(from);
             starDetailPanel.animate().translationX(0f)
-                    .setDuration(300L).setInterpolator(SLIDE_IN_EASE).start();
+                    .setDuration(300L).setInterpolator(com.polaris.app.util.UiFx.SLIDE_IN_EASE).start();
         });
     }
 
@@ -2078,7 +2078,7 @@ public class MainActivity extends BaseActivity {
             starMap.setRightInsetPx(0f);
         }
         starDetailPanel.animate().translationX(panelSlideWidth()).setDuration(260L)
-                .setInterpolator(SLIDE_IN_EASE)
+                .setInterpolator(com.polaris.app.util.UiFx.SLIDE_IN_EASE)
                 .withEndAction(() -> starDetailPanel.setVisibility(View.GONE))
                 .start();
         slideDetailCompanions(false);
@@ -2136,7 +2136,7 @@ public class MainActivity extends BaseActivity {
                     ? starDetailPanel.getWidth() : starDetailPanel.getMeasuredWidth();
             starDetailPanel.setTranslationX(from);
             starDetailPanel.animate().translationX(0f)
-                    .setDuration(300L).setInterpolator(SLIDE_IN_EASE).start();
+                    .setDuration(300L).setInterpolator(com.polaris.app.util.UiFx.SLIDE_IN_EASE).start();
         });
     }
 
@@ -2160,7 +2160,7 @@ public class MainActivity extends BaseActivity {
             alpha = 0f;
         }
         v.animate().translationX(tx).alpha(alpha)
-                .setDuration(260L).setInterpolator(SLIDE_IN_EASE)
+                .setDuration(260L).setInterpolator(com.polaris.app.util.UiFx.SLIDE_IN_EASE)
                 .setStartDelay(40L).start();
     }
 
@@ -2448,7 +2448,8 @@ public class MainActivity extends BaseActivity {
             int total;
             if ("folder".equals(act) && uris != null) {
                 total = 0;
-                for (Uri u : uris) total += countTree(u);
+                for (Uri u : uris) total += com.polaris.app.scan.FolderCounter.countTree(
+                        this, u, folderTotals, COUNT_CAP);
             } else {
                 total = countFiles(Environment.getExternalStorageDirectory());
             }
@@ -2592,8 +2593,8 @@ public class MainActivity extends BaseActivity {
         if (dy <= 0f && dx <= 0f) dy = dm.heightPixels * 0.22f;
         resultArea.animate()
                 .translationX(dx).translationY(dy).alpha(0f)
-                .setDuration(SLIDE_OUT_MS)
-                .setInterpolator(SLIDE_OUT_EASE)
+                .setDuration(com.polaris.app.util.UiFx.SLIDE_OUT_MS)
+                .setInterpolator(com.polaris.app.util.UiFx.SLIDE_OUT_EASE)
                 .withEndAction(this::closeResultSheet)
                 .start();
     }
@@ -3035,8 +3036,8 @@ public class MainActivity extends BaseActivity {
             homeAppIcon.setVisibility(View.GONE);
             return;
         }
-        homeAppIcon.animate().translationY(-h).alpha(0f).setDuration(SLIDE_OUT_MS)
-                .setInterpolator(SLIDE_OUT_EASE)
+        homeAppIcon.animate().translationY(-h).alpha(0f).setDuration(com.polaris.app.util.UiFx.SLIDE_OUT_MS)
+                .setInterpolator(com.polaris.app.util.UiFx.SLIDE_OUT_EASE)
                 .withEndAction(() -> {
                     homeAppIcon.setVisibility(View.GONE);
                     homeAppIcon.setTranslationY(0f);
@@ -3045,7 +3046,7 @@ public class MainActivity extends BaseActivity {
 
         // 同步把占位高度收到 0，否则会留下一块空白
         ValueAnimator va = ValueAnimator.ofInt(h, 0);
-        va.setDuration(SLIDE_OUT_MS);
+        va.setDuration(com.polaris.app.util.UiFx.SLIDE_OUT_MS);
         va.addUpdateListener(a -> {
             ViewGroup.LayoutParams lp = homeAppIcon.getLayoutParams();
             lp.height = (Integer) a.getAnimatedValue();
@@ -3076,8 +3077,8 @@ public class MainActivity extends BaseActivity {
         homeAppIcon.setTranslationY(0f);
         ValueAnimator va = ValueAnimator.ofInt(
                 Math.max(0, homeAppIcon.getLayoutParams().height), homeIconSize);
-        va.setDuration(SLIDE_IN_MS);
-        va.setInterpolator(SLIDE_IN_EASE);
+        va.setDuration(com.polaris.app.util.UiFx.SLIDE_IN_MS);
+        va.setInterpolator(com.polaris.app.util.UiFx.SLIDE_IN_EASE);
         va.addUpdateListener(a -> {
             ViewGroup.LayoutParams lp = homeAppIcon.getLayoutParams();
             lp.height = (Integer) a.getAnimatedValue();
@@ -3569,72 +3570,7 @@ public class MainActivity extends BaseActivity {
     private int countFiles(File dir) {
         folderTotals.clear();
         folderDone.clear();
-        if (dir == null) return 0;
-        int[] c = {0};
-        countFilesRec(dir, dir.getAbsolutePath(), c, 0);
-        return c[0];
-    }
-
-    private void countFilesRec(File dir, String root, int[] c, int depth) {
-        if (c[0] >= COUNT_CAP) return;
-        File[] children = dir.listFiles();
-        if (children == null) return;
-        for (File f : children) {
-            if (c[0] >= COUNT_CAP) return;
-            if (f.isDirectory()) {
-                if (depth < 20) countFilesRec(f, root, c, depth + 1);
-            } else {
-                c[0]++;
-                // 按一级目录聚合（与 folderKeyFor 一致），供局部进度条使用
-                String key = folderKeyOfPath(f.getAbsolutePath(), root);
-                Integer old = folderTotals.get(key);
-                folderTotals.put(key, old == null ? 1 : old + 1);
-            }
-        }
-    }
-
-    /** 路径 → 一级目录名（与 FileRiskInfo 的 folderKeyFor 同规则）。 */
-    private String folderKeyOfPath(String path, String root) {
-        String rel = path.startsWith(root) ? path.substring(root.length()) : path;
-        if (rel.startsWith("/")) rel = rel.substring(1);
-        int slash = rel.indexOf('/');
-        return slash < 0 ? "/" : rel.substring(0, slash);
-    }
-
-    private int countTree(Uri treeUri) {
-        if (treeUri == null) return 0;
-        int[] c = {0};
-        countTreeRec(treeUri, treeUri, c, 0);
-        folderTotals.put(treeUri.toString(), c[0]);
-        return c[0];
-    }
-
-    private void countTreeRec(Uri treeUri, Uri dirUri, int[] c, int depth) {
-        if (c[0] >= COUNT_CAP) return;
-        Uri childrenUri;
-        try {
-            childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(
-                    treeUri, DocumentsContract.getDocumentId(dirUri));
-        } catch (Exception e) {
-            return;
-        }
-        try (Cursor cur = getContentResolver().query(childrenUri,
-                new String[]{ DocumentsContract.Document.COLUMN_DOCUMENT_ID,
-                        DocumentsContract.Document.COLUMN_MIME_TYPE }, null, null, null)) {
-            if (cur == null) return;
-            while (cur.moveToNext() && c[0] < COUNT_CAP) {
-                String docId = cur.getString(0);
-                String mime = cur.getString(1);
-                if (DocumentsContract.Document.MIME_TYPE_DIR.equals(mime)) {
-                    if (depth < 20) {
-                        countTreeRec(treeUri, DocumentsContract.buildDocumentUriUsingTree(treeUri, docId), c, depth + 1);
-                    }
-                } else {
-                    c[0]++;
-                }
-            }
-        } catch (Exception ignored) {
-        }
+        return com.polaris.app.scan.FolderCounter.countLocal(dir, folderTotals, COUNT_CAP);
     }
 
     private boolean hasFullStorageAccess() {
@@ -3684,58 +3620,18 @@ public class MainActivity extends BaseActivity {
     }
 
     // ---------- 滑动动画 ----------
-    // 非线性缓动：进入用「减速」曲线（快速启动后平缓收尾），退出用「加速」曲线（缓慢起步后加速离场）。
-    // 两条均为 Material 强调曲线（emphasized decelerate / accelerate），取代原先的匀速位移。
-    private static final Interpolator SLIDE_IN_EASE = new PathInterpolator(0.05f, 0.7f, 0.1f, 1.0f);
-    private static final Interpolator SLIDE_OUT_EASE = new PathInterpolator(0.3f, 0.0f, 0.8f, 0.15f);
-    private static final long SLIDE_IN_MS = 360L;
-    private static final long SLIDE_OUT_MS = 240L;
 
-    // 结果页内容逐项淡入的缓动与时长（比滑入更柔和，强调层级揭示的高级感）
-    private static final Interpolator FADE_EASE = new DecelerateInterpolator(1.3f);
-    private static final long FADE_MS = 420L;
 
-    private void slideInLeft(View v) {
-        v.setVisibility(View.VISIBLE);
-        int w = getResources().getDisplayMetrics().widthPixels;
-        v.setTranslationX(-w);
-        v.setAlpha(1f);
-        v.animate().translationX(0f).setDuration(SLIDE_IN_MS)
-                .setInterpolator(SLIDE_IN_EASE).start();
-    }
+    private void slideInLeft(View v) { com.polaris.app.util.UiFx.slideInLeft(v); }
 
-    private void slideInRight(View v) {
-        v.setVisibility(View.VISIBLE);
-        int w = getResources().getDisplayMetrics().widthPixels;
-        v.setTranslationX(w);
-        v.setAlpha(1f);
-        v.animate().translationX(0f).setDuration(SLIDE_IN_MS)
-                .setInterpolator(SLIDE_IN_EASE).start();
-    }
+    private void slideInRight(View v) { com.polaris.app.util.UiFx.slideInRight(v); }
 
     /** 从下方滑入（结果页用，配合顶部图标上滑收起）。 */
-    private void slideInUp(View v) {
-        v.setVisibility(View.VISIBLE);
-        int h = getResources().getDisplayMetrics().heightPixels;
-        v.setTranslationY(h * 0.22f);
-        v.setAlpha(0f);
-        v.animate().translationY(0f).alpha(1f).setDuration(SLIDE_IN_MS)
-                .setInterpolator(SLIDE_IN_EASE).start();
-    }
+    private void slideInUp(View v) { com.polaris.app.util.UiFx.slideInUp(v); }
 
-    private void slideOutRight(View v) {
-        int w = getResources().getDisplayMetrics().widthPixels;
-        v.animate().translationX(w).alpha(0f).setDuration(SLIDE_OUT_MS)
-                .setInterpolator(SLIDE_OUT_EASE)
-                .withEndAction(() -> v.setVisibility(View.GONE)).start();
-    }
+    private void slideOutRight(View v) { com.polaris.app.util.UiFx.slideOutRight(v); }
 
-    private void slideOutLeft(View v) {
-        int w = getResources().getDisplayMetrics().widthPixels;
-        v.animate().translationX(-w).alpha(0f).setDuration(SLIDE_OUT_MS)
-                .setInterpolator(SLIDE_OUT_EASE)
-                .withEndAction(() -> v.setVisibility(View.GONE)).start();
-    }
+    private void slideOutLeft(View v) { com.polaris.app.util.UiFx.slideOutLeft(v); }
 
     private void hidePanelsExcept(View keep) {
         View[] panels = {modeList, modeResume, btnPickMode, configScope, configFolders, resultArea};
@@ -3751,59 +3647,27 @@ public class MainActivity extends BaseActivity {
     // ---------- 结果页 / 首页 视觉美化（全部取主题色，运行时解析，不硬编码）----------
 
     /** 解析主题属性色值（与 ObservatoryIntroView 同口径）。 */
-    private int resolveAttr(int attr) {
-        TypedValue tv = new TypedValue();
-        if (getTheme().resolveAttribute(attr, tv, true)) return tv.data;
-        return 0xFF000000;
-    }
+    private int resolveAttr(int attr) { return com.polaris.app.util.UiFx.resolveAttr(this, attr); }
 
     /** 结果页底座：90% 不透明的主题表面（透出一丝星图）+ 顶部主题色微光，营造星空高级感。 */
     private void applyResultSheetStyle() {
-        if (resultArea == null) return;
-        int surface = resolveAttr(com.google.android.material.R.attr.colorSurface);
-        int primary = resolveAttr(com.google.android.material.R.attr.colorPrimary);
-        int baseColor = (surface & 0x00FFFFFF) | 0xE6000000;   // 90% 不透明
-        ColorDrawable base = new ColorDrawable(baseColor);
-        int sheen = (primary & 0x00FFFFFF) | 0x1C000000;        // 顶部主题色微光（~11%）
-        GradientDrawable grad = new GradientDrawable(
-                GradientDrawable.Orientation.TOP_BOTTOM, new int[]{sheen, 0x00000000});
-        LayerDrawable layers = new LayerDrawable(new Drawable[]{base, grad});
-        resultArea.setBackground(layers);
+        com.polaris.app.util.UiFx.applySheetStyle(resultArea);
     }
 
     /** 段面板背景：圆角 + 主题表面容器色 + 细描边的「玻璃卡」，承载文件/应用段内容。 */
     private Drawable makePanelBg() {
-        float d = getResources().getDisplayMetrics().density;
-        GradientDrawable g = new GradientDrawable();
-        g.setShape(GradientDrawable.RECTANGLE);
-        g.setCornerRadius(20f * d);
-        g.setColor(resolveAttr(com.google.android.material.R.attr.colorSurfaceContainerLow));
-        g.setStroke((int) (1f * d), resolveAttr(com.google.android.material.R.attr.colorOutlineVariant));
-        return g;
+        return com.polaris.app.util.UiFx.panelBg(this);
     }
+
 
     /** 四角星背后的柔光晕（主题色径向渐变），强化星空主题的焦点感。 */
     private void applyHomeStarGlow() {
-        if (homeAppIcon == null) return;
-        float d = getResources().getDisplayMetrics().density;
-        int primary = resolveAttr(com.google.android.material.R.attr.colorPrimary);
-        int glow = (primary & 0x00FFFFFF) | 0x33000000;
-        GradientDrawable g = new GradientDrawable();
-        g.setGradientType(GradientDrawable.RADIAL_GRADIENT);
-        g.setGradientRadius(46f * d);
-        g.setGradientCenter(0.5f, 0.5f);
-        g.setColors(new int[]{glow, 0x00000000});
-        homeAppIcon.setBackground(g);
+        com.polaris.app.util.UiFx.starGlow(homeAppIcon);
     }
 
+
     /** 单个视图淡入：从透明 + 轻微下移，回到原位，带起始延迟。 */
-    private void fadeInView(View v, long delay) {
-        if (v == null || v.getVisibility() != View.VISIBLE) return;
-        v.setAlpha(0f);
-        v.setTranslationY(14f);
-        v.animate().alpha(1f).translationY(0f)
-                .setDuration(FADE_MS).setStartDelay(delay).setInterpolator(FADE_EASE).start();
-    }
+    private void fadeInView(View v, long delay) { com.polaris.app.util.UiFx.fadeInView(v, delay); }
 
     /** 结果页内容逐项淡入：分数行 → 分栏 → 各段逐块（标题/评分/折叠组），形成层级揭示。 */
     private void revealResultContents() {
