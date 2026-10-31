@@ -55,10 +55,9 @@ public final class IocDatabase {
      */
     /**
      * 二进制索引的多源分发地址（按顺序回退）。
-     * 不同网络对 GitHub 各域名的可达性差异极大，实测：
-     *   - raw.githubusercontent.com 在部分网络直接超时；
-     *   - media 域名只对 LFS 对象有效（普通 blob 会超时）；
-     *   - jsDelivr 对普通 blob 可用，但单文件上限 20MB。
+     * 两个库都以 LFS 存储，因此 media 域名为首选——它对 LFS 对象即时生效，
+     * 而 jsDelivr 的 `@main` 别名在 push 后会滞后数小时（实测新 commit 可即时访问、
+     * 但 @main 仍返回旧文件，purge 也无效），只能作为兜底。
      */
     public static final String[] BIN_URLS_REGION = {
             "https://media.githubusercontent.com/media/cat-and-mouse1/Polaris_Safety/main/polar-region/iodb.bin",
@@ -66,9 +65,9 @@ public final class IocDatabase {
             "https://raw.githubusercontent.com/cat-and-mouse1/Polaris_Safety/main/polar-region/iodb.bin",
     };
     public static final String[] BIN_URLS_POINT = {
+            "https://media.githubusercontent.com/media/cat-and-mouse1/Polaris_Safety/main/polar-point/iodb.bin",
             "https://cdn.jsdelivr.net/gh/cat-and-mouse1/Polaris_Safety@main/polar-point/iodb.bin",
             "https://raw.githubusercontent.com/cat-and-mouse1/Polaris_Safety/main/polar-point/iodb.bin",
-            "https://media.githubusercontent.com/media/cat-and-mouse1/Polaris_Safety/main/polar-point/iodb.bin",
     };
     private static final String BIN_NAME = "iodb.bin";
     private static final String BIN_NAME_POINT = "iodb_point.bin";
