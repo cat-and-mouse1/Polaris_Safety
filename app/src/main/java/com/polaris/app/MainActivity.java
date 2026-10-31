@@ -127,15 +127,15 @@ public class MainActivity extends BaseActivity {
     // 恒星详情面板（点按星图恒星 → 从右划出，占满整个高度）+ 其迷你星图与内容视图
      android.view.View starDetailPanel;
      StarMapView starDetailMap;
-    private android.widget.TextView starDetailName, starDetailSub, starDetailType;
-    private android.widget.TextView starDetailSize, starDetailRisk;
-    private android.widget.TextView starDetailChildren, starDetailTime, starDetailAdvice;
-    private android.widget.TextView starDetailPlanets, starDetailMag, starDetailTemp, starDetailSpec;
-    private android.widget.TextView starDetailRadius, starDetailMass;
+    android.widget.TextView starDetailName, starDetailSub, starDetailType;
+    android.widget.TextView starDetailSize, starDetailRisk;
+    android.widget.TextView starDetailChildren, starDetailTime, starDetailAdvice;
+    android.widget.TextView starDetailPlanets, starDetailMag, starDetailTemp, starDetailSpec;
+    android.widget.TextView starDetailRadius, starDetailMass;
      android.widget.LinearLayout starDetailOrbit;
     // 信息行左侧标签（卫星详情模式会改写文字，恒星模式恢复标准文案）
-    private android.widget.TextView starDetailTypeLabel, starDetailSizeLabel;
-    private android.widget.TextView starDetailChildrenLabel, starDetailTimeLabel;
+    android.widget.TextView starDetailTypeLabel, starDetailSizeLabel;
+    android.widget.TextView starDetailChildrenLabel, starDetailTimeLabel;
     /** 星体/星系参数区（迷你星图解算）：卫星详情模式下整体隐藏。 */
      android.view.View starDetailFacts;
      com.google.android.material.button.MaterialButton starDetailOpenBtn;
@@ -1556,92 +1556,33 @@ public class MainActivity extends BaseActivity {
 
     // ---------- 恒星详情面板（点按恒星 → 从右侧划出，占满整个高度） ----------
 
-    /** 面板几何：右缘贴边、竖排居中；窄屏按 56% 屏宽收敛（含 include 根为材质卡片）。 */
-    private void applyStarDetailGeometry(boolean animate) {
-        if (starDetailPanel == null) return;
-        starDetailPanel.post(() -> {
-            if (starDetailPanel == null) return;
-            float d = getResources().getDisplayMetrics().density;
-            int parentW = starDetailPanel.getParent() instanceof android.view.ViewGroup
-                    ? ((android.view.ViewGroup) starDetailPanel.getParent()).getWidth()
-                    : getResources().getDisplayMetrics().widthPixels;
-            int w = (int) Math.min(300 * d, parentW * 0.56f);
-            if (w <= 0) w = (int) (300 * d);
-            android.widget.FrameLayout.LayoutParams lp =
-                    (android.widget.FrameLayout.LayoutParams) starDetailPanel.getLayoutParams();
-            if (lp == null) return;
-            lp.width = w;
-            lp.gravity = android.view.Gravity.END;     // 占满整个高度，贴右缘
-            lp.height = android.widget.FrameLayout.LayoutParams.MATCH_PARENT;
-            lp.setMargins(0, 0, 0, 0);            // 抽屉：直角贴右缘、占满整个高度
-            starDetailPanel.setLayoutParams(lp);
-            if (!animate) starDetailPanel.setTranslationX(0f);
-        });
-    }
+    private final StarDetailController stardetailcontroller = new StarDetailController(this);
 
-    /**
-     * 点按恒星后把星图视角推到「左侧可视区中央」：抽屉贴右缘遮掉 min(300dp, 56% 屏宽)，
-     * 该宽度写入星图作为右侧 inset，星图据此把选中恒星移到未遮挡区域的几何中心（与抽屉同步滑入）。
-     */
-    private void focusStarView(String key) {
-        if (starMap == null || key == null) return;
-        starMap.post(() -> {
-            if (starMap == null || key == null) return;
-            int vw = starMap.getWidth();
-            if (vw <= 0) return;
-            float d = getResources().getDisplayMetrics().density;
-            starMap.setRightInsetPx(Math.min(300 * d, vw * 0.56f));
-            starMap.focusStar(key, 0f);   // 0 = 按该恒星大小自动放大到合适尺寸
-        });
-    }
+    private void applyStarDetailGeometry(boolean animate) { stardetailcontroller.applyStarDetailGeometry(animate); }
+    private void focusStarView(String key) { stardetailcontroller.focusStarView(key); }
+    private void settleStarMapLayout() { stardetailcontroller.settleStarMapLayout(); }
+    private void openStarDetailTarget() { stardetailcontroller.openStarDetailTarget(); }
+    private void applyStarNameFade() { stardetailcontroller.applyStarNameFade(); }
+    private void hideStarDetail() { stardetailcontroller.hideStarDetail(); }
+    private void showSatelliteDetail() { stardetailcontroller.showSatelliteDetail(); }
+    private void slideDetailCompanions(boolean shifted) { stardetailcontroller.slideDetailCompanions(shifted); }
+    private void slideCompanionForDetail(android.view.View v, float dx, float keepPx) { stardetailcontroller.slideCompanionForDetail(v, dx, keepPx); }
+    private void hideStarDetailQuiet() { stardetailcontroller.hideStarDetailQuiet(); }
+    private float panelSlideWidth() { return stardetailcontroller.panelSlideWidth(); }
+    private void renderStarDetailMap(String key, String label, long bytes, int level, boolean isApp) { stardetailcontroller.renderStarDetailMap(key, label, bytes, level, isApp); }
+    private void setStarDetailRisk(int level) { stardetailcontroller.setStarDetailRisk(level); }
+    private void setStarDetailOrbit(int planetCount) { stardetailcontroller.setStarDetailOrbit(planetCount); }
+    private String starRiskText(int level) { return stardetailcontroller.starRiskText(level); }
+    private int riskColor(int level) { return stardetailcontroller.riskColor(level); }
+    private static String packageOf(String key, String fallback) { return StarDetailController.packageOf(key, fallback); }
+    private static String formatBytes(long bytes) { return StarDetailController.formatBytes(bytes); }
+    private long appSizeBytes(String packageName) { return stardetailcontroller.appSizeBytes(packageName); }
 
-    /**
-     * 固定星图重排 + 动态适配：恒星按 MAP_SEED 槽位自动补位（同等级优先占中心），
-     * 再把全部恒星框进「可视区」正中央——任何恒星数量下都保证每颗星在屏内可见。
-     * 放在结果渲染末尾：用户收回结果页回到星图时看到的就是适配后的最终构图。
-     */
-    private void settleStarMapLayout() {
-        if (starMap == null) return;
-        starMap.post(() -> {
-            if (starMap == null) return;
-            starMap.settleFixedLayout();
-            starMap.keepCurrentAsHome();   // 结果态延续扫描态视角，不再重新缩放
-        });
-    }
 
-    /** 「打开」按钮：应用段启动该包名主_activity，其余（文件/文件夹）隐藏。 */
-    private void openStarDetailTarget() {
-        if (starDetailOpenBtn == null) return;
-        if (starDetailKey == null || !starDetailKey.startsWith("app:")) return;
-        String pkg = packageOf(starDetailKey, null);
-        if (pkg == null || pkg.isEmpty()) return;
-        try {
-            android.content.Intent i = getPackageManager()
-                    .getLaunchIntentForPackage(pkg);
-            if (i != null) {
-                i.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(i);
-            }
-        } catch (Exception ignored) {
-            Toast.makeText(this, R.string.toast_open_failed, Toast.LENGTH_SHORT).show();
-        }
-    }
 
-    /** 名称右侧淡出遮罩：透明 → 抽屉底色（与抽屉背景同色，文字自然淡出而非硬截断）。 */
-    private void applyStarNameFade() {
-        if (starDetailNameFade == null) return;
-        android.util.TypedValue tv = new android.util.TypedValue();
-        int solid = android.graphics.Color.TRANSPARENT;
-        if (getTheme().resolveAttribute(
-                com.google.android.material.R.attr.colorSurfaceContainerHighest, tv, true)) {
-            solid = tv.data;
-        }
-        android.graphics.drawable.GradientDrawable gd =
-                new android.graphics.drawable.GradientDrawable(
-                        android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT,
-                        new int[]{0x00000000, solid});
-        starDetailNameFade.setBackground(gd);
-    }
+
+
+
 
     /** 点按恒星：填充详情面板并从右侧划出；已展开时只换内容（不再播滑入）。 */
     private void showStarDetail(String key, String label, long bytes, int level,
@@ -1743,243 +1684,19 @@ public class MainActivity extends BaseActivity {
         });
     }
 
-    /** 关闭详情面板：右滑收回 + 复位入口块/缩放条位置。 */
-    private void hideStarDetail() {
-        if (!starDetailOpen || starDetailPanel == null) return;
-        starDetailOpen = false;
-        if (starMap != null) {                          // 抽屉收起：停掉未完成的视角平移并复原选中星大小
-            starMap.cancelPanAnim();
-            starMap.clearFocusStar();
-            starMap.setRightInsetPx(0f);
-        }
-        starDetailPanel.animate().translationX(panelSlideWidth()).setDuration(260L)
-                .setInterpolator(com.polaris.app.util.UiFx.SLIDE_IN_EASE)
-                .withEndAction(() -> starDetailPanel.setVisibility(View.GONE))
-                .start();
-        slideDetailCompanions(false);
-    }
 
-    /**
-     * 卫星详情：点按星图常驻卫星（深扫入轨后）→ 同一侧边抽屉，内容换成卫星信息。
-     * 星体参数区与迷你星图隐藏；行标签换成卫星语义（类型/轨道/状态/部署）；
-     * 风险恒为安全（蓝，等级 0）；无「打开」操作。不做视角平移（卫星沿轨移动，无固定焦点）。
-     */
-    private void showSatelliteDetail() {
-        if (starDetailPanel == null) return;
-        if (starDetailFacts != null) starDetailFacts.setVisibility(View.GONE);
-        if (starDetailMap != null) starDetailMap.setVisibility(View.GONE);
-        if (starDetailTypeLabel != null) starDetailTypeLabel.setText(R.string.star_detail_type);
-        if (starDetailSizeLabel != null) {
-            starDetailSizeLabel.setText(R.string.sat_detail_orbit_label);
-        }
-        if (starDetailChildrenLabel != null) {
-            starDetailChildrenLabel.setText(R.string.sat_detail_status_label);
-        }
-        if (starDetailTimeLabel != null) {
-            starDetailTimeLabel.setText(R.string.sat_detail_deploy_label);
-        }
-        if (starDetailName != null) starDetailName.setText(R.string.sat_detail_name);
-        if (starDetailSub != null) starDetailSub.setText(R.string.sat_detail_sub);
-        if (starDetailType != null) starDetailType.setText(R.string.sat_detail_type);
-        if (starDetailSize != null) starDetailSize.setText(R.string.sat_detail_orbit_value);
-        if (starDetailChildren != null) {
-            starDetailChildren.setText(R.string.sat_detail_status_value);
-        }
-        if (starDetailTime != null) {
-            if (lastScanFinishedAt > 0L) {
-                starDetailTime.setText(getString(R.string.sat_detail_deploy_value_fmt,
-                        android.text.format.DateFormat.getTimeFormat(this)
-                                .format(lastScanFinishedAt)));
-            } else {
-                starDetailTime.setText(R.string.star_detail_never);
-            }
-        }
-        if (starDetailRisk != null) starDetailRisk.setText(starRiskText(0));
-        setStarDetailRisk(0);
-        if (starDetailAdvice != null) {
-            starDetailAdvice.setText(R.string.sat_detail_advice);
-            starDetailAdvice.setTextColor(riskColor(0));
-        }
-        if (starDetailActionBar != null) starDetailActionBar.setVisibility(View.GONE);
-        starDetailPanel.setVisibility(View.VISIBLE);
-        if (starDetailOpen) return;      // 已在屏上：仅换内容
-        starDetailOpen = true;
-        slideDetailCompanions(true);
-        starDetailPanel.post(() -> {
-            if (starDetailPanel == null) return;
-            float from = starDetailPanel.getWidth() > 0
-                    ? starDetailPanel.getWidth() : starDetailPanel.getMeasuredWidth();
-            starDetailPanel.setTranslationX(from);
-            starDetailPanel.animate().translationX(0f)
-                    .setDuration(300L).setInterpolator(com.polaris.app.util.UiFx.SLIDE_IN_EASE).start();
-        });
-    }
 
-    /** 面板右缘划出时，让「查看结果」入口块与缩放条整体左移让位（反之复位）。
-     *  窄屏下面板已占掉大半宽度、左移会把入口块推出屏幕外 → 改为缩小淡出（关闭时淡回）。 */
-    private void slideDetailCompanions(boolean shifted) {
-        float d = getResources().getDisplayMetrics().density;
-        float dx = shifted ? -(panelSlideWidth() + 10 * d) : 0f;
-        slideCompanionForDetail(resultEntryBar, dx, 6 * d);
-        slideCompanionForDetail(zoomSlider, dx, 4 * d);
-    }
 
-    /** 单个伴生控件让位：dx 后可完整留在左缘之外则平移；否则淡出/复位。 */
-    private void slideCompanionForDetail(android.view.View v, float dx, float keepPx) {
-        if (v == null) return;
-        float baseLeft = v.getX() - v.getTranslationX();   // 未平移时的左缘
-        float tx = dx;
-        float alpha = 1f;
-        if (dx < -(baseLeft - keepPx)) {                   // 会出屏 → 不平移，淡出
-            tx = 0f;
-            alpha = 0f;
-        }
-        v.animate().translationX(tx).alpha(alpha)
-                .setDuration(260L).setInterpolator(com.polaris.app.util.UiFx.SLIDE_IN_EASE)
-                .setStartDelay(40L).start();
-    }
 
-    /** 结果面板需要独占右侧/整屏时：详情面板直接撤下，不做滑出动画。 */
-    private void hideStarDetailQuiet() {
-        if (!starDetailOpen || starDetailPanel == null) return;
-        starDetailOpen = false;
-        starDetailPanel.setTranslationX(0f);
-        starDetailPanel.setVisibility(View.GONE);
-        if (starMap != null) {
-            starMap.cancelPanAnim();
-            starMap.clearFocusStar();
-            starMap.setRightInsetPx(0f);
-        }
-        slideDetailCompanions(false);
-    }
 
-    /** 面板滑出距离（px）：以实际宽度为准，未测量时按 300dp 兜底。 */
-    private float panelSlideWidth() {
-        int w = starDetailPanel != null ? starDetailPanel.getWidth() : 0;
-        if (w <= 0 && starDetailPanel != null) w = starDetailPanel.getMeasuredWidth();
-        float d = getResources().getDisplayMetrics().density;
-        return w > 0 ? w : 300 * d;
-    }
 
-    /** 面板迷你星图：只画这一颗恒星（含其行星）。 */
-    private void renderStarDetailMap(String key, String label, long bytes, int level, boolean isApp) {
-        if (starDetailMap == null) return;
-        starDetailMap.post(() -> {
-            if (starDetailMap == null) return;
-            if (starDetailMap.getWidth() <= 0) {   // 首帧尚未测量：重投一次
-                renderStarDetailMap(key, label, bytes, level, isApp);
-                return;
-            }
-            starDetailMap.resetScanField();        // 清掉上一颗恒星
-            starDetailMap.beginScanField(1);
-            if (isApp) {
-                starDetailMap.revealAppStar(packageOf(key, label), label, bytes, level);
-            } else {
-                starDetailMap.revealItem(level, bytes, label);
-            }
-        });
-    }
 
-    /** 安全程度：四段等级条，点亮数 = 等级+1；颜色只表达威胁等级。 */
-    private void setStarDetailRisk(int level) {
-        if (starDetailDots == null) return;
-        starDetailDots.removeAllViews();
-        int lit = Math.max(0, Math.min(4, level + 1));
-        int top = Math.max(0, Math.min(3, level));
-        int litColor = riskColor(top);
-        float d = getResources().getDisplayMetrics().density;
-        android.util.TypedValue tv = new android.util.TypedValue();
-        int outline = 0;
-        if (getTheme().resolveAttribute(com.google.android.material.R.attr.colorOutlineVariant, tv, true)) {
-            outline = tv.data;
-        }
-        for (int i = 0; i < 4; i++) {
-            android.view.View v = new android.view.View(this);
-            android.widget.LinearLayout.LayoutParams lp =
-                    new android.widget.LinearLayout.LayoutParams((int) (20 * d), (int) (4 * d));
-            lp.setMargins(i > 0 ? (int) (6 * d) : 0, 0, 0, 0);
-            v.setLayoutParams(lp);
-            if (i < lit) {
-                v.setBackgroundColor(litColor);
-            } else {
-                v.setBackgroundColor(outline);
-                v.setAlpha(0.45f);
-            }
-            starDetailDots.addView(v);
-        }
-    }
 
-    /** 行星轨道：把行星数量画成圆点（最多 6 个坑位，未占的用描边点）。 */
-    private void setStarDetailOrbit(int planetCount) {
-        if (starDetailOrbit == null) return;
-        starDetailOrbit.removeAllViews();
-        int slots = Math.max(0, Math.min(6, planetCount));
-        float d = getResources().getDisplayMetrics().density;
-        android.util.TypedValue tv = new android.util.TypedValue();
-        int outline = 0;
-        if (getTheme().resolveAttribute(com.google.android.material.R.attr.colorOutlineVariant, tv, true)) {
-            outline = tv.data;
-        }
-        for (int i = 0; i < 6; i++) {
-            android.graphics.drawable.GradientDrawable gd =
-                    new android.graphics.drawable.GradientDrawable();
-            gd.setShape(android.graphics.drawable.GradientDrawable.OVAL);
-            gd.setSize((int) (8 * d), (int) (8 * d));
-            gd.setColor(i < slots ? outline : outline);
-            gd.setAlpha(i < slots ? 0xFF : 0x40);
-            android.view.View v = new android.view.View(this);
-            android.widget.LinearLayout.LayoutParams lp =
-                    new android.widget.LinearLayout.LayoutParams((int) (8 * d), (int) (8 * d));
-            lp.setMargins(i > 0 ? (int) (8 * d) : 0, 0, 0, 0);
-            v.setLayoutParams(lp);
-            v.setBackground(gd);
-            starDetailOrbit.addView(v);
-        }
-    }
 
-    /** 威胁等级 → 显示文字（runtime 字符串，三语一致）。 */
-    private String starRiskText(int level) {
-        if (level >= 3) return getString(R.string.risk_high);
-        if (level == 2) return getString(R.string.risk_medium);
-        if (level == 1) return getString(R.string.risk_low);
-        if (level == 0) return getString(R.string.risk_safe);
-        return getString(R.string.star_detail_risk_unknown);
-    }
 
-    /** 威胁等级 → 资源色（日/夜两套由资源限定符切换）。 */
-    private int riskColor(int level) {
-        int rid = level >= 3 ? R.color.risk_high
-                : level == 2 ? R.color.risk_medium
-                : level == 1 ? R.color.risk_low : R.color.risk_safe;
-        return androidx.core.content.ContextCompat.getColor(this, rid);
-    }
 
-    /** 恒星键（app:<包名> / folder:<键>#<后缀>）→ 包名。 */
-    private static String packageOf(String key, String fallback) {
-        if (key != null && key.startsWith("app:") && key.length() > 4) return key.substring(4);
-        return fallback == null ? "" : fallback;
-    }
 
-    /** 字节数 → 人类可读大小（KB/MB/GB）。 */
-    private static String formatBytes(long bytes) {
-        if (bytes < 1024) return bytes + " B";
-        double kb = bytes / 1024.0;
-        if (kb < 1024) return String.format(java.util.Locale.US, "%.1f KB", kb);
-        double mb = kb / 1024.0;
-        if (mb < 1024) return String.format(java.util.Locale.US, "%.1f MB", mb);
-        return String.format(java.util.Locale.US, "%.2f GB", mb / 1024.0);
-    }
 
-    private long appSizeBytes(String packageName) {
-        try {
-            android.content.pm.ApplicationInfo ai = getPackageManager()
-                    .getApplicationInfo(packageName, 0);
-            long len = ai.sourceDir == null ? 0 : new java.io.File(ai.sourceDir).length();
-            return len > 0 ? len : 1024L * 1024;
-        } catch (Exception e) {
-            return 1024L * 1024;
-        }
-    }
 
     /** 所有扫描结束：按需做 AI 判定，然后统一渲染两段结果。 */    private void finishCombinedScan() {
         scanning = false;
