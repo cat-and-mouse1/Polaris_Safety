@@ -82,10 +82,22 @@ public class AboutActivity extends BaseActivity {
                     Toast.LENGTH_LONG).show();
         });
 
-        // 病毒库版本行
-        IocDatabase db = IocDatabase.getInstance(this);
-        ((TextView) findViewById(R.id.virusDbLine))
-                .setText(getString(R.string.virusdb_name) + " v" + db.getDbVersion());
+        // 病毒库版本行：解析可能很重（全量库数百 MB），放后台线程，避免进入关于页卡死
+        final TextView virusDbLine = findViewById(R.id.virusDbLine);
+        final android.content.Context app = getApplicationContext();
+        new Thread(() -> {
+            final int v;
+            try {
+                v = IocDatabase.getInstance(app).getDbVersion();
+            } catch (Throwable t) {
+                android.util.Log.w("AboutActivity", "load IOC db failed", t);
+                return;
+            }
+            runOnUiThread(() -> {
+                if (isFinishing() || isDestroyed()) return;
+                virusDbLine.setText(getString(R.string.virusdb_name) + " v" + v);
+            });
+        }, "polaris-about-vdb").start();
 
         checkButton.setOnClickListener(v -> checkUpdate());
     }

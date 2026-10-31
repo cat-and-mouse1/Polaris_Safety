@@ -2,14 +2,25 @@ package com.polaris.app;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import com.google.android.material.color.DynamicColors;
 import com.google.android.material.color.DynamicColorsOptions;
+import com.polaris.app.scan.IocDatabase;
 import com.polaris.app.scan.IocRefreshWorker;
 import com.polaris.app.util.Prefs;
 
@@ -30,6 +41,7 @@ public class PolarisApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        installCrashHandler();
         applyTheme(new Prefs(this).getThemeMode());
         // 追踪所有 Activity 生命周期（用于主题变更时刷新前台页；自定义主题色由各页 BaseActivity 自行注入）
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
@@ -46,6 +58,55 @@ public class PolarisApp extends Application {
         });
         // 注册病毒库每日自动更新（若用户开启）
         IocRefreshWorker.schedule(this);
+        // 后台清理无 meta 的残留分片（避免界面误显示「下载中」并占用空间）
+        new Thread(() -> IocDatabase.cleanupOrphanedParts(this), "polaris-ioc-cleanup").start();
+
+        // 清理历史脏数据：NORMAL（浅层）模式下残留的拦截标记。
+        // 拦截依赖守护服务，浅层模式不可能生效，留着会导致「显示已开启 + 常驻通知残留」。
+        Prefs p0 = new Prefs(this);
+        if (!p0.isDeepScanMode() && p0.isBlockModeStored()) {
+            p0.setBlockMode(false);
+            com.polaris.app.scan.Notifier.cancelBlockNotification(this);
+        }
+    }
+
+    // ---------- 轻量崩溃捕获（无 adb 环境下定位启动闪退） ----------
+
+    /** 全局异常捕获：完整堆栈落盘 + Toast 显示「异常类型 + 首个业务栈帧（文件:行号）」。 */
+    private void installCrashHandler() {
+        final Thread.UncaughtExceptionHandler original = Thread.getDefaultUncaughtExceptionHandler();
+        Thread.setDefaultUncaughtExceptionHandler((thread, ex) -> {
+            String brief;
+            try {
+                File log = new File(getCacheDir(), "polaris_crash.log");
+                try (PrintWriter pw = new PrintWriter(new FileWriter(log, true))) {
+                    pw.println("==== " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())
+                            + "  tid=" + thread.getId() + " ====");
+                    ex.printStackTrace(pw);
+                }
+                brief = describeCrash(ex);
+                Toast.makeText(this, "Polaris崩溃: " + brief, Toast.LENGTH_LONG).show();
+            } catch (Throwable ignored) {
+                brief = ex.getClass().getSimpleName();
+            }
+            if (original != null) original.uncaughtException(thread, ex);
+            else Runtime.getRuntime().exit(2);
+        });
+    }
+
+    /** 摘要：异常类名 + 首个 com.polaris 栈帧（沿 cause 链向下找）。 */
+    private static String describeCrash(Throwable ex) {
+        Throwable t = ex;
+        while (t != null) {
+            for (StackTraceElement e : t.getStackTrace()) {
+                if (e.getClassName().startsWith("com.polaris")) {
+                    return ex.getClass().getSimpleName() + " @ "
+                            + e.getFileName() + ":" + e.getLineNumber();
+                }
+            }
+            t = t.getCause();
+        }
+        return ex.getClass().getSimpleName() + " (无业务栈帧)";
     }
 
     /** 应用主题模式；与 Prefs.THEME_* 常量对应。 */

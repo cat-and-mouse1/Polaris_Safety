@@ -13,6 +13,7 @@ import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
 import com.polaris.app.util.Prefs;
+import com.polaris.app.scan.Notifier;
 
 import java.util.concurrent.TimeUnit;
 
@@ -45,34 +46,33 @@ public class IocRefreshWorker extends Worker {
         Log.i(TAG, "Starting IOC database refresh...");
 
         try {
-            // 同步等待异步刷新完成（最长 60 秒）
-            final Object lock = new Object();
+            // 同步等待异步刷新完成（最长 60 秒）；用 CountDownLatch 避免
+            // 「回调早于 wait() 触发 → notifyAll 丢失 → 白等满 60 秒」的竞态
+            final java.util.concurrent.CountDownLatch done = new java.util.concurrent.CountDownLatch(1);
             final Result[] resultHolder = {Result.retry()};
 
             IocDatabase.getInstance(getApplicationContext(), "region").refresh(new IocDatabase.RefreshCallback() {
                 @Override
                 public void onUpdated(int newVersion) {
                     Log.i(TAG, "IOC database updated to version " + newVersion);
-                    synchronized (lock) {
-                        resultHolder[0] = Result.success();
-                        lock.notifyAll();
-                    }
+                    Notifier.notifyVirusUpdate(getApplicationContext(), newVersion);
+                    resultHolder[0] = Result.success();
+                    done.countDown();
                 }
 
                 @Override
                 public void onError(String message) {
                     Log.w(TAG, "IOC refresh failed: " + message);
-                    synchronized (lock) {
-                        resultHolder[0] = Result.retry();
-                        lock.notifyAll();
-                    }
+                    resultHolder[0] = Result.retry();
+                    done.countDown();
                 }
             });
 
-            synchronized (lock) {
-                lock.wait(60_000); // 等待回调，最多 60 秒
+            // 已完成的回调会立刻返回 true，不会白等
+            if (!done.await(60, java.util.concurrent.TimeUnit.SECONDS)) {
+                Log.w(TAG, "IOC refresh timed out after 60s");
+                return Result.retry();
             }
-
             return resultHolder[0];
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

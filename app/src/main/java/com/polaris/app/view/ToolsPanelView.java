@@ -1,5 +1,7 @@
 package com.polaris.app.view;
 
+import android.app.usage.NetworkStats;
+import android.app.usage.NetworkStatsManager;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
@@ -27,13 +29,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.tabs.TabLayout;
-import android.net.TrafficStats;
+import android.net.ConnectivityManager;
 import com.polaris.app.R;
+import com.polaris.app.util.PermUtil;
 import com.polaris.app.util.Prefs;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -72,6 +76,8 @@ public class ToolsPanelView extends LinearLayout {
     private final List<PermAppItem> permApps = new ArrayList<>();
     private final List<RecentFileItem> recentFiles = new ArrayList<>();
     private final List<TrafficAppItem> trafficApps = new ArrayList<>();
+    /** 流量数据需要「使用情况访问」权限（TrafficStats 对其它 UID 恒返回 -1，必须走 NetworkStatsManager）。 */
+    private volatile boolean trafficNeedsUsageAccess = false;
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -294,35 +300,17 @@ public class ToolsPanelView extends LinearLayout {
     private void loadRecentFiles() {
         List<RecentFileItem> out = new ArrayList<>();
 
-        File[] dirs = {
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES),
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC)
-        };
-
-        long oneWeekAgo = System.currentTimeMillis() - 7L * 24 * 60 * 60 * 1000;
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
-
-        for (File dir : dirs) {
-            if (dir == null || !dir.exists() || !dir.isDirectory()) continue;
-            File[] files = dir.listFiles();
-            if (files == null) continue;
-            for (File file : files) {
-                if (!file.isFile() || file.lastModified() <= oneWeekAgo) continue;
-                out.add(new RecentFileItem(
-                        file.getName(),
-                        file.getAbsolutePath(),
-                        sdf.format(new Date(file.lastModified())),
-                        formatSize(file.length()),
-                        file.lastModified(),
-                        file));
-            }
+        // 统一数据源：RecentFilesUtil（File 直读，覆盖外部存储根 + 公共目录及一层子目录）
+        for (com.polaris.app.util.RecentFilesUtil.Entry e
+                : com.polaris.app.util.RecentFilesUtil.load(50)) {
+            out.add(new RecentFileItem(
+                    e.name,
+                    e.path,
+                    e.dateText,
+                    e.sizeText,
+                    e.lastModified,
+                    e.file));
         }
-
-        Collections.sort(out, (a, b) -> Long.compare(b.lastModified, a.lastModified));
 
         synchronized (recentFiles) {
             recentFiles.clear();
@@ -332,6 +320,17 @@ public class ToolsPanelView extends LinearLayout {
 
     private void loadTrafficApps() {
         List<TrafficAppItem> out = new ArrayList<>();
+        // TrafficStats.getUidRxBytes() 自 Android 7 起对「其他 UID」一律返回
+        // UNSUPPORTED(-1)，直接用它会导致列表里只剩本应用；必须改用
+        // NetworkStatsManager（需「使用情况访问」授权，可给出按应用的真实流量）。
+        if (!PermUtil.hasUsageAccess(getContext())) {
+            trafficNeedsUsageAccess = true;
+            synchronized (trafficApps) {
+                trafficApps.clear();
+            }
+            return;
+        }
+        trafficNeedsUsageAccess = false;
         PackageManager pm = getContext().getPackageManager();
         List<PackageInfo> packages;
         try {
@@ -339,14 +338,20 @@ public class ToolsPanelView extends LinearLayout {
         } catch (Exception e) {
             packages = new ArrayList<>();
         }
+        final Map<Integer, long[]> traffic = queryTodayTraffic(getContext());
+        if (trafficNeedsUsageAccess) {
+            synchronized (trafficApps) {
+                trafficApps.clear();
+            }
+            return;
+        }
         for (PackageInfo pkg : packages) {
             if (pkg.applicationInfo == null) continue;
             if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) continue;
             int uid = pkg.applicationInfo.uid;
-            long rx = TrafficStats.getUidRxBytes(uid);
-            long tx = TrafficStats.getUidTxBytes(uid);
-            if (rx < 0) rx = 0;
-            if (tx < 0) tx = 0;
+            long[] bytes = traffic.get(uid);
+            long rx = bytes == null ? 0 : bytes[0];
+            long tx = bytes == null ? 0 : bytes[1];
             if (rx == 0 && tx == 0) continue;
             Drawable icon = pkg.applicationInfo.loadIcon(pm);
             String appName = pkg.applicationInfo.loadLabel(pm).toString();
@@ -357,6 +362,67 @@ public class ToolsPanelView extends LinearLayout {
             trafficApps.clear();
             trafficApps.addAll(out);
         }
+    }
+
+    /**
+     * 查询「今日 0 点至今」各 UID 的收发字节数（WiFi + 移动数据合并）。
+     * 只返回本进程有权限读取的汇总数据；调用方需已确认「使用情况访问」授权。
+     */
+    private Map<Integer, long[]> queryTodayTraffic(Context context) {
+        Map<Integer, long[]> result = new HashMap<>();
+        NetworkStatsManager nsm = (NetworkStatsManager)
+                context.getSystemService(Context.NETWORK_STATS_SERVICE);
+        if (nsm == null) return result;
+
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        long start = cal.getTimeInMillis();
+        long end = System.currentTimeMillis();
+
+        boolean anySuccess = false;
+        boolean denided = false;
+        int[] types = {ConnectivityManager.TYPE_WIFI, ConnectivityManager.TYPE_MOBILE};
+        for (int type : types) {
+            NetworkStats stats = null;
+            try {
+                stats = nsm.querySummary(type, null, start, end);
+                anySuccess = true;      // 调用未抛异常即视为有统计权限
+                if (stats == null) continue;
+                NetworkStats.Bucket bucket = new NetworkStats.Bucket();
+                while (stats.hasNextBucket()) {
+                    stats.getNextBucket(bucket);
+                    long[] v = result.get(bucket.getUid());
+                    if (v == null) {
+                        v = new long[2];
+                        result.put(bucket.getUid(), v);
+                    }
+                    v[0] += bucket.getRxBytes();
+                    v[1] += bucket.getTxBytes();
+                }
+            } catch (SecurityException se) {
+                // 真正未授予「使用情况访问」：两次查询都会抛，交给上层显示授权引导
+                denided = true;
+                android.util.Log.w("ToolsPanelView", "traffic permission denied", se);
+            } catch (Exception e) {
+                // 部分设备对移动数据要求 READ_PHONE_STATE；WiFi 结果仍然可用
+                android.util.Log.w("ToolsPanelView", "traffic query failed type=" + type, e);
+            } finally {
+                if (stats != null) {
+                    try {
+                        stats.close();
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+        }
+        if (!anySuccess && denided) {
+            // 权限判定以「实际能否查询」为准：部分 ROM 的 appops 返回 DEFAULT 但实际拒绝
+            trafficNeedsUsageAccess = true;
+        }
+        return result;
     }
 
     private String formatSize(long bytes) {
@@ -400,10 +466,17 @@ public class ToolsPanelView extends LinearLayout {
                     ? recentFileAdapter.getItemCount() == 0
                     : trafficAdapter.getItemCount() == 0;
         if (empty) {
-            emptyText.setText(currentTab == 0
-                    ? R.string.tools_empty
-                    : currentTab == 1 ? R.string.tools_no_recent_files
-                        : R.string.tools_no_traffic);
+            if (currentTab == 2 && trafficNeedsUsageAccess) {
+                // 流量统计需要授权：空态文案兼作入口，点击直达系统授权页
+                emptyText.setText(R.string.tools_traffic_need_usage_access);
+                emptyText.setOnClickListener(v -> PermUtil.openUsageAccessSettings(getContext()));
+            } else {
+                emptyText.setText(currentTab == 0
+                        ? R.string.tools_empty
+                        : currentTab == 1 ? R.string.tools_no_recent_files
+                            : R.string.tools_no_traffic_today);
+                emptyText.setOnClickListener(null);
+            }
             emptyText.setVisibility(View.VISIBLE);
             recyclerView.setVisibility(View.GONE);
         } else {
@@ -784,7 +857,8 @@ public class ToolsPanelView extends LinearLayout {
             holder.appName.setText(app.appName);
             holder.appPackage.setText(app.packageName);
             holder.appTrafficMeta.setText(getContext().getString(
-                    R.string.tools_traffic_detail, formatSize(app.rxBytes), formatSize(app.txBytes)));
+                    R.string.tools_traffic_detail_compact,
+                    formatSize(app.rxBytes), formatSize(app.txBytes)));
             holder.appTotal.setText(formatSize(app.total));
         }
 
