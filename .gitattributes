@@ -1,3 +1,5 @@
 polar-region/iodb.json filter=lfs diff=lfs merge=lfs -text
 polar-region/iodb.bin filter=lfs diff=lfs merge=lfs -text
 polar-point/iodb.bin filter=lfs diff=lfs merge=lfs -text
+polar-region/iodb-delta-*.bin filter=lfs diff=lfs merge=lfs -text
+polar-point/iodb-delta-*.bin filter=lfs diff=lfs merge=lfs -text
