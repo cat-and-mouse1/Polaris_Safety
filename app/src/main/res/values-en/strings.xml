@@ -770,4 +770,9 @@
     <string name="tools_no_traffic_today">No traffic recorded today</string>
     <string name="notify_ip_hit_title">%1$s is connecting to a malicious host</string>
     <string name="notify_ip_hit_text">Remote %1$s matched threat intel: %2$s</string>
+    <string name="ip_check_title">IP Connection Check</string>
+    <string name="ip_check_subtitle">Detect apps connecting to known malicious servers</string>
+    <string name="ip_check_status_off">Off</string>
+    <string name="ip_check_status_on">On · checked every 10s while guarding</string>
+    <string name="ip_check_status_need_mode">Takes effect only in Shizuku or Root mode</string>
 </resources>

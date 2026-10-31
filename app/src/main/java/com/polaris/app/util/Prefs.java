@@ -39,6 +39,7 @@ public class Prefs {
     private static final String KEY_VIRUS_AUTO = "virus_auto";             // 病毒库自动更新
     private static final String KEY_VIRUS_DB = "virus_db";                 // 病毒库选择：region | point
     private static final String KEY_ML_ENABLED = "ml_enabled";             // ML 引擎开关
+    private static final String KEY_IP_CHECK = "ip_check_enabled";         // IP 连接检测开关
     private static final String KEY_ML_MODEL = "ml_model";               // ML 模型选择：mh100k | mh1m
     private static final String KEY_UPDATE_SOURCE = "update_source";       // 更新下载源：github | mirror
     private static final String KEY_MONITORED_APPS = "monitored_apps";     // 应用监控名单（逗号分隔）
@@ -183,34 +184,7 @@ public class Prefs {
 
     /** 启用的 AI 服务商配置列表。 */
     public List<AiProviderConfig> getEnabledProviders() {
-        List<AiProviderConfig> list = new ArrayList<>();
-        String json = sp.getString(KEY_AI_PROVIDERS_JSON, "[]");
-        try {
-            org.json.JSONArray arr = new org.json.JSONArray(json);
-            for (int i = 0; i < arr.length(); i++) {
-                org.json.JSONObject obj = arr.getJSONObject(i);
-                if (obj.optBoolean("enabled", true)) {
-                    AiProviderConfig cfg = new AiProviderConfig(
-                            obj.getString("id"),
-                            obj.getString("name"),
-                            obj.getString("badge"),
-                            obj.getString("baseUrl"),
-                            obj.getString("model"),
-                            obj.getString("apiKey"),
-                            obj.optBoolean("enabled", true)
-                    );
-                    if (obj.has("models")) {
-                        org.json.JSONArray modelsArr = obj.getJSONArray("models");
-                        for (int j = 0; j < modelsArr.length(); j++) {
-                            cfg.models.add(ModelEntry.fromJson(modelsArr.getJSONObject(j)));
-                        }
-                    }
-                    list.add(cfg);
-                }
-            }
-        } catch (Exception ignored) {
-        }
-        return list;
+        return parseProviders(true);
     }
 
     /** 保存/更新单个服务商配置。 */
@@ -254,12 +228,18 @@ public class Prefs {
 
     /** 获取所有配置（含禁用的）。 */
     public List<AiProviderConfig> getAllProviders() {
+        return parseProviders(false);
+    }
+
+    /** 统一的服务商 JSON 解析（onlyEnabled=true 时过滤禁用项）。 */
+    private List<AiProviderConfig> parseProviders(boolean onlyEnabled) {
         List<AiProviderConfig> list = new ArrayList<>();
         String json = sp.getString(KEY_AI_PROVIDERS_JSON, "[]");
         try {
             org.json.JSONArray arr = new org.json.JSONArray(json);
             for (int i = 0; i < arr.length(); i++) {
                 org.json.JSONObject obj = arr.getJSONObject(i);
+                if (onlyEnabled && !obj.optBoolean("enabled", true)) continue;
                 AiProviderConfig cfg = new AiProviderConfig(
                         obj.getString("id"),
                         obj.getString("name"),
@@ -269,7 +249,6 @@ public class Prefs {
                         obj.getString("apiKey"),
                         obj.optBoolean("enabled", true)
                 );
-                // 解析模型列表
                 if (obj.has("models")) {
                     org.json.JSONArray modelsArr = obj.getJSONArray("models");
                     for (int j = 0; j < modelsArr.length(); j++) {
@@ -278,7 +257,8 @@ public class Prefs {
                 }
                 list.add(cfg);
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            android.util.Log.w("Prefs", "parse AI providers failed", e);
         }
         return list;
     }
@@ -434,6 +414,26 @@ public class Prefs {
         sp.edit().putString(KEY_PREFERRED_ENGINE, engine).apply();
     }
 
+    // ---------- AI 检测模式（复核 / 独立检测） ----------
+
+    private static final String KEY_AI_DETECTION_MODE = "ai_detection_mode"; // review | independent
+    /** 复核模式：只对本地已标记（≥低风险）的候选做 AI 复核，省 token（默认）。 */
+    public static final String AI_MODE_REVIEW = "review";
+    /** 独立检测：向 AI 送审全部候选，由其独立判定风险等级并并入最终结果。 */
+    public static final String AI_MODE_INDEPENDENT = "independent";
+
+    public String getAiDetectionMode() {
+        return sp.getString(KEY_AI_DETECTION_MODE, AI_MODE_REVIEW);
+    }
+
+    public void setAiDetectionMode(String mode) {
+        sp.edit().putString(KEY_AI_DETECTION_MODE, mode).apply();
+    }
+
+    public boolean isAiIndependentMode() {
+        return AI_MODE_INDEPENDENT.equals(getAiDetectionMode());
+    }
+
     // ---------- 外观主题（深色 / 浅色 / 跟随系统） ----------
 
     public static final int THEME_SYSTEM = 0;
@@ -508,13 +508,29 @@ public class Prefs {
 
     // ---------- 拦截模式（红色守护栏） ----------
 
-    /** 拦截模式是否开启（开启后常驻置顶通知并集中记录被拦截的应用）。 */
+    /**
+     * 拦截模式是否生效。
+     * 拦截依赖守护服务（GuardService），而守护只在 Accessibility / Shizuku / Root 模式启动，
+     * 因此 NORMAL（浅层）模式下即使持久化标记为 true 也不算开启，否则会出现
+     * 「界面显示已开启但实际无守护、常驻通知残留」的假开启状态。
+     */
     public boolean isBlockMode() {
+        return sp.getBoolean(KEY_BLOCK_MODE, false) && isDeepScanMode();
+    }
+
+    /** 仅读取持久化标记（不校验当前模式），用于清理历史脏数据等场景。 */
+    public boolean isBlockModeStored() {
         return sp.getBoolean(KEY_BLOCK_MODE, false);
     }
 
-    public void setBlockMode(boolean on) {
+    /**
+     * 设置拦截开关。
+     * @return false 表示被拒绝（在 NORMAL 模式下不允许开启拦截）
+     */
+    public boolean setBlockMode(boolean on) {
+        if (on && !isDeepScanMode()) return false;
         sp.edit().putBoolean(KEY_BLOCK_MODE, on).apply();
+        return true;
     }
 
     /** 被拦截应用包名集合。 */
@@ -537,6 +553,40 @@ public class Prefs {
 
     private void setBlockedApps(Set<String> pkgs) {
         sp.edit().putString(KEY_BLOCKED_APPS, TextUtil.join(pkgs)).apply();
+    }
+
+    // ---------- 通知类别开关（默认全部开启） ----------
+    // 守护常驻通知来自前台服务，系统强制必须显示，关闭后仅转为静音/最小化。
+
+    private static final String KEY_NOTIFY_GUARD = "notify_guard";   // 守护常驻通知
+    private static final String KEY_NOTIFY_BLOCK = "notify_block";   // 拦截常驻通知
+    private static final String KEY_NOTIFY_VIRUS = "notify_virus";   // 病毒库更新通知
+
+    /** 守护常驻通知是否显示（默认开启；关闭后前台通知转为静音）。 */
+    public boolean isGuardNotifyEnabled() {
+        return sp.getBoolean(KEY_NOTIFY_GUARD, true);
+    }
+
+    public void setGuardNotifyEnabled(boolean on) {
+        sp.edit().putBoolean(KEY_NOTIFY_GUARD, on).apply();
+    }
+
+    /** 拦截常驻通知是否显示（默认开启；关闭后完全不显示）。 */
+    public boolean isBlockNotifyEnabled() {
+        return sp.getBoolean(KEY_NOTIFY_BLOCK, true);
+    }
+
+    public void setBlockNotifyEnabled(boolean on) {
+        sp.edit().putBoolean(KEY_NOTIFY_BLOCK, on).apply();
+    }
+
+    /** 病毒库更新通知是否显示（默认开启；关闭后自动更新不再提醒）。 */
+    public boolean isVirusUpdateNotifyEnabled() {
+        return sp.getBoolean(KEY_NOTIFY_VIRUS, true);
+    }
+
+    public void setVirusUpdateNotifyEnabled(boolean on) {
+        sp.edit().putBoolean(KEY_NOTIFY_VIRUS, on).apply();
     }
 
     // ---------- 病毒库 · Polar Region ----------
@@ -562,6 +612,17 @@ public class Prefs {
             db = "point";
         }
         sp.edit().putString(KEY_VIRUS_DB, db).apply();
+    }
+
+    // ---------- IP 连接检测 ----------
+
+    /** IP 连接检测是否开启（默认开启）。注意：仅在 Shizuku / Root 模式下实际生效。 */
+    public boolean isIpCheckEnabled() {
+        return sp.getBoolean(KEY_IP_CHECK, true);
+    }
+
+    public void setIpCheckEnabled(boolean on) {
+        sp.edit().putBoolean(KEY_IP_CHECK, on).apply();
     }
 
     // ---------- ML 引擎 ----------

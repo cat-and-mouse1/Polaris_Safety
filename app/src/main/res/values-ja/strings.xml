@@ -770,4 +770,9 @@
     <string name="tools_no_traffic_today">本日の通信量はまだありません</string>
     <string name="notify_ip_hit_title">%1$s が悪意のあるホストに接続しています</string>
     <string name="notify_ip_hit_text">リモート %1$s が脅威情報に一致：%2$s</string>
+    <string name="ip_check_title">IP 接続チェック</string>
+    <string name="ip_check_subtitle">既知の悪意あるサーバーへの接続を検出します</string>
+    <string name="ip_check_status_off">オフ</string>
+    <string name="ip_check_status_on">オン · ガード中は 10 秒ごとに確認</string>
+    <string name="ip_check_status_need_mode">Shizuku または Root モードでのみ有効になります</string>
 </resources>

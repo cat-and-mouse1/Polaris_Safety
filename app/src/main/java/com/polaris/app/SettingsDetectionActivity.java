@@ -2,12 +2,10 @@ package com.polaris.app;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.material.switchmaterial.SwitchMaterial;
@@ -28,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 检测配置子页：合并原设置页的「AI 智能判定」与「ML 机器学习」两块配置。
+ * 检测配置子页：AI 智能判定 与 ML 机器学习的完整配置（默认引擎在设置主页检测配置卡内）。
  * 从主设置页「检测配置」入口进入。包含：
  * - AI 引擎：接入状态 + 跳转 AI 配置（AiSetupActivity）+ 多模型策略（交叉检测 / 最快优先）；
  * - ML 引擎：本地模型开关 + 模型选择 + 模型详情 + 立即 ML 扫描。
@@ -52,6 +50,16 @@ public class SettingsDetectionActivity extends BaseActivity {
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
         findViewById(R.id.aiConfigCard).setOnClickListener(v ->
                 startActivity(new Intent(this, AiSetupActivity.class)));
+
+        // IP 连接检测开关（仅在 Shizuku / Root 模式下实际生效）
+        SwitchMaterial ipCheckSwitch = findViewById(R.id.ipCheckSwitch);
+        TextView ipCheckStatus = findViewById(R.id.ipCheckStatus);
+        ipCheckSwitch.setChecked(prefs.isIpCheckEnabled());
+        updateIpCheckStatus(ipCheckStatus);
+        ipCheckSwitch.setOnCheckedChangeListener((b, checked) -> {
+            prefs.setIpCheckEnabled(checked);
+            updateIpCheckStatus(ipCheckStatus);
+        });
 
         // ML 引擎开关
         mlEngineSwitch = findViewById(R.id.mlEngineSwitch);
@@ -118,7 +126,23 @@ public class SettingsDetectionActivity extends BaseActivity {
                 aiFastestSwitch.setChecked(true);
             }
         });
+
+        // AI 检测模式（复核 / 独立检测）
+        com.google.android.material.button.MaterialButtonToggleGroup aiModeGroup =
+                findViewById(R.id.aiModeGroup);
+        boolean independent = prefs.isAiIndependentMode();
+        aiModeGroup.check(independent ? R.id.aiModeIndependent : R.id.aiModeReview);
+        aiModeGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (!isChecked) return; // 只处理被选中的按钮
+            if (checkedId == R.id.aiModeIndependent) {
+                prefs.setAiDetectionMode(Prefs.AI_MODE_INDEPENDENT);
+            } else {
+                prefs.setAiDetectionMode(Prefs.AI_MODE_REVIEW);
+            }
+        });
     }
+
+    // ---------- 默认引擎已移回设置主页检测配置卡 ----------
 
     @Override
     protected void onResume() {
@@ -139,6 +163,20 @@ public class SettingsDetectionActivity extends BaseActivity {
     }
 
     /** 启动 ML 扫描（仅 ML 引擎，快速扫描已安装应用）。 */
+    /** IP 连接检测的状态说明：关闭 / 未满足模式前提 / 已启用。 */
+    private void updateIpCheckStatus(TextView tv) {
+        if (tv == null) return;
+        if (!prefs.isIpCheckEnabled()) {
+            tv.setText(R.string.ip_check_status_off);
+        } else if (prefs.getActiveMode() != Prefs.MODE_SHIZUKU
+                && prefs.getActiveMode() != Prefs.MODE_ROOT) {
+            // 注意：Accessibility 模式虽然也是「深层扫描」，但读不到全局连接表，IP 检查不会跑
+            tv.setText(R.string.ip_check_status_need_mode);
+        } else {
+            tv.setText(R.string.ip_check_status_on);
+        }
+    }
+
     private void startMlScan(MaterialButton btn) {
         if (!prefs.isMlEnabled()) {
             Toast.makeText(this, R.string.ml_engine_title, Toast.LENGTH_SHORT).show();

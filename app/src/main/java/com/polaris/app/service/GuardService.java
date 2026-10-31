@@ -148,6 +148,7 @@ public class GuardService extends Service {
      */
     private void checkMaliciousConnections() {
         if (mode != Prefs.MODE_SHIZUKU && mode != Prefs.MODE_ROOT) return;
+        if (prefs == null || !prefs.isIpCheckEnabled()) return;
 
         String table = ShizukuHelper.runShell("cat", "/proc/net/tcp");
         if (table == null || table.isEmpty()) {

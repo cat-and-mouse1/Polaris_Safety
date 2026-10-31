@@ -775,4 +775,9 @@
     <string name="tools_no_traffic_today">今日暂无流量记录</string>
     <string name="notify_ip_hit_title">%1$s 正在连接恶意地址</string>
     <string name="notify_ip_hit_text">远端 %1$s 命中威胁情报：%2$s</string>
+    <string name="ip_check_title">IP 连接检测</string>
+    <string name="ip_check_subtitle">发现应用连接已知恶意服务器</string>
+    <string name="ip_check_status_off">已关闭</string>
+    <string name="ip_check_status_on">已启用 · 后台守护每 10 秒检查一次连接</string>
+    <string name="ip_check_status_need_mode">需 Shizuku 或 Root 模式才会实际生效</string>
 </resources>

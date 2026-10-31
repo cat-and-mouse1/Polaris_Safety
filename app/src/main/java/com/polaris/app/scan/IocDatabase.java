@@ -464,8 +464,10 @@ public final class IocDatabase {
                     || head[4] != 'R' || head[5] != 'I' || head[6] != 'S' || head[7] != 'B') {
                 return -1;
             }
-            return java.nio.ByteBuffer.wrap(head, 8, 8)
-                    .order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt(4);
+            // 注意：ByteBuffer.getInt(int) 是「绝对索引」，与 wrap 的 offset 无关；
+            // db_version 在 header 的第 12 字节，必须写 getInt(12)。
+            return java.nio.ByteBuffer.wrap(head)
+                    .order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt(12);
         } catch (Exception e) {
             return -1;
         }
