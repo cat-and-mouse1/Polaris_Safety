@@ -667,7 +667,7 @@
     <string name="guard_dashboard_greeting_evening">晚上好！</string>
     <string name="guard_dashboard_status">守护状况</string>
     <string name="guard_dashboard_mode_none">未激活任何守护模式</string>
-    <string name="guard_dashboard_mode_active">守护中 · %1$s</string>
+    <string name="guard_dashboard_mode_active">守护中 · %1$s · 熄屏后暂停</string>
     <string name="guard_dashboard_stats">守护统计</string>
     <string name="guard_dashboard_last_time">距上次守护</string>
     <string name="guard_dashboard_total_count">累计守护次数</string>
@@ -780,4 +780,6 @@
     <string name="ip_check_status_off">已关闭</string>
     <string name="ip_check_status_on">已启用 · 后台守护每 30 秒检查一次连接</string>
     <string name="ip_check_status_need_mode">需 Shizuku 或 Root 模式才会实际生效</string>
+    <string name="notify_installed_risk_title">发现风险应用</string>
+    <string name="notify_installed_risk_text">%1 安装后立即扫描，风险指数 %2</string>
 </resources>

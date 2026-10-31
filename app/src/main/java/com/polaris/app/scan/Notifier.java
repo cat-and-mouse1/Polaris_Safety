@@ -115,6 +115,26 @@ public final class Notifier {
         }
     }
 
+    /** 新安装/更新的应用被判定为风险时提示（由 InstallReceiver 触发）。 */
+    public static void notifyInstalledRisk(Context context, AppRiskInfo info) {
+        ensureChannels(context);
+        if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return;
+        String app = info.appName != null ? info.appName.toString() : info.packageName;
+        String text = context.getString(R.string.notify_installed_risk_text, app, info.score);
+        Notification n = new NotificationCompat.Builder(context, CHANNEL_SCAN)
+                .setSmallIcon(R.drawable.ic_shield)
+                .setContentTitle(context.getString(R.string.notify_installed_risk_title))
+                .setContentText(text)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true)
+                .build();
+        try {
+            NotificationManagerCompat.from(context).notify(1002, n);
+        } catch (SecurityException ignored) {
+        }
+    }
+
     // ---------- 拦截模式常驻通知 ----------
 
     /**

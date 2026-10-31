@@ -37,8 +37,7 @@
         android:theme="@style/Theme.Polaris"
         android:localeConfig="@xml/locales_config"
         android:allowBackup="false"
-        android:supportsRtl="true"
-        android:screenOrientation="portrait">
+        android:supportsRtl="true">
 
         <!-- OnboardingActivity: launcher on first install -->
         <activity
@@ -94,6 +93,12 @@
         <!-- 设置子页：外观（深色浅色 + 主题色） -->
         <activity
             android:name=".SettingsAppearanceActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Polaris" />
+
+        <!-- 设置子页：通知（守护常驻 / 拦截常驻 / 病毒库更新三类开关） -->
+        <activity
+            android:name=".SettingsNotificationActivity"
             android:exported="false"
             android:theme="@style/Theme.Polaris" />
 
@@ -176,6 +181,17 @@
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- 应用安装/更新后立即扫描：PACKAGE_ADDED/REPLACED 属隐式广播豁免名单，可静态注册 -->
+        <receiver
+            android:name=".scan.InstallReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_ADDED" />
+                <action android:name="android.intent.action.PACKAGE_REPLACED" />
+                <data android:scheme="package" />
             </intent-filter>
         </receiver>
 

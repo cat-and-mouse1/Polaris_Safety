@@ -23,6 +23,7 @@ import androidx.core.content.ContextCompat;
 import com.polaris.app.R;
 import com.polaris.app.scan.IocDatabase;
 import com.polaris.app.scan.IocEntry;
+import com.polaris.app.scan.InstallReceiver;
 import com.polaris.app.scan.NetConnScanner;
 import com.polaris.app.scan.Notifier;
 import com.polaris.app.util.BehaviorLog;
@@ -104,6 +105,8 @@ public class GuardService extends Service {
     private volatile Set<String> malicious;
     /** 已告警过的「ip@uid」，避免同一连接每 10 秒重复提示；超过上限整体清空。 */
     private final Set<String> alertedConns = new java.util.HashSet<>();
+    /** 守护运行时动态监听安装/更新（静态注册在 Android 8+ 收不到 PACKAGE_ADDED）。 */
+    private android.content.BroadcastReceiver installWatcher;
     private Prefs prefs;
 
     @Override
@@ -114,6 +117,42 @@ public class GuardService extends Service {
         pollThread = new HandlerThread("polaris-guard-poll");
         pollThread.start();
         pollHandler = new Handler(pollThread.getLooper());
+        registerInstallWatcher();
+    }
+
+    /**
+     * 动态注册安装/更新监听。
+     *
+     * <p>必须在运行时注册：{@code PACKAGE_ADDED} / {@code PACKAGE_REPLACED} 自 Android 8
+     * 起被移出隐式广播豁免名单，静态声明在真机上收不到（本机实测确认）。
+     * 这样在守护运行期间，用户装完应用立刻就能扫一遍，不必等每日定时扫描。
+     */
+    private void registerInstallWatcher() {
+        if (installWatcher != null) return;
+        installWatcher = new android.content.BroadcastReceiver() {
+            @Override
+            public void onReceive(Context c, Intent i) {
+                android.net.Uri d = i != null ? i.getData() : null;
+                final String pkg = d != null ? d.getSchemeSpecificPart() : null;
+                if (pkg == null || pkg.isEmpty()) return;
+                new Thread(() -> InstallReceiver.scanInstalled(getApplicationContext(), pkg),
+                        "polaris-install-scan").start();
+            }
+        };
+        android.content.IntentFilter f = new android.content.IntentFilter();
+        f.addAction(Intent.ACTION_PACKAGE_ADDED);
+        f.addAction(Intent.ACTION_PACKAGE_REPLACED);
+        f.addDataScheme("package");
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= 33) {
+                registerReceiver(installWatcher, f, Context.RECEIVER_EXPORTED);
+            } else {
+                registerReceiver(installWatcher, f);
+            }
+            Log.i(TAG, "install watcher registered");
+        } catch (Exception e) {
+            Log.w(TAG, "register install watcher failed", e);
+        }
     }
 
     @Override
@@ -364,6 +403,13 @@ public class GuardService extends Service {
     public void onDestroy() {
         if (pollHandler != null) pollHandler.removeCallbacks(poller);
         if (pollThread != null) pollThread.quitSafely();
+        if (installWatcher != null) {
+            try {
+                unregisterReceiver(installWatcher);
+            } catch (Exception ignored) {
+            }
+            installWatcher = null;
+        }
         super.onDestroy();
     }
 }

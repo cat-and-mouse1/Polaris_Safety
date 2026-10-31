@@ -633,7 +633,7 @@
     <string name="guard_dashboard_greeting_evening">Good Evening!</string>
     <string name="guard_dashboard_status">Guard Status</string>
     <string name="guard_dashboard_mode_none">No guard mode activated</string>
-    <string name="guard_dashboard_mode_active">Guarding · %1$s</string>
+    <string name="guard_dashboard_mode_active">Guarding · %1$s · paused when screen off</string>
     <string name="guard_dashboard_stats">Guard Statistics</string>
     <string name="guard_dashboard_last_time">Last Guard</string>
     <string name="guard_dashboard_total_count">Total Guards</string>
@@ -775,4 +775,6 @@
     <string name="ip_check_status_off">Off</string>
     <string name="ip_check_status_on">On · checked every 30s while guarding</string>
     <string name="ip_check_status_need_mode">Takes effect only in Shizuku or Root mode</string>
+    <string name="notify_installed_risk_title">Risky app detected</string>
+    <string name="notify_installed_risk_text">%1$s was scanned on install — risk score %2$d</string>
 </resources>

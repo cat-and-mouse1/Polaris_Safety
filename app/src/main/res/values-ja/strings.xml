@@ -633,7 +633,7 @@
     <string name="guard_dashboard_greeting_evening">こんばんは！</string>
     <string name="guard_dashboard_status">守護状況</string>
     <string name="guard_dashboard_mode_none">守護モードが未アクティブ</string>
-    <string name="guard_dashboard_mode_active">守護中 · %1$s</string>
+    <string name="guard_dashboard_mode_active">守護中 · %1$s · 画面オフ時は一時停止</string>
     <string name="guard_dashboard_stats">守護統計</string>
     <string name="guard_dashboard_last_time">前回の守護</string>
     <string name="guard_dashboard_total_count">累計守護回数</string>
@@ -775,4 +775,6 @@
     <string name="ip_check_status_off">オフ</string>
     <string name="ip_check_status_on">オン · ガード中は 30 秒ごとに確認</string>
     <string name="ip_check_status_need_mode">Shizuku または Root モードでのみ有効になります</string>
+    <string name="notify_installed_risk_title">リスクのあるアプリを検出</string>
+    <string name="notify_installed_risk_text">%1$s をインストール直後にスキャンしました — リスク指数 %2$d</string>
 </resources>
