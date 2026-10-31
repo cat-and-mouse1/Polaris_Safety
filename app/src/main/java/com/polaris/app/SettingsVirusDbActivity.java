@@ -69,7 +69,7 @@ public class SettingsVirusDbActivity extends BaseActivity {
                 IocRefreshWorker.cancel(this);
             }
         });
-        regionUpdateButton.setOnClickListener(v -> updateVirusDb("region"));
+        regionUpdateButton.setOnClickListener(v -> confirmUpdate("region"));
     }
 
     @Override
@@ -97,14 +97,28 @@ public class SettingsVirusDbActivity extends BaseActivity {
             }));
         }
 
-        IocDatabase dbR = IocDatabase.getInstance(this, "region");
-        IocDatabase dbP = IocDatabase.getInstance(this, "point");
-        regionUpdatedText.setText(getString(R.string.virusdb_updated, dbR.getUpdatedAt()));
-        regionEntriesText.setText(getString(R.string.virusdb_region_scale) + " · "
-                + dbStatusText("region", vRegion, vRegion >= 0));
-        pointUpdatedText.setText(getString(R.string.virusdb_updated, dbP.getUpdatedAt()));
-        pointEntriesText.setText(getString(R.string.virusdb_point_scale) + " · "
-                + dbStatusText("point", vPoint, true));
+        // 解析库可能很重（全量库数百 MB），放后台线程，避免 onResume 卡死
+        final android.content.Context app = getApplicationContext();
+        new Thread(() -> {
+            final String updatedR;
+            final String updatedP;
+            try {
+                updatedR = IocDatabase.getInstance(app, "region").getUpdatedAt();
+                updatedP = IocDatabase.getInstance(app, "point").getUpdatedAt();
+            } catch (Throwable t) {
+                android.util.Log.w("SettingsVirusDb", "load IOC db failed", t);
+                return;
+            }
+            runOnUiThread(() -> {
+                if (isFinishing() || isDestroyed()) return;
+                regionUpdatedText.setText(getString(R.string.virusdb_updated, updatedR));
+                regionEntriesText.setText(getString(R.string.virusdb_region_scale) + " · "
+                        + dbStatusText("region", vRegion, vRegion >= 0));
+                pointUpdatedText.setText(getString(R.string.virusdb_updated, updatedP));
+                pointEntriesText.setText(getString(R.string.virusdb_point_scale) + " · "
+                        + dbStatusText("point", vPoint, true));
+            });
+        }, "polaris-vdb-page").start();
         virusDbAutoSwitch.setOnCheckedChangeListener(null);
         virusDbAutoSwitch.setChecked(prefs.getVirusAutoUpdate());
         virusDbAutoSwitch.setOnCheckedChangeListener((b, checked) ->
@@ -139,6 +153,44 @@ public class SettingsVirusDbActivity extends BaseActivity {
         return getString(R.string.virusdb_status_not_downloaded, v);
     }
 
+    /**
+     * 点「立即更新」先确认再动手：
+     * - 本地（含增量叠加）已不落后于远端 → 直接提示「已是最新」，不弹对话框不下载；
+     * - 否则弹确认框，写明实测的服务器体积（Range 探测头部获得）与 Wi-Fi 建议。
+     * 探测结果在页面打开时已预热缓存（refreshVirusDb → peekRemoteVersion），
+     * 缓存未命中时才需要现场等待（多源探测最坏十几秒）。
+     */
+    private void confirmUpdate(String type) {
+        MaterialButton btn = regionUpdateButton;
+        btn.setEnabled(false);
+        int localVer = IocDatabase.peekDbVersion(this, type);
+        IocDatabase.peekRemoteInfo(type, ri -> runOnUiThread(() -> {
+            if (isFinishing() || isDestroyed()) return;
+            btn.setEnabled(true);
+            if (localVer > 0 && ri.version > 0 && ri.version <= localVer) {
+                Toast.makeText(this, getString(R.string.virusdb_already_latest, localVer),
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+            String msg = (ri.sizeBytes > 0)
+                    ? getString(R.string.virusdb_update_confirm_known, formatMb(ri.sizeBytes))
+                    : getString(R.string.virusdb_update_confirm_unknown);
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle(R.string.virusdb_update_confirm_title)
+                    .setMessage(msg)
+                    .setPositiveButton(R.string.virusdb_update_now, (d, w) -> updateVirusDb(type))
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
+        }));
+    }
+
+    private static String formatMb(long bytes) {
+        double mb = bytes / 1048576.0;
+        return (mb >= 10)
+                ? String.format(java.util.Locale.US, "%.0f MB", mb)
+                : String.format(java.util.Locale.US, "%.1f MB", mb);
+    }
+
     private void updateVirusDb(String type) {
         IocDatabase db = IocDatabase.getInstance(this, type);
         MaterialButton btn = regionUpdateButton;
@@ -159,6 +211,19 @@ public class SettingsVirusDbActivity extends BaseActivity {
                             getString(R.string.virusdb_updated_toast, newVersion),
                             Toast.LENGTH_SHORT).show();
                     refreshVirusDb();
+                });
+            }
+
+            @Override
+            public void onUpToDate(int version) {
+                runOnUiThread(() -> {
+                    dbTokens.remove(type);
+                    showVirusDbProgress(type, false);
+                    btn.setEnabled(true);
+                    btn.setText(R.string.virusdb_update_now);
+                    Toast.makeText(SettingsVirusDbActivity.this,
+                            getString(R.string.virusdb_already_latest, version),
+                            Toast.LENGTH_SHORT).show();
                 });
             }
 

@@ -177,7 +177,14 @@ def read_head(path):
     return version, updated, source
 
 
-def compile_db(src, dst, limit=0):
+def compile_db(src, dst, limit=0, base_version=0):
+    """
+    编译 iodb.json → iodb.bin。
+
+    base_version > 0 时表示这是一个「增量包」：文件内容只包含 base 版本之后新增的条目，
+    header 偏移 88 记录基线版本，客户端据此判断该增量能否叠加到本地 base 上。
+    普通全量包保持 0。
+    """
     version, updated, source = read_head(src)
     print(f"源库: {src}")
     print(f"  db_version={version} updated_at={updated!r} source={source!r}")
@@ -300,6 +307,8 @@ def compile_db(src, dst, limit=0):
     struct.pack_into("<I", header, 76, md5_off)
     struct.pack_into("<I", header, 80, len(sha1_rows))
     struct.pack_into("<I", header, 84, sha1_off)
+    # 88: 增量包的基线版本（0 = 全量包）。v2 预留区，老客户端不读该字段、不受影响。
+    struct.pack_into("<I", header, 88, base_version)
 
     with open(dst, "wb") as f:
         f.write(header)
@@ -325,8 +334,10 @@ def main():
     ap.add_argument("src", help="输入 iodb.json")
     ap.add_argument("dst", help="输出 iodb.bin")
     ap.add_argument("--limit", type=int, default=0, help="只取前 N 条（调试用）")
+    ap.add_argument("--base-version", type=int, default=0,
+                    help="增量包的基线版本（0 = 全量包）")
     args = ap.parse_args()
-    return compile_db(args.src, args.dst, args.limit)
+    return compile_db(args.src, args.dst, args.limit, args.base_version)
 
 
 if __name__ == "__main__":

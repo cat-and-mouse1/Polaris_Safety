@@ -49,6 +49,8 @@ public final class IocBinaryIndex implements Closeable {
 
     private int formatVersion;
     private int dbVersion;
+    /** 增量包基线版本（header 偏移 88）；全量包为 0。 */
+    private int baseVersion;
     private int entryCount;
     private int hashCount;
     private int pkgCount;
@@ -125,6 +127,8 @@ public final class IocBinaryIndex implements Closeable {
             md5Off = buf.getInt(76);
             sha1Count = buf.getInt(80);
             sha1Off = buf.getInt(84);
+            // 偏移 88（v2 预留区）：增量包的基线版本；全量包为 0。
+            baseVersion = buf.getInt(88);
         }
         updatedAt = readString(updatedAtId);
         source = readString(sourceId);
@@ -132,6 +136,15 @@ public final class IocBinaryIndex implements Closeable {
 
     public int getDbVersion() {
         return dbVersion;
+    }
+
+    public int getFormatVersion() {
+        return formatVersion;
+    }
+
+    /** 增量包的基线版本（全量包为 0）。客户端据此判断增量能否叠加到本地全量库上。 */
+    public int getBaseVersion() {
+        return baseVersion;
     }
 
     public int getEntryCount() {

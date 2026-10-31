@@ -536,7 +536,7 @@
 
     <!-- Onboarding Region download (cancellable / resumable) -->
     <string name="virusdb_downloading">Downloading…</string>
-    <string name="virusdb_download_start">Downloading Polar Region DB (≈357 MB). You can cancel anytime…</string>
+    <string name="virusdb_download_start">Downloading Polar Region DB… (Wi-Fi recommended). You can cancel anytime</string>
     <string name="virusdb_download_done">Download complete, entering…</string>
     <string name="virusdb_cancel_download">Cancel and enter</string>
     <string name="virusdb_cancelled_toast">Download cancelled, using built-in DB (resume later in Settings)</string>
@@ -777,4 +777,8 @@
     <string name="ip_check_status_need_mode">Takes effect only in Shizuku or Root mode</string>
     <string name="notify_installed_risk_title">Risky app detected</string>
     <string name="notify_installed_risk_text">%1$s was scanned on install — risk score %2$d</string>
+    <string name="virusdb_update_confirm_title">Update virus database</string>
+    <string name="virusdb_update_confirm_known">About %1$s will be downloaded from the server. Wi-Fi recommended.</string>
+    <string name="virusdb_update_confirm_unknown">The latest database will be downloaded (size unknown). Wi-Fi recommended.</string>
+    <string name="virusdb_already_latest">Database is already up to date (v%1$d)</string>
 </resources>

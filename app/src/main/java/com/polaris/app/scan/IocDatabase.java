@@ -18,7 +18,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -88,6 +90,8 @@ public final class IocDatabase {
 
     public interface RefreshCallback {
         void onUpdated(int newVersion);
+        /** 本地已不落后于远端（无需下载）。默认回落到 onUpdated，UI 可覆盖以显示不同文案。 */
+        default void onUpToDate(int version) { onUpdated(version); }
         void onError(String message);
     }
 
@@ -105,6 +109,11 @@ public final class IocDatabase {
     private String source = "";
     /** 非空时走二进制索引（mmap 二分），此时上面三个 Map 保持空。 */
     private volatile IocBinaryIndex binIndex;
+
+    /** 增量包叠加层：按 dbVersion 升序，链式基于 base（base v15 → v16 → v17 …）。 */
+    private final List<IocBinaryIndex> overlays = new ArrayList<>();
+    /** 叠加层数量上限：超过则放弃增量、整份重下全量库（防止无限膨胀）。 */
+    private static final int MAX_OVERLAYS = 5;
 
     private final Map<String, IocEntry> byHash = new HashMap<>();
     private final Map<String, IocEntry> byMd5 = new HashMap<>();
@@ -169,11 +178,13 @@ public final class IocDatabase {
         String cacheName = "point".equals(dbType) ? CACHE_NAME_POINT : CACHE_NAME;
         String assetSeed = ASSET_NAME; // 内置种子库（assets/iodb_seed.json）：内容来自 Polar Region v14 过滤，轻量可离线；point 与 region 共用
 
-        // 0) 优先二进制索引（mmap 只读，堆占用≈0）
+        // 0) 优先二进制索引（mmap 只读，堆占用≈0）；随后叠加增量包（iodb-delta-*.bin）
         File binFile = new File(appContext.getFilesDir(),
                 "point".equals(dbType) ? BIN_NAME_POINT : BIN_NAME);
         if (binFile.exists() && reloadBinary(binFile)) {
-            Log.i(TAG, "Loaded binary IOC db [" + dbType + "] v" + dbVersion);
+            loadOverlays();
+            Log.i(TAG, "Loaded binary IOC db [" + dbType + "] v" + dbVersion
+                    + (overlays.isEmpty() ? "" : " (+" + overlays.size() + " delta)"));
             return;
         }
         // 1) 优先加载运行时缓存（可能已被 refresh 更新）
@@ -226,6 +237,103 @@ public final class IocDatabase {
         byPkg.clear();
         byUrl.clear();
         return true;
+    }
+
+    /**
+     * 增量包文件名：iodb.bin → iodb-delta-<基线版本>.bin（point: iodb_point-delta-<v>.bin）。
+     * 与服务端发布约定一致，客户端按本地基线版本拼出地址去探测。
+     */
+    private static String deltaFileName(String type, int baseVer) {
+        String binName = "point".equals(type) ? BIN_NAME_POINT : BIN_NAME;
+        int dot = binName.lastIndexOf(".bin");
+        return binName.substring(0, dot) + "-delta-" + baseVer + ".bin";
+    }
+
+    /** 扫描 files/ 下本库的全部增量包，返回 基线版本 → 目标版本 的映射（含非法文件过滤）。 */
+    private static Map<Integer, Integer> readDeltaChain(Context context, String type) {
+        Map<Integer, Integer> chain = new HashMap<>();
+        String prefix = ("point".equals(type) ? BIN_NAME_POINT : BIN_NAME)
+                .replace(".bin", "-delta-");
+        File[] files = context.getFilesDir().listFiles();
+        if (files == null) return chain;
+        for (File f : files) {
+            String n = f.getName();
+            if (!n.startsWith(prefix) || !n.endsWith(".bin")) continue;
+            int[] vv = peekBinVersions(f);
+            if (vv != null && vv[1] > 0 && vv[0] > vv[1]) chain.put(vv[1], vv[0]);
+        }
+        return chain;
+    }
+
+    /** 读取 bin 头部的 [dbVersion, baseVersion]；magic 不符返回 null。 */
+    static int[] peekBinVersions(File f) {        try (java.io.RandomAccessFile raf = new java.io.RandomAccessFile(f, "r")) {
+            byte[] head = new byte[96];
+            raf.readFully(head);
+            if (head[0] != 'P' || head[1] != 'O' || head[2] != 'L' || head[3] != 'A'
+                    || head[4] != 'R' || head[5] != 'I' || head[6] != 'S' || head[7] != 'B') {
+                return null;
+            }
+            java.nio.ByteBuffer b = java.nio.ByteBuffer.wrap(head)
+                    .order(java.nio.ByteOrder.LITTLE_ENDIAN);
+            return new int[]{b.getInt(12), b.getInt(88)};
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * 叠加本地全部合法增量包：从 base 版本开始沿 baseVersion → dbVersion 链加载，
+     * 链断处停止（跳版或文件缺失），保证查询时叠加顺序与发布顺序一致。
+     */
+    private void loadOverlays() {
+        closeOverlays();
+        int v = (binIndex != null) ? binIndex.getDbVersion() : -1;
+        for (int i = 0; i < MAX_OVERLAYS; i++) {
+            File f = new File(appContext.getFilesDir(), deltaFileName(dbType, v));
+            if (!f.exists()) break;
+            int[] vv = peekBinVersions(f);
+            if (vv == null || vv[1] != v || vv[0] <= v) {
+                Log.w(TAG, "delta " + f.getName() + " 不构成 v" + v + " 的合法后继，忽略其后全部增量");
+                break;
+            }
+            try {
+                overlays.add(IocBinaryIndex.open(f));
+            } catch (Exception e) {
+                Log.w(TAG, "open delta " + f.getName() + " failed", e);
+                break;
+            }
+            v = vv[0];
+        }
+        if (!overlays.isEmpty() && binIndex != null) {
+            dbVersion = v;
+        }
+    }
+
+    private void closeOverlays() {
+        for (IocBinaryIndex o : overlays) {
+            try { o.close(); } catch (Exception ignored) { }
+        }
+        overlays.clear();
+    }
+
+    /** 删除本地全部增量包（整份全量更新成功后调用）。 */
+    private void clearOverlayFiles() {
+        closeOverlays();
+        File[] files = appContext.getFilesDir().listFiles();
+        if (files == null) return;
+        String prefix = ("point".equals(dbType) ? BIN_NAME_POINT : BIN_NAME)
+                .replace(".bin", "-delta-");
+        for (File f : files) {
+            if (f.getName().startsWith(prefix) && f.getName().endsWith(".bin")) {
+                if (f.delete()) Log.i(TAG, "removed delta " + f.getName());
+            }
+        }
+    }
+
+    /** 当前有效版本：叠加层链顶；无叠加层时即 base 版本。 */
+    private int effectiveVersion() {
+        if (!overlays.isEmpty()) return overlays.get(overlays.size() - 1).getDbVersion();
+        return (binIndex != null) ? binIndex.getDbVersion() : dbVersion;
     }
 
     /**
@@ -347,10 +455,21 @@ public final class IocDatabase {
 
     // ---------- 查询 ----------
 
+    /**
+     * 查询顺序：增量叠加层（新 → 旧）优先，再查全量 base。
+     * 增量包只含新增条目，与 base 无重叠；先查叠加层让「最新情报」优先返回，
+     * 同键冲突时以新数据为准。
+     */
     public IocEntry matchByHash(String sha256) {
         if (sha256 == null) return null;
         IocBinaryIndex bin = binIndex;
-        if (bin != null) return bin.matchByHash(sha256);
+        if (bin != null) {
+            for (int i = overlays.size() - 1; i >= 0; i--) {
+                IocEntry e = overlays.get(i).matchByHash(sha256);
+                if (e != null) return e;
+            }
+            return bin.matchByHash(sha256);
+        }
         return byHash.get(sha256.toLowerCase(java.util.Locale.US));
     }
 
@@ -358,7 +477,13 @@ public final class IocDatabase {
     public IocEntry matchByMd5(String md5) {
         if (md5 == null) return null;
         IocBinaryIndex bin = binIndex;
-        if (bin != null) return bin.matchByMd5(md5);
+        if (bin != null) {
+            for (int i = overlays.size() - 1; i >= 0; i--) {
+                IocEntry e = overlays.get(i).matchByMd5(md5);
+                if (e != null) return e;
+            }
+            return bin.matchByMd5(md5);
+        }
         return byMd5.get(md5.toLowerCase(java.util.Locale.US));
     }
 
@@ -366,21 +491,39 @@ public final class IocDatabase {
     public IocEntry matchBySha1(String sha1) {
         if (sha1 == null) return null;
         IocBinaryIndex bin = binIndex;
-        if (bin != null) return bin.matchBySha1(sha1);
+        if (bin != null) {
+            for (int i = overlays.size() - 1; i >= 0; i--) {
+                IocEntry e = overlays.get(i).matchBySha1(sha1);
+                if (e != null) return e;
+            }
+            return bin.matchBySha1(sha1);
+        }
         return bySha1.get(sha1.toLowerCase(java.util.Locale.US));
     }
 
     public IocEntry matchByPkg(String pkg) {
         if (pkg == null) return null;
         IocBinaryIndex bin = binIndex;
-        if (bin != null) return bin.matchByPkg(pkg);
+        if (bin != null) {
+            for (int i = overlays.size() - 1; i >= 0; i--) {
+                IocEntry e = overlays.get(i).matchByPkg(pkg);
+                if (e != null) return e;
+            }
+            return bin.matchByPkg(pkg);
+        }
         return byPkg.get(pkg);
     }
 
     public IocEntry matchByUrl(String url) {
         if (url == null) return null;
         IocBinaryIndex bin = binIndex;
-        if (bin != null) return bin.matchByUrl(url);
+        if (bin != null) {
+            for (int i = overlays.size() - 1; i >= 0; i--) {
+                IocEntry e = overlays.get(i).matchByUrl(url);
+                if (e != null) return e;
+            }
+            return bin.matchByUrl(url);
+        }
         return byUrl.get(url.toLowerCase(java.util.Locale.US));
     }
 
@@ -392,12 +535,21 @@ public final class IocDatabase {
      * @return 版本号；region 无本地缓存时返回 -1（未下载）。
      */
     public static int peekDbVersion(Context context, String type) {
-        // 二进制索引优先：只读 16 字节头，不触发任何解析
+        // 二进制索引优先：只读头部，不触发任何解析；有效版本 = base 沿增量链走到顶
         File bin = new File(context.getFilesDir(),
                 "point".equals(type) ? BIN_NAME_POINT : BIN_NAME);
         if (bin.exists()) {
-            int v = peekBinaryVersion(bin);
-            if (v >= 0) return v;
+            int[] vv = peekBinVersions(bin);
+            if (vv != null) {
+                int v = vv[0];
+                Map<Integer, Integer> chain = readDeltaChain(context, type);
+                for (int guard = 0; guard < MAX_OVERLAYS + 1; guard++) {
+                    Integer next = chain.get(v);
+                    if (next == null) break;
+                    v = next;
+                }
+                return v;
+            }
         }
         String cacheName = "point".equals(type) ? CACHE_NAME_POINT : CACHE_NAME;
         File cache = new File(context.getFilesDir(), cacheName);
@@ -474,7 +626,8 @@ public final class IocDatabase {
     }
 
     public static void cleanupOrphanedParts(Context context) {
-        for (String name : new String[]{CACHE_NAME, CACHE_NAME_POINT, BIN_NAME, BIN_NAME_POINT}) {
+        for (String name : new String[]{CACHE_NAME, CACHE_NAME_POINT, BIN_NAME, BIN_NAME_POINT,
+                BIN_NAME + ".delta", BIN_NAME_POINT + ".delta"}) {
             File part = new File(context.getFilesDir(), name + ".part");
             if (!part.exists()) continue;
             File meta = new File(context.getFilesDir(), name + ".part.meta");
@@ -531,49 +684,101 @@ public final class IocDatabase {
     /** 远端版本探测结果缓存（进程内）：同一类型只发一次请求。 */
     private static final java.util.concurrent.ConcurrentHashMap<String, Integer> REMOTE_VER_CACHE =
             new java.util.concurrent.ConcurrentHashMap<>();
+    private static final java.util.concurrent.ConcurrentHashMap<String, RemoteInfo> REMOTE_INFO_CACHE =
+            new java.util.concurrent.ConcurrentHashMap<>();
     private static final ExecutorService PROBE_EXECUTOR = Executors.newSingleThreadExecutor();
 
+    /** 远端库信息：版本号 + 总字节数（-1 = 未知）。 */
+    public static class RemoteInfo {
+        public final int version;
+        public final long sizeBytes;
+
+        RemoteInfo(int version, long sizeBytes) {
+            this.version = version;
+            this.sizeBytes = sizeBytes;
+        }
+    }
+
     /**
-     * 异步探测远端库文件的 db_version（Range 请求只取头部 512 字节，不下载全量库）。
-     * 用于「未下载」状态下在设置页显示真实最新版本；成功结果进程内缓存，失败返回 -1。
+     * 对单个 bin 分发地址发 Range 0-127 探测：从头部解析 dbVersion，
+     * 并从 Content-Range 拿全量体积（LFS 的 media 域名对 Range 支持正常；
+     * jsDelivr 的 Range 会返回压缩流 → magic 校验失败 → 视为该源不可用）。
      */
-    public static void peekRemoteVersion(String type, RemoteVersionCallback cb) {
-        Integer cached = REMOTE_VER_CACHE.get(type);
+    private static RemoteInfo probeBinUrl(String urlStr) {
+        HttpURLConnection conn = null;
+        try {
+            conn = (HttpURLConnection) new URL(urlStr).openConnection();
+            conn.setConnectTimeout(8000);
+            conn.setReadTimeout(8000);
+            conn.setRequestProperty("Range", "bytes=0-127");
+            conn.setRequestProperty("Accept-Encoding", "identity");
+            int code = conn.getResponseCode();
+            if (code != 200 && code != 206) return null;
+            try (InputStream in = conn.getInputStream()) {
+                byte[] buf = new byte[128];
+                int n = 0, r;
+                while (n < buf.length && (r = in.read(buf, n, buf.length - n)) != -1) n += r;
+                if (n < 16) return null;
+                java.nio.ByteBuffer b = java.nio.ByteBuffer.wrap(buf, 0, n)
+                        .order(java.nio.ByteOrder.LITTLE_ENDIAN);
+                boolean magicOk = buf[0] == 'P' && buf[1] == 'O' && buf[2] == 'L' && buf[3] == 'A'
+                        && buf[4] == 'R' && buf[5] == 'I' && buf[6] == 'S' && buf[7] == 'B';
+                if (!magicOk || b.getInt(8) != 2) return null;
+                int ver = b.getInt(12);
+                if (ver <= 0) return null;
+                long size = -1;
+                String cr = conn.getHeaderField("Content-Range");
+                if (cr != null) {
+                    int slash = cr.lastIndexOf('/');
+                    if (slash > 0) {
+                        try { size = Long.parseLong(cr.substring(slash + 1).trim()); }
+                        catch (NumberFormatException ignored) { }
+                    }
+                } else if (code == 200) {
+                    size = conn.getContentLengthLong();
+                }
+                return new RemoteInfo(ver, size);
+            }
+        } catch (Exception e) {
+            return null;
+        } finally {
+            if (conn != null) conn.disconnect();
+        }
+    }
+
+    /** 依次探测 bin 多源，返回第一个成功的结果；全失败返回 null。 */
+    private static RemoteInfo probeRemoteBinInfo(String type) {
+        for (String url : ("point".equals(type) ? BIN_URLS_POINT : BIN_URLS_REGION)) {
+            RemoteInfo ri = probeBinUrl(url);
+            if (ri != null) return ri;
+        }
+        return null;
+    }
+
+    /**
+     * 异步探测远端库的版本与体积（Range 只取 128 字节头，不下载全量库）。
+     * 用于「未下载」状态下显示真实最新版本、以及更新前对话框的体积提示。
+     * 成功结果进程内缓存，失败返回 version=-1。
+     */
+    public static void peekRemoteInfo(String type, java.util.function.Consumer<RemoteInfo> cb) {
+        RemoteInfo cached = REMOTE_INFO_CACHE.get(type);
         if (cached != null) {
-            cb.onVersion(cached);
+            cb.accept(cached);
             return;
         }
         PROBE_EXECUTOR.execute(() -> {
-            int v = -1;
-            HttpURLConnection conn = null;
-            try {
-                String urlStr = "point".equals(type) ? BASE_URL_POINT : BASE_URL_REGION;
-                conn = (HttpURLConnection) new URL(urlStr).openConnection();
-                conn.setConnectTimeout(8000);
-                conn.setReadTimeout(8000);
-                conn.setRequestProperty("Range", "bytes=0-511");
-                int code = conn.getResponseCode();
-                if (code == 200 || code == 206) {
-                    try (InputStream in = conn.getInputStream()) {
-                        byte[] buf = new byte[512];
-                        int n = 0, r;
-                        while (n < buf.length && (r = in.read(buf, n, buf.length - n)) != -1) n += r;
-                        String head = new String(buf, 0, n, StandardCharsets.UTF_8);
-                        // 防御：拿到 Git LFS 指针（分发地址误用 raw 域名）时无版本可解析
-                        if (!head.startsWith("version https://git-lfs.github.com/spec")) {
-                            java.util.regex.Matcher m = java.util.regex.Pattern
-                                    .compile("\"db_version\"\\s*:\\s*(\\d+)").matcher(head);
-                            if (m.find()) v = Integer.parseInt(m.group(1));
-                        }
-                    }
-                }
-            } catch (Exception ignored) {
-            } finally {
-                if (conn != null) conn.disconnect();
+            RemoteInfo ri = probeRemoteBinInfo(type);
+            if (ri != null) {
+                REMOTE_INFO_CACHE.put(type, ri);
+                REMOTE_VER_CACHE.put(type, ri.version);
             }
-            if (v > 0) REMOTE_VER_CACHE.put(type, v);
-            cb.onVersion(v);
+            cb.accept(ri != null ? ri : new RemoteInfo(-1, -1));
         });
+    }
+
+    /** 兼容旧调用：只关心版本号。 */
+    public static void peekRemoteVersion(String type, RemoteVersionCallback cb) {
+        peekRemoteInfo(type, ri -> cb.onVersion(ri.version));
     }
 
     /** 记录部分下载的远端总大小（sidecar：iodb.json.part.meta，一行数字）。 */
@@ -667,6 +872,55 @@ public final class IocDatabase {
     }
 
     /**
+     * 尝试下载并叠加增量包 iodb-delta-<localVer>.bin（多源依次尝试）。
+     * 增量包通常只有几百 KB ~ 几 MB，条目与 base 无重叠，直接作为 mmap 叠加层生效。
+     * 成功且链顶达到远端版本返回 true；任何失败（404/体积不匹配/校验失败）都清理现场
+     * 并返回 false，由调用方回退全量下载。
+     */
+    private boolean tryApplyDelta(RemoteInfo ri, int localVer, String[] binUrls,
+                                  RefreshCallback cb, ProgressCallback pc, DownloadToken token) {
+        String binName = "point".equals(dbType) ? BIN_NAME_POINT : BIN_NAME;
+        String deltaName = deltaFileName(dbType, localVer);
+        File deltaPart = new File(appContext.getFilesDir(), binName + ".delta.part");
+        File deltaTarget = new File(appContext.getFilesDir(), deltaName);
+        Log.i(TAG, "probing delta " + deltaName + " for v" + localVer + " -> v" + ri.version);
+        for (String binUrl : binUrls) {
+            String deltaUrl = binUrl.substring(0, binUrl.lastIndexOf('/') + 1) + deltaName;
+            try {
+                long total = downloadToFileResume(deltaUrl, deltaPart, pc, token);
+                if (token != null && token.isCancelled()) {
+                    silentCancel(cb);
+                    return true;
+                }
+                if (total > 0 && looksLikeIocBin(deltaPart)) {
+                    int[] vv = peekBinVersions(deltaPart);
+                    if (vv != null && vv[1] == localVer && vv[0] == ri.version
+                            && deltaPart.renameTo(deltaTarget)) {
+                        loadOverlays();
+                        if (effectiveVersion() == ri.version) {
+                            deletePartMeta(deltaPart);
+                            Log.i(TAG, "IOC delta [" + dbType + "] applied: v" + localVer
+                                    + " -> v" + ri.version + " (+" + deltaTarget.length() / 1024 + " KB)");
+                            cb.onUpdated(ri.version);
+                            return true;
+                        }
+                        deltaTarget.delete();
+                    }
+                    Log.w(TAG, "delta from " + deltaUrl + " not applicable (base/target mismatch)");
+                }
+            } catch (Exception e) {
+                Log.w(TAG, "delta download failed from " + deltaUrl + ": " + e.getMessage());
+            }
+            if (deltaPart.exists()) deltaPart.delete();
+            deletePartMeta(deltaPart);
+            // 该源没有增量包（404 / 压缩流）→ 换下一个源
+        }
+        if (deltaPart.exists()) deltaPart.delete();
+        deletePartMeta(deltaPart);
+        return false;
+    }
+
+    /**
      * 拉取最新病毒库并落盘缓存（支持断点续传 + 可取消 + 进度回调 + 超时提示）。
      * 大文件（region 357MB）写入 iodb.json.part；若该文件已存在则从断点用 HTTP Range
      * 续传，完成后原子 rename 为 iodb.json。取消/超时/网络出错均保留 .part 以便后续补全。
@@ -683,6 +937,25 @@ public final class IocDatabase {
 
         executor.execute(() -> {
             try {
+                // -1) 探测远端最新版本与体积（Range 128B，秒级）
+                RemoteInfo ri = probeRemoteBinInfo(dbType);
+                int localVer = effectiveVersion();
+                if (ri != null && ri.version > 0 && localVer > 0) {
+                    if (ri.version <= localVer) {
+                        // 本地（base + 增量叠加）已不落后于远端：不重复下载
+                        Log.i(TAG, "IOC db [" + dbType + "] already latest: local v" + localVer
+                                + " >= remote v" + ri.version);
+                        cb.onUpToDate(localVer);
+                        return;
+                    }
+                    // -2) 增量优先：iodb-delta-<本地版本>.bin 存在且基线匹配时，只下载新增条目
+                    if (overlays.size() < MAX_OVERLAYS
+                            && tryApplyDelta(ri, localVer, binUrls, cb, pc, token)) {
+                        return;
+                    }
+                    // 无可用增量（跳版/文件不存在/叠加层已满）→ 走全量
+                }
+
                 // 0) 优先二进制索引：体积约为 JSON 的 1/3，且可 mmap 加载（161 万条也不 OOM）
                 //    多源依次尝试，任一源成功即止；全部失败才回退 JSON。
                 long binTotal = -1;
@@ -709,6 +982,8 @@ public final class IocDatabase {
                 }
                 if (binTotal > 0 && binPart.exists() && binPart.renameTo(binTarget)) {
                     if (reloadBinary(binTarget)) {
+                        // 全量已是最新内容：旧增量包全部作废，删除以免叠加出错误版本
+                        clearOverlayFiles();
                         deletePartMeta(binPart);
                         Log.i(TAG, "IOC bin [" + dbType + "] refreshed to v" + dbVersion);
                         cb.onUpdated(dbVersion);
@@ -731,9 +1006,8 @@ public final class IocDatabase {
                 if (knownTotal > MAX_PARSE_BYTES) {
                     if (part.exists()) part.delete();
                     deletePartMeta(part);
-                    cb.onError("该病毒库 " + (knownTotal / 1024 / 1024)
-                            + " MB 超过客户端解析上限（" + (MAX_PARSE_BYTES / 1024 / 1024)
-                            + " MB），需服务端提供二进制索引（iodb.bin）");
+                    cb.onError("服务器数据包过大（" + (knownTotal / 1024 / 1024)
+                            + " MB），暂时无法在手机上使用，请等待后续版本");
                     return;
                 }
                 long total = downloadToFileResume(baseUrl, part, pc, token);
@@ -781,8 +1055,8 @@ public final class IocDatabase {
                     // 这类库必须由服务端提供 .bin（见 tools/ioc_pack.py）。
                     target.delete();
                     deletePartMeta(part);
-                    cb.onError("该病毒库体积过大（" + (target.length() / 1024 / 1024)
-                            + " MB），需服务端提供二进制索引（iodb.bin）才能使用");
+                    cb.onError("服务器数据包过大（" + (target.length() / 1024 / 1024)
+                            + " MB），暂时无法在手机上使用，请等待后续版本");
                     return;
                 }
                 try (InputStream in = new FileInputStream(target)) {
@@ -798,6 +1072,8 @@ public final class IocDatabase {
                         binIndex.close();
                         binIndex = null;
                     }
+                    closeOverlays(); // JSON 重建了全量索引，增量叠加层随之作废
+                    clearOverlayFiles();
                     Log.i(TAG, "IOC db [" + dbType + "] refreshed to v" + dbVersion);
                     cb.onUpdated(dbVersion);
                 } else {

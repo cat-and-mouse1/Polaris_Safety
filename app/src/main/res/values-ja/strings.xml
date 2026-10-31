@@ -536,7 +536,7 @@
 
     <!-- 欢迎画面 Region ダウンロード（中断可・再開可） -->
     <string name="virusdb_downloading">ダウンロード中…</string>
-    <string name="virusdb_download_start">Polar Region データベースをダウンロード中（約 357 MB）。いつでもキャンセル可…</string>
+    <string name="virusdb_download_start">Polar Region データベースをダウンロード中…（Wi-Fi 推奨）。いつでもキャンセル可</string>
     <string name="virusdb_download_done">ダウンロード完了、移行中…</string>
     <string name="virusdb_cancel_download">キャンセルして進む</string>
     <string name="virusdb_cancelled_toast">ダウンロードをキャンセル。内蔵 DB を使用（設定で後から再開可）</string>
@@ -777,4 +777,8 @@
     <string name="ip_check_status_need_mode">Shizuku または Root モードでのみ有効になります</string>
     <string name="notify_installed_risk_title">リスクのあるアプリを検出</string>
     <string name="notify_installed_risk_text">%1$s をインストール直後にスキャンしました — リスク指数 %2$d</string>
+    <string name="virusdb_update_confirm_title">ウイルスデータベースの更新</string>
+    <string name="virusdb_update_confirm_known">サーバーから約 %1$s のデータをダウンロードします。Wi-Fi 推奨。</string>
+    <string name="virusdb_update_confirm_unknown">最新のデータベースをダウンロードします（サイズ不明）。Wi-Fi 推奨。</string>
+    <string name="virusdb_already_latest">データベースは最新です（v%1$d）</string>
 </resources>

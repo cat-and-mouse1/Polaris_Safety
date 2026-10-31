@@ -536,7 +536,7 @@
 
     <!-- 欢迎页 Region 下载（可中断 / 续传） -->
     <string name="virusdb_downloading">正在下载…</string>
-    <string name="virusdb_download_start">正在下载 Polar Region 病毒库（约 357 MB），可随时取消…</string>
+    <string name="virusdb_download_start">正在下载 Polar Region 病毒库，可随时取消…（建议在 Wi-Fi 下进行）</string>
     <string name="virusdb_download_done">下载完成，正在进入…</string>
     <string name="virusdb_cancel_download">取消并进入</string>
     <string name="virusdb_cancelled_toast">已取消下载，将使用内置库（可在设置中继续补全）</string>
@@ -782,4 +782,8 @@
     <string name="ip_check_status_need_mode">需 Shizuku 或 Root 模式才会实际生效</string>
     <string name="notify_installed_risk_title">发现风险应用</string>
     <string name="notify_installed_risk_text">%1 安装后立即扫描，风险指数 %2</string>
+    <string name="virusdb_update_confirm_title">更新病毒库</string>
+    <string name="virusdb_update_confirm_known">将从服务器下载约 %1$s 的最新病毒库数据，建议在 Wi-Fi 下进行。</string>
+    <string name="virusdb_update_confirm_unknown">将从服务器下载最新病毒库数据（体积未知），建议在 Wi-Fi 下进行。</string>
+    <string name="virusdb_already_latest">病毒库已是最新（v%1$d）</string>
 </resources>
