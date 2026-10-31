@@ -37,6 +37,38 @@
 
     <!-- Mode: Root -->
     <string name="mode_root_name">Root mode</string>
+    <string name="mode_resume_scan">Start scan with %1$s</string>
+    <string name="mode_reconfigure">Reconfigure mode</string>
+    <string name="mode_pick_to_start">Pick a mode to start scanning</string>
+    <string name="mode_pick_first">Pick a mode first</string>
+    <string name="mode_status_not_ready">Not ready</string>
+    <string name="mode_status_checking">Checking…</string>
+    <string name="mode_check_title">Check logic</string>
+    <string-array name="mode_check_steps_normal">
+        <item>Enumerates all installed apps, parses manifest permissions, and flags dangerous permission combos (e.g. SMS+network, overlay+accessibility).</item>
+        <item>Scans accessible directories for APK packages and executables, verifying signatures and file structure integrity.</item>
+        <item>Matches disguised files, ransom notes, and known malware family naming patterns via filename heuristics.</item>
+        <item>Scores hits and generates a report; never touches protected system areas or modifies any files.</item>
+    </string-array>
+    <string-array name="mode_check_steps_accessibility">
+        <item>Includes every step of the normal check (permission combos, APK and suspicious file scanning).</item>
+        <item>The accessibility service watches sensitive events in real time: silent installs, disguised login screens, auto-tapping consent buttons.</item>
+        <item>Intercepts high-risk behavior and writes an activity log shown in the home App activity panel for audit.</item>
+        <item>Deep scan additionally detects non-system apps holding accessibility services (+30) or device admin (+25).</item>
+    </string-array>
+    <string-array name="mode_check_steps_shizuku">
+        <item>Includes every step of the normal check (permission combos, APK and suspicious file scanning).</item>
+        <item>Uses Shizuku (ADB-level privileges) for deep scanning across sensitive directories and system-adjacent areas.</item>
+        <item>Detects non-system apps abusing accessibility services or holding device admin.</item>
+        <item>Force-stops confirmed high-risk apps via am force-stop, removing runtime threats immediately.</item>
+    </string-array>
+    <string-array name="mode_check_steps_root">
+        <item>Includes every step of the normal check (permission combos, APK and suspicious file scanning).</item>
+        <item>Deep scanning reaches protected system areas and partition directories for the most complete coverage.</item>
+        <item>Detects accessibility/device-admin abuse and other deep misuse signals.</item>
+        <item>Force-stops and freezes high-risk apps (pm disable-user) to prevent relaunch — ideal for unattended devices.</item>
+    </string-array>
+    <string name="behavior_panel_title">App activity</string>
     <string name="mode_root_desc">Uses Root permission for all-round blocking and guarding</string>
     <string name="mode_root_detail">Directly uses the phone\'s Root permission for all-round interception and guarding: freeze malicious apps and block their auto-start and execution.</string>
     <string name="mode_level_4">Lv.4 Full guard</string>
@@ -50,12 +82,45 @@
     <string name="scan_done_clean">No malware found. Your phone is in good shape</string>
     <string name="scan_done_risk">%1$d suspicious apps found</string>
     <string name="scan_title">Scan results</string>
+    <string name="result_score_max">/100</string>
+    <string name="result_tab_files">Files</string>
+    <string name="result_tab_apps">Apps</string>
+    <string name="result_file_scope">Scope: %1$s</string>
+    <string name="result_file_total">Files scanned: %1$d</string>
+    <string name="result_file_score">File score: %1$d</string>
+    <string name="result_app_total">Apps scanned: %1$d</string>
+    <string name="result_app_score">App score: %1$d</string>
+    <string name="result_fold_files">File findings (%1$d)</string>
+    <string name="result_fold_apps">App results (%1$d)</string>
+    <string name="result_no_app_risk">No risky apps found</string>
+
+    <!-- Satellite detail (tap the resident satellite on the star map → side detail drawer) -->
+    <string name="sat_detail_name">Polaris-1</string>
+    <string name="sat_detail_sub">Survey satellite deployed by deep scan</string>
+    <string name="sat_detail_type">Survey satellite</string>
+    <string name="sat_detail_orbit_label">Orbit</string>
+    <string name="sat_detail_orbit_value">36 s per revolution</string>
+    <string name="sat_detail_status_label">Status</string>
+    <string name="sat_detail_status_value">In orbit</string>
+    <string name="sat_detail_deploy_label">Deployed</string>
+    <string name="sat_detail_deploy_value_fmt">Deep scan · %s</string>
+    <string name="sat_detail_advice">The satellite is operating normally in orbit, continuously monitoring risk targets in the current star region.</string>
+    <string name="result_scope_folders">Selected folders (%1$d)</string>
+    <string name="scan_section_files">File risks (%1$d)</string>
+    <string name="scan_section_apps">App risks (%1$d)</string>
+
+    <string name="result_score_placeholder">--</string>
+    <string name="result_collapse_desc">Collapse results</string>
     <string name="scan_deep_badge">Deep scan</string>
     <string name="scan_shallow_badge">Light scan</string>
     <string name="risk_high">High risk</string>
     <string name="risk_medium">Medium risk</string>
     <string name="risk_low">Low risk</string>
     <string name="risk_safe">Safe</string>
+    <string name="star_info_app">Size %1$s · %2$s</string>
+    <string name="star_info_folder">Size %1$s</string>
+    <string name="scan_result_hint">Swipe up to view scan results</string>
+    <string name="scan_view_results">View scan results</string>
     <string name="action_handle">Handle</string>
     <string name="action_app_details">App details</string>
     <string name="action_force_stop">Force stop</string>
@@ -77,8 +142,20 @@
     <string name="toast_guard_started">Guard service started</string>
     <string name="toast_guard_stopped">Guard service stopped</string>
     <string name="toast_scan_start">Scan started</string>
+    <string name="toast_open_failed">Cannot open this app</string>
     <string name="notification_channel_scan">Scan alerts</string>
     <string name="notification_channel_guard">Guard interception</string>
+    <string name="notification_channel_update">Virus DB update</string>
+    <string name="notification_section">Notifications</string>
+    <string name="notification_intro">Manage system notifications by category. Changes take effect immediately.</string>
+    <string name="notify_guard_title">Guard persistent notification</string>
+    <string name="notify_guard_desc">Shown while guarding; turning off only silences it (foreground service, cannot be removed by system)</string>
+    <string name="notify_block_title">Block persistent notification</string>
+    <string name="notify_block_desc">Guard blessing hint while block mode is on; can be fully disabled</string>
+    <string name="notify_virus_title">Virus DB update notification</string>
+    <string name="notify_virus_desc">Remind after the virus database auto-updates</string>
+    <string name="notification_virus_updated_title">Virus database updated</string>
+    <string name="notification_virus_updated_text">Threat intelligence database updated to v%1$d</string>
     <string name="notification_scan_title">Polaris found a suspicious app</string>
     <string name="notification_blocked_title">Polaris blocked malware</string>
     <string name="notification_blocked_text">Blocked %1$s from running</string>
@@ -107,6 +184,8 @@
     <string name="ai_think_8">Producing the verdict: remove or keep…</string>
     <string name="ai_home_entry">AI engine</string>
     <string name="ai_home_status_off">Not connected · tap to configure</string>
+    <string name="ai_summary_providers">%1$d providers connected</string>
+    <string name="ai_summary_models">%1$d models enabled</string>
     <string name="ai_home_status_on">Connected to %1$s</string>
     <string name="ai_home_status_multi_provider">Connected to %1$d providers · %2$s mode</string>
 
@@ -149,6 +228,14 @@
     <string name="ai_scan_start">AI is analyzing, please wait…</string>
     <string name="ai_judge_failed">AI analysis failed: %1$s</string>
     <string name="ai_not_configured">AI engine not connected yet. Please configure the API first</string>
+
+    <!-- AI detection mode (review / independent) -->
+    <string name="ai_mode_title">AI Detection Mode</string>
+    <string name="ai_mode_review">Review</string>
+    <string name="ai_mode_review_desc">AI only reviews locally-flagged risks to save API usage (default)</string>
+    <string name="ai_mode_independent">Independent</string>
+    <string name="ai_mode_independent_desc">Send all candidates to AI; it judges risk level and merges into the final result</string>
+    <string name="ai_independent_clean">AI independent scan: reviewed %1$d items, no new risks found</string>
 
     <!-- AI custom provider -->
     <string name="ai_custom_provider_title">Custom LLM Provider</string>
@@ -247,6 +334,10 @@
     <string name="settings_engine_hint">When set, every mode entry defaults to this engine (you can still change it temporarily in the sheet)</string>
     <string name="settings_ai_configure">Configure</string>
     <string name="detection_config_title">Detection Config</string>
+    <string name="detection_subtitle">AI intelligence &amp; machine learning</string>
+    <string name="detection_engine_section">Engine</string>
+    <string name="detection_default_engine">Default Engine</string>
+    <string name="detection_ai_section">AI Detection</string>
     <string name="detection_ai_on">AI connected</string>
     <string name="detection_ai_off">AI not connected</string>
     <string name="detection_ml_on">ML enabled</string>
@@ -266,6 +357,7 @@
     <string name="theme_toast_system">Switched to follow system</string>
 
     <!-- ============ Custom theme color ============ -->
+    <string name="display_section">Display</string>
     <string name="theme_mode_title">Display mode</string>
     <string name="theme_color_section">Appearance</string>
     <string name="appearance_entry_summary">Dark mode and theme color</string>
@@ -327,6 +419,16 @@
     <string name="block_toggle_off">Disable intercept mode</string>
     <string name="block_guard_desc">Guarding: lock-screen · screen takeover · notification theft · ransomware · usage-rights abuse</string>
     <string name="block_pin">Pinned</string>
+    <string name="app_monitor_title">App monitoring</string>
+    <string name="block_realtime_title">Real-time protection</string>
+    <string name="block_realtime_desc">Background guard; intercepts malicious apps immediately</string>
+    <string name="block_perms_title">Required permissions</string>
+    <string name="block_add_apps">Add apps</string>
+    <string name="block_search_hint">Search app name or package</string>
+    <string name="block_search_empty">No matching apps</string>
+    <string name="block_fullscreen_hint">Fullscreen</string>
+    <string name="block_fullscreen_exit_hint">Restore</string>
+    <string name="close">Close</string>
 
     <!-- Intercept module · required permissions -->
     <string name="perm_grant">Grant</string>
@@ -426,6 +528,11 @@
     <string name="virusdb_point_name">Polar Point (Curated · ~75K entries)</string>
     <string name="virusdb_region_desc">Full version, precise hash blocking (357 MB)</string>
     <string name="virusdb_point_desc">Curated, lightweight built-in, works offline</string>
+    <string name="virusdb_region_chip">Region·%1$s</string>
+    <string name="virusdb_point_chip">Point·%1$s</string>
+    <string name="virusdb_status_short_downloaded">Downloaded</string>
+    <string name="virusdb_status_short_downloading">Downloading</string>
+    <string name="virusdb_status_short_not_downloaded">Not downloaded</string>
 
     <!-- Onboarding Region download (cancellable / resumable) -->
     <string name="virusdb_downloading">Downloading…</string>
@@ -440,6 +547,8 @@
 
     <!-- ============ ML Machine Learning Detection ============ -->
     <string name="ml_engine_title">ML Detection Engine</string>
+    <string name="ml_engine_switch">ML Engine</string>
+    <string name="detection_more_config">Advanced Settings</string>
     <string name="ml_engine_subtitle">On-device local models — no network needed, adding extra detection dimensions</string>
     <string name="ml_results_title">ML Detection Results</string>
     <string name="ml_no_results">No ML detection results</string>
@@ -565,6 +674,17 @@
     <!-- Tutorial -->
     <string name="tutorial_welcome_title">Welcome to Polaris</string>
     <string name="tutorial_welcome_subtitle">Protecting your device</string>
+    <string name="onboarding_welcome_btn">Get Started</string>
+    <string name="onboarding_appearance_title">Appearance</string>
+    <string name="onboarding_appearance_subtitle">Pick a theme color and display mode; this page previews live</string>
+    <string name="onboarding_virusdb_subtitle">Choose the virus database source used for scanning</string>
+    <string name="onboarding_ai_title">AI Connect</string>
+    <string name="onboarding_ai_subtitle">Connect an AI engine for smarter threat verdicts (optional)</string>
+    <string name="onboarding_ai_enable">Enable AI engine</string>
+    <string name="onboarding_ai_config">Configure provider</string>
+    <string name="onboarding_ai_status">Connected: %s</string>
+    <string name="onboarding_ai_status_none">No provider configured</string>
+    <string name="onboarding_ai_status_disabled">AI engine disabled</string>
     <string name="tutorial_enter">Get Started</string>
     <string name="tutorial_scan_title">Full Scan</string>
     <string name="tutorial_scan_desc">Scan all apps to detect malware</string>
@@ -580,4 +700,74 @@
     <string name="pulldown_perm_empty">No permission records to show</string>
     <string name="pulldown_recent_count">%1$d files</string>
     <string name="pulldown_close">Close</string>
+
+    <!-- Star detail panel (slide out from the right when a star is tapped) -->
+    <string name="star_detail_title">Star detail</string>
+    <string name="star_detail_close">Close</string>
+    <string name="star_detail_type">Type</string>
+    <string name="star_detail_type_app">App</string>
+    <string name="star_detail_type_folder">Folder</string>
+    <string name="star_detail_size">Size</string>
+    <string name="star_detail_risk">Risk level</string>
+    <string name="star_detail_children">Items</string>
+    <string name="star_detail_children_fmt">%1$d items · max %2$s</string>
+    <string name="star_detail_sub_app">Package %1$s</string>
+    <string name="star_detail_sub_folder">Path %1$s</string>
+    <string name="star_detail_risk_unknown">No risky item</string>
+    <string name="star_detail_time">Last scan</string>
+    <string name="star_detail_never">Not scanned</string>
+    <string name="star_detail_open">Open</string>
+    <string name="star_detail_advice_safe">No risk detected, safe to use.</string>
+    <string name="star_detail_advice_low">A few suspicious items found; keep an eye on its permissions.</string>
+    <string name="star_detail_advice_medium">Medium risk detected; handle it as suggested before continuing.</string>
+    <string name="star_detail_advice_high">High risk detected; uninstall or isolate it right away.</string>
+    <string name="star_detail_facts_title">Star facts</string>
+    <string name="star_detail_planets">Planets</string>
+    <string name="star_detail_planets_fmt">%1$d</string>
+    <string name="star_detail_mag">Magnitude</string>
+    <string name="star_detail_mag_fmt">%1$.1f mag</string>
+    <string name="star_detail_temp">Temperature</string>
+    <string name="star_detail_temp_fmt">%1$d K</string>
+    <string name="star_detail_spec">Spectral type</string>
+    <string name="star_detail_radius">Radius</string>
+    <string name="star_detail_radius_fmt">%1$.1f R☉</string>
+    <string name="star_detail_mass">Mass</string>
+    <string name="star_detail_mass_fmt">%1$.2f M☉</string>
+
+    <!-- 扫描流程 / 动画测试 / 病毒库规模（补齐三语） -->
+    <string name="scan_scope_title">Choose scan scope</string>
+    <string name="scan_scope_global">Full device scan</string>
+    <string name="scan_scope_global_desc">Traverse device storage and check every file (requires "All files access")</string>
+    <string name="scan_scope_folder">Choose folders</string>
+    <string name="scan_scope_folder_desc">Scan one or more folders individually (SAF authorization, no extra permission)</string>
+    <string name="scan_scope_apps">Installed apps</string>
+    <string name="scan_scope_apps_desc">Check permissions and behavior of installed apps; deep mode also detects accessibility-service and device-admin abuse</string>
+    <string name="scan_next">Next</string>
+    <string name="scan_folders_title">Choose folders</string>
+    <string name="scan_folders_hint">You can add multiple folders; they will be scanned one by one.</string>
+    <string name="scan_folder_add">Add folder</string>
+    <string name="scan_folder_empty">No folders added yet</string>
+    <string name="scan_folder_remove">Remove</string>
+    <string name="scan_back">Back</string>
+    <string name="scan_again">Scan again</string>
+    <string name="scan_back_to_modes">Back to mode selection</string>
+    <string name="scan_counting">Counting files: %1$d</string>
+    <string name="scan_scanned">Scanned %1$d files</string>
+    <string name="scan_no_risk">No risky files found</string>
+    <string name="scan_result_count_label">Scan results (%1$d)</string>
+    <string name="scan_low_risk_group">Low risk &amp; safe items (%1$d)</string>
+    <string name="anim_test_on">Animation test mode on: scan progress and icon rotation play once at a fixed pace.</string>
+    <string name="anim_test_off">Animation test mode off.</string>
+    <string name="virusdb_region_scale">~1.61M threat intelligence entries</string>
+    <string name="virusdb_point_scale">~75K threat intelligence entries</string>
+    <string name="virusdb_builtin_note">Built in · Works offline · No update needed</string>
+    <string name="toggle_collapse">Expand or collapse</string>
+    <string name="onboarding_star_caption">Finish setup</string>
+    <string name="action_view">View</string>
+    <string name="block_need_deep_mode">Interception requires Accessibility / Shizuku / Root mode</string>
+    <string name="tools_traffic_detail_compact">↓%1$s · ↑%2$s</string>
+    <string name="tools_traffic_need_usage_access">Usage access permission is required to measure per-app traffic. Tap to grant.</string>
+    <string name="tools_no_traffic_today">No traffic recorded today</string>
+    <string name="notify_ip_hit_title">%1$s is connecting to a malicious host</string>
+    <string name="notify_ip_hit_text">Remote %1$s matched threat intel: %2$s</string>
 </resources>

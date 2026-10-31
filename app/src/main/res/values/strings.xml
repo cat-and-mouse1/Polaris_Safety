@@ -37,6 +37,38 @@
 
     <!-- 模式：Root -->
     <string name="mode_root_name">Root 模式</string>
+    <string name="mode_resume_scan">以%1$s开始扫描</string>
+    <string name="mode_reconfigure">重新配置模式</string>
+    <string name="mode_pick_to_start">选择模式以开始扫描</string>
+    <string name="mode_pick_first">请先选择一个模式</string>
+    <string name="mode_status_not_ready">未就绪</string>
+    <string name="mode_status_checking">检测中…</string>
+    <string name="mode_check_title">检查逻辑</string>
+    <string-array name="mode_check_steps_normal">
+        <item>枚举所有已安装应用，解析 manifest 中的权限声明，识别危险权限组合（如短信+联网、悬浮窗+无障碍）。</item>
+        <item>扫描可访问目录中的 APK 安装包与可执行文件，校验签名与文件结构完整性。</item>
+        <item>按文件名启发式规则匹配伪装文件、勒索提示与已知恶意家族命名模式。</item>
+        <item>对命中特征计算风险分并生成报告；不涉及系统受保护区域，不改动任何文件。</item>
+    </string-array>
+    <string-array name="mode_check_steps_accessibility">
+        <item>包含普通模式的全部检查步骤（应用权限组合、APK 与可疑文件扫描）。</item>
+        <item>无障碍服务实时监听敏感事件：静默安装、伪装登录界面、自动点击授权按钮。</item>
+        <item>拦截高危行为并写入行为日志，供主页「应用行为」面板展示与追溯。</item>
+        <item>深层扫描追加检测：非系统应用注册无障碍服务（+30 分）、申请设备管理员（+25 分）等滥用特征。</item>
+    </string-array>
+    <string-array name="mode_check_steps_shizuku">
+        <item>包含普通模式的全部检查步骤（应用权限组合、APK 与可疑文件扫描）。</item>
+        <item>通过 Shizuku 获取 ADB 级权限，执行深层扫描，覆盖敏感目录与系统关联区域。</item>
+        <item>检测非系统应用滥用无障碍服务、申请设备管理员等高危特征。</item>
+        <item>对确认的高风险应用直接执行 am force-stop 强制停止进程，立即消除运行时威胁。</item>
+    </string-array>
+    <string-array name="mode_check_steps_root">
+        <item>包含普通模式的全部检查步骤（应用权限组合、APK 与可疑文件扫描）。</item>
+        <item>深层扫描覆盖系统受保护区域与分区目录，检查范围最完整。</item>
+        <item>检测非系统应用滥用无障碍服务、申请设备管理员等深层滥用信号。</item>
+        <item>对高风险应用执行强制停止并冻结（pm disable-user），防止其再次运行，适合长期无人值守的设备。</item>
+    </string-array>
+    <string name="behavior_panel_title">应用行为</string>
     <string name="mode_root_desc">调用 Root 权限，全方位拦截与守护</string>
     <string name="mode_root_detail">直接调用手机的 Root 权限，进行全方位地拦截与守护任务，可冻结恶意应用、阻断其自启与运行。</string>
     <string name="mode_level_4">Lv.4 全方位守护</string>
@@ -50,12 +82,41 @@
     <string name="scan_done_clean">未发现恶意程序，手机状态良好</string>
     <string name="scan_done_risk">发现 %1$d 个可疑应用</string>
     <string name="scan_title">扫描结果</string>
+    <string name="result_score_max">/100</string>
+    <string name="result_tab_files">文件</string>
+    <string name="result_tab_apps">应用</string>
+    <string name="result_file_scope">扫描范围：%1$s</string>
+    <string name="result_file_total">文件总数：%1$d</string>
+    <string name="result_file_score">文件评分：%1$d</string>
+    <string name="result_app_total">扫描应用：%1$d</string>
+    <string name="result_app_score">应用评分：%1$d</string>
+    <string name="result_fold_files">文件结果（%1$d）</string>
+    <string name="result_fold_apps">应用结果（%1$d）</string>
+    <string name="result_no_app_risk">未发现风险应用</string>
+
+    <!-- 卫星详情（点按星图常驻卫星 → 侧边详情抽屉） -->
+    <string name="sat_detail_name">Polaris-1</string>
+    <string name="sat_detail_sub">深层扫描部署的监测卫星</string>
+    <string name="sat_detail_type">监测卫星</string>
+    <string name="sat_detail_orbit_label">轨道</string>
+    <string name="sat_detail_orbit_value">36 秒绕行一圈</string>
+    <string name="sat_detail_status_label">状态</string>
+    <string name="sat_detail_status_value">在轨运行</string>
+    <string name="sat_detail_deploy_label">部署</string>
+    <string name="sat_detail_deploy_value_fmt">深层扫描 · %s</string>
+    <string name="sat_detail_advice">卫星在轨运行正常，持续监测当前星域的风险目标。</string>
+    <string name="result_scope_folders">所选文件夹（%1$d 个）</string>
+
+    <string name="result_score_placeholder">--</string>
+    <string name="result_collapse_desc">收回结果页</string>
     <string name="scan_deep_badge">深层扫描</string>
     <string name="scan_shallow_badge">浅层扫描</string>
     <string name="risk_high">高风险</string>
     <string name="risk_medium">中风险</string>
     <string name="risk_low">低风险</string>
     <string name="risk_safe">安全</string>
+    <string name="star_info_app">大小 %1$s · %2$s</string>
+    <string name="star_info_folder">大小 %1$s</string>
     <string name="action_handle">处置</string>
     <string name="action_app_details">应用详情</string>
     <string name="action_force_stop">强制停止</string>
@@ -77,8 +138,20 @@
     <string name="toast_guard_started">守护服务已启动</string>
     <string name="toast_guard_stopped">守护服务已停止</string>
     <string name="toast_scan_start">开始扫描</string>
+    <string name="toast_open_failed">无法打开该应用</string>
     <string name="notification_channel_scan">扫描提醒</string>
     <string name="notification_channel_guard">守护拦截</string>
+    <string name="notification_channel_update">病毒库更新</string>
+    <string name="notification_section">通知</string>
+    <string name="notification_intro">按类别管理应用会发出的系统通知，关闭后立即生效。</string>
+    <string name="notify_guard_title">守护常驻通知</string>
+    <string name="notify_guard_desc">守护运行时显示，关闭后仅静音（前台服务，系统强制不可移除）</string>
+    <string name="notify_block_title">拦截常驻通知</string>
+    <string name="notify_block_desc">拦截模式开启时的加护提示，可完全关闭</string>
+    <string name="notify_virus_title">病毒库更新通知</string>
+    <string name="notify_virus_desc">病毒库自动更新完成后提醒</string>
+    <string name="notification_virus_updated_title">病毒库已更新</string>
+    <string name="notification_virus_updated_text">威胁情报病毒库已更新至 v%1$d</string>
     <string name="notification_scan_title">Polaris 发现可疑应用</string>
     <string name="notification_blocked_title">Polaris 已拦截恶意程序</string>
     <string name="notification_blocked_text">已阻止 %1$s 运行</string>
@@ -108,6 +181,8 @@
     <string name="ai_think_8">生成判定结论：建议清除或保留…</string>
     <string name="ai_home_entry">AI 引擎</string>
     <string name="ai_home_status_off">未接入 · 点击配置</string>
+    <string name="ai_summary_providers">已接入 %1$d 家服务商</string>
+    <string name="ai_summary_models">已启用 %1$d 款模型</string>
     <string name="ai_home_status_on">已接入 %1$s</string>
     <string name="ai_home_status_multi_provider">已接入 %1$d 个供应商 · %2$s模式</string>
 
@@ -127,6 +202,8 @@
     <string name="scan_folder_remove">移除</string>
     <string name="scan_back">返回</string>
     <string name="scan_again">重新扫描</string>
+    <string name="scan_result_hint">上滑查看扫描结果</string>
+    <string name="scan_view_results">查看扫描结果</string>
     <string name="scan_back_to_modes">返回模式选择</string>
     <string name="scan_counting">正在统计文件：%1$d</string>
     <string name="scan_scanning">扫描中：%1$s</string>
@@ -176,6 +253,14 @@
     <string name="ai_judge_failed">AI 分析失败：%1$s</string>
     <string name="ai_not_configured">尚未接入 AI 引擎，请先配置 API</string>
 
+    <!-- AI 检测模式（复核 / 独立检测） -->
+    <string name="ai_mode_title">AI 检测模式</string>
+    <string name="ai_mode_review">复核模式</string>
+    <string name="ai_mode_review_desc">仅对本地已标记的风险项做 AI 复核，节省 API 用量（默认）</string>
+    <string name="ai_mode_independent">独立检测</string>
+    <string name="ai_mode_independent_desc">向 AI 送审全部候选，由其独立判定风险等级并并入最终结果</string>
+    <string name="ai_independent_clean">AI 独立检测：已复核 %1$d 项，无新增风险</string>
+
     <!-- AI 判定结果 -->
     <string name="ai_badge">AI 判定</string>
     <string name="ai_verdict_remove">建议清除</string>
@@ -186,11 +271,11 @@
     <string name="ai_reason_prefix">AI 理由：%1$s</string>
 
     <!-- AI 判定提示词 -->
-    <string name="ai_system_prompt">你是 Polaris Safety（北极星手机安全守护）的 AI 安全分析引擎。你会收到一份应用扫描报告，每行包含：包名、应用名称、启发式风险分数(0-100)、风险等级与检测特征（敏感权限、危险权限组合、隐藏图标、无障碍服务滥用、设备管理员滥用、命中已知恶意签名库等）。\n\n你的任务：逐个判断这些应用应该「清除」(remove) 还是「保留」(keep)。判定准则：\n1. 出现「命中已知恶意程序签名库」「非系统应用注册无障碍服务」「非系统应用注册设备管理员」等明确恶意特征，或同时具备多个高风险特征（如短信+联网、悬浮窗+无障碍）→ 建议清除；\n2. 系统应用、知名厂商应用、仅有个别敏感权限但无组合滥用 → 建议保留；\n3. 拿不准时宁保守（保留），避免误杀。\n\n只输出一个 JSON 数组，不要输出任何其他文字、注释或 Markdown。数组元素格式：{"package":"包名","action":"remove"或"keep","confidence":0到1的小数,"reason":"不超过20字的中文理由"}。必须为报告中的每个应用各输出一条。</string>
+    <string name="ai_system_prompt">你是 Polaris Safety（北极星手机安全守护）的 AI 安全分析引擎。你会收到一份应用扫描报告，每行包含：包名、应用名称、启发式风险分数(0-100)、风险等级与检测特征（敏感权限、危险权限组合、隐藏图标、无障碍服务滥用、设备管理员滥用、命中已知恶意签名库等）。\n\n你的任务：逐个判断这些应用应该「清除」(remove) 还是「保留」(keep)。判定准则：\n1. 出现「命中已知恶意程序签名库」「非系统应用注册无障碍服务」「非系统应用注册设备管理员」等明确恶意特征，或同时具备多个高风险特征（如短信+联网、悬浮窗+无障碍）→ 建议清除；\n2. 系统应用、知名厂商应用、仅有个别敏感权限但无组合滥用 → 建议保留；\n3. 拿不准时宁保守（保留），避免误杀。\n\n只输出一个 JSON 数组，不要输出任何其他文字、注释或 Markdown。数组元素格式：{"package":"包名","action":"remove"或"keep","level":"safe/low/medium/high","confidence":0到1的小数,"reason":"不超过20字的中文理由"}。必须为报告中的每个应用各输出一条。level 规则：判定为应清除或高风险时 level 至少为 medium；仅有轻微特征或应保留时 level 用 low 或 safe。</string>
     <string name="ai_user_prompt">以下是本次扫描报告（分数越高风险越大）：\n%1$s\n请按规则输出 JSON 数组。</string>
 
     <!-- 文件级 AI 判定提示词（扫描中心） -->
-    <string name="ai_system_prompt_files">你是 Polaris Safety（北极星手机安全守护）的 AI 文件安全分析引擎。你会收到一份文件扫描报告，每行包含：文件标识、文件名、大小、启发式风险分数(0-100)、风险等级与检测特征（APK 安装包、文件名命中已知恶意家族、风险关键词、伪装文件、勒索提示、隐藏文件、体积异常等）。\n\n你的任务：逐个判断这些文件应该「清除」(remove，即隔离删除) 还是「保留」(keep)。判定准则：\n1. 命中「已知恶意家族」「伪装文件」「勒索提示文件」等明确恶意特征，或同时具备多个风险特征 → 建议清除；\n2. 正常的 APK 安装包、系统文件、知名软件文件，或仅有个别轻微特征 → 建议保留；\n3. 拿不准时宁保守（保留），避免误删用户文件。\n\n只输出一个 JSON 数组，不要输出任何其他文字、注释或 Markdown。数组元素格式：{"package":"文件标识","action":"remove"或"keep","confidence":0到1的小数,"reason":"不超过20字的中文理由"}。必须为报告中的每个文件各输出一条，文件标识必须原样返回。</string>
+    <string name="ai_system_prompt_files">你是 Polaris Safety（北极星手机安全守护）的 AI 文件安全分析引擎。你会收到一份文件扫描报告，每行包含：文件标识、文件名、大小、启发式风险分数(0-100)、风险等级与检测特征（APK 安装包、文件名命中已知恶意家族、风险关键词、伪装文件、勒索提示、隐藏文件、体积异常等）。\n\n你的任务：逐个判断这些文件应该「清除」(remove，即隔离删除) 还是「保留」(keep)。判定准则：\n1. 命中「已知恶意家族」「伪装文件」「勒索提示文件」等明确恶意特征，或同时具备多个风险特征 → 建议清除；\n2. 正常的 APK 安装包、系统文件、知名软件文件，或仅有个别轻微特征 → 建议保留；\n3. 拿不准时宁保守（保留），避免误删用户文件。\n\n只输出一个 JSON 数组，不要输出任何其他文字、注释或 Markdown。数组元素格式：{"package":"文件标识","action":"remove"或"keep","level":"safe/low/medium/high","confidence":0到1的小数,"reason":"不超过20字的中文理由"}。必须为报告中的每个文件各输出一条，文件标识必须原样返回。level 规则：判定为应隔离或高风险时 level 至少为 medium；仅有轻微特征或应保留时 level 用 low 或 safe。</string>
 
     <!-- ============ 扫描中心（文件扫描 / 隔离区） ============ -->
     <string name="back">返回</string>
@@ -241,6 +326,10 @@
     <string name="settings_engine_hint">选择后，每次进入模式时默认采用该引擎（仍可在弹窗中临时更改）</string>
     <string name="settings_ai_configure">配置</string>
     <string name="detection_config_title">检测配置</string>
+    <string name="detection_subtitle">AI 智能判定与机器学习</string>
+    <string name="detection_engine_section">引擎</string>
+    <string name="detection_default_engine">默认引擎</string>
+    <string name="detection_ai_section">AI 判定</string>
     <string name="detection_ai_on">AI 已接入</string>
     <string name="detection_ai_off">AI 未接入</string>
     <string name="detection_ml_on">ML 已开启</string>
@@ -260,6 +349,7 @@
     <string name="theme_toast_system">已切换为跟随系统</string>
 
     <!-- ============ 自定义主题色 ============ -->
+    <string name="display_section">显示</string>
     <string name="theme_mode_title">显示模式</string>
     <string name="theme_color_section">外观</string>
     <string name="appearance_entry_summary">深色模式与主题配色</string>
@@ -323,6 +413,16 @@
     <string name="block_toggle_off">关闭拦截模式</string>
     <string name="block_guard_desc">正在守护：恶意锁机 · 霸屏 · 盗取通知 · 勒索 · 侵犯使用权</string>
     <string name="block_pin">置顶</string>
+    <string name="app_monitor_title">应用监控</string>
+    <string name="block_realtime_title">实时防护</string>
+    <string name="block_realtime_desc">后台守护，发现恶意应用立即拦截</string>
+    <string name="block_perms_title">所需权限</string>
+    <string name="block_add_apps">添加应用</string>
+    <string name="block_search_hint">搜索应用名称或包名</string>
+    <string name="block_search_empty">没有匹配的应用</string>
+    <string name="block_fullscreen_hint">全屏</string>
+    <string name="block_fullscreen_exit_hint">还原</string>
+    <string name="close">关闭</string>
 
     <!-- 拦截模块 · 所需权限索取 -->
     <string name="perm_grant">授权</string>
@@ -418,14 +518,21 @@
     <string name="virusdb_entries">%1$d 条威胁情报</string>
     <string name="file_ioc_hit">命中开源病毒库：%1$s（%2$s）</string>
     <string name="virusdb_select">选择病毒库</string>
-    <string name="virusdb_region_name">Polar Region（云端全量库 · 需下载）</string>
-    <string name="virusdb_point_name">Polar Point（内置精选库 · 离线即用）</string>
+    <string name="virusdb_region_name">Region 库（云端全量 · 需下载）</string>
+    <string name="virusdb_point_name">Point 库（内置精选 · 离线即用）</string>
     <!-- 病毒库规模介绍（静态，描述库本身的内容量，非当前已加载条数） -->
     <string name="virusdb_region_scale">约 161 万条威胁情报</string>
     <string name="virusdb_point_scale">约 7.5 万条威胁情报</string>
     <string name="virusdb_region_desc">全量版，精确哈希拦截（357 MB）</string>
     <string name="virusdb_point_desc">精选版，轻量内置，离线可用</string>
     <string name="virusdb_builtin_note">已内置 · 离线可用 · 无需更新</string>
+    <string name="virusdb_region_chip">Region 库·%1$s</string>
+    <string name="virusdb_point_chip">Point 库·%1$s</string>
+
+    <string name="toggle_collapse">展开或收起</string>
+    <string name="virusdb_status_short_downloaded">已下载</string>
+    <string name="virusdb_status_short_downloading">下载中</string>
+    <string name="virusdb_status_short_not_downloaded">未下载</string>
 
     <!-- 欢迎页 Region 下载（可中断 / 续传） -->
     <string name="virusdb_downloading">正在下载…</string>
@@ -440,6 +547,8 @@
 
     <!-- ============ ML 机器学习检测 ============ -->
     <string name="ml_engine_title">ML 机器学习检测引擎</string>
+    <string name="ml_engine_switch">ML 引擎开关</string>
+    <string name="detection_more_config">更多高级配置</string>
     <string name="ml_engine_subtitle">设备端本地模型，无需联网，提供额外的检测维度</string>
     <string name="ml_results_title">ML 检测结果</string>
     <string name="ml_no_results">暂无 ML 检测结果</string>
@@ -599,6 +708,18 @@
     <!-- 教程 -->
     <string name="tutorial_welcome_title">欢迎使用 Polaris</string>
     <string name="tutorial_welcome_subtitle">守护你的设备安全</string>
+    <string name="onboarding_welcome_btn">开始使用</string>
+    <string name="onboarding_star_caption">完成初始设置</string>
+    <string name="onboarding_appearance_title">外观设置</string>
+    <string name="onboarding_appearance_subtitle">选择主题色与显示模式，本页将实时预览</string>
+    <string name="onboarding_virusdb_subtitle">选择病毒库来源，影响扫描范围与更新方式</string>
+    <string name="onboarding_ai_title">AI 接入</string>
+    <string name="onboarding_ai_subtitle">接入 AI 引擎以获得更智能的威胁判定（可选）</string>
+    <string name="onboarding_ai_enable">启用 AI 引擎</string>
+    <string name="onboarding_ai_config">配置提供方</string>
+    <string name="onboarding_ai_status">已接入：%s</string>
+    <string name="onboarding_ai_status_none">尚未配置提供方</string>
+    <string name="onboarding_ai_status_disabled">未启用 AI 引擎</string>
     <string name="tutorial_enter">开始体验</string>
     <string name="tutorial_scan_title">全面扫描</string>
     <string name="tutorial_scan_desc">一键扫描所有应用，检测恶意程序</string>
@@ -614,4 +735,44 @@
     <string name="pulldown_perm_empty">暂无可展示的权限记录</string>
     <string name="pulldown_recent_count">%1$d 个文件</string>
     <string name="pulldown_close">关闭</string>
+
+    <!-- 恒星详情面板（点按恒星从右划出） -->
+    <string name="star_detail_title">恒星详情</string>
+    <string name="star_detail_close">关闭</string>
+    <string name="star_detail_type">对象类型</string>
+    <string name="star_detail_type_app">应用</string>
+    <string name="star_detail_type_folder">文件夹</string>
+    <string name="star_detail_size">对象大小</string>
+    <string name="star_detail_risk">安全程度</string>
+    <string name="star_detail_children">包含项</string>
+    <string name="star_detail_children_fmt">%1$d 项 · 最高 %2$s</string>
+    <string name="star_detail_sub_app">包名 %1$s</string>
+    <string name="star_detail_sub_folder">目录 %1$s</string>
+    <string name="star_detail_risk_unknown">无风险项</string>
+    <string name="star_detail_time">最近扫描</string>
+    <string name="star_detail_never">尚未扫描</string>
+    <string name="star_detail_open">打开</string>
+    <string name="star_detail_advice_safe">未发现风险，可正常使用。</string>
+    <string name="star_detail_advice_low">存在少量可疑项，建议留意其权限与权限申请。</string>
+    <string name="star_detail_advice_medium">存在中危风险，建议按结果提示处理后再继续使用。</string>
+    <string name="star_detail_advice_high">存在高危风险，建议立即卸载后果断隔离。</string>
+    <string name="star_detail_facts_title">星体参数</string>
+    <string name="star_detail_planets">行星数量</string>
+    <string name="star_detail_planets_fmt">%1$d 颗</string>
+    <string name="star_detail_mag">星等</string>
+    <string name="star_detail_mag_fmt">%1$.1f 等</string>
+    <string name="star_detail_temp">温度</string>
+    <string name="star_detail_temp_fmt">%1$d K</string>
+    <string name="star_detail_spec">光谱型</string>
+    <string name="star_detail_radius">半径</string>
+    <string name="star_detail_radius_fmt">%1$.1f R☉</string>
+    <string name="star_detail_mass">质量</string>
+    <string name="star_detail_mass_fmt">%1$.2f M☉</string>
+    <string name="action_view">查看</string>
+    <string name="block_need_deep_mode">拦截需在无障碍 / Shizuku / Root 模式下开启</string>
+    <string name="tools_traffic_detail_compact">↓%1$s · ↑%2$s</string>
+    <string name="tools_traffic_need_usage_access">需要「使用情况访问」权限才能统计各应用流量，点击前往授权</string>
+    <string name="tools_no_traffic_today">今日暂无流量记录</string>
+    <string name="notify_ip_hit_title">%1$s 正在连接恶意地址</string>
+    <string name="notify_ip_hit_text">远端 %1$s 命中威胁情报：%2$s</string>
 </resources>

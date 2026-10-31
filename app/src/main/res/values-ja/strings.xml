@@ -37,6 +37,38 @@
 
     <!-- モード：Root -->
     <string name="mode_root_name">Root モード</string>
+    <string name="mode_resume_scan">%1$sでスキャン開始</string>
+    <string name="mode_reconfigure">モードを再設定</string>
+    <string name="mode_pick_to_start">スキャンを開始するモードを選択</string>
+    <string name="mode_pick_first">先にモードを選択してください</string>
+    <string name="mode_status_not_ready">未準備</string>
+    <string name="mode_status_checking">確認中…</string>
+    <string name="mode_check_title">検査ロジック</string>
+    <string-array name="mode_check_steps_normal">
+        <item>インストール済みアプリを列挙し、manifest の権限を解析して危険な権限の組み合わせ（SMS+ネットワーク、オーバーレイ+ユーザー補助など）を検出します。</item>
+        <item>アクセス可能なディレクトリ内の APK と実行ファイルをスキャンし、署名とファイル構造の整合性を検証します。</item>
+        <item>ファイル名ヒューリスティックで偽装ファイル、ランサム note、既知マルウェアファミリーの命名パターンを照合します。</item>
+        <item>一致した特徴にリスクスコアを付けて報告します。保護されたシステム領域には触れず、ファイルも変更しません。</item>
+    </string-array>
+    <string-array name="mode_check_steps_accessibility">
+        <item>通常検査の全ステップ（権限の組み合わせ、APK と不審ファイルのスキャン）を含みます。</item>
+        <item>ユーザー補助サービスがサイレントインストール、偽装ログイン画面、承認ボタンの自動タップなどの不正イベントをリアルタイムで監視します。</item>
+        <item>高リスク動作を遮断して動作ログに記録し、ホームの「アプリの動作」パネルで確認・追跡できます。</item>
+        <item>ディープスキャンでは、非システムアプリによるユーザー補助サービスの保持（+30）やデバイス管理者権限（+25）の悪用も検出します。</item>
+    </string-array>
+    <string-array name="mode_check_steps_shizuku">
+        <item>通常検査の全ステップ（権限の組み合わせ、APK と不審ファイルのスキャン）を含みます。</item>
+        <item>Shizuku（ADB 相当権限）でディープスキャンを行い、機密ディレクトリやシステム関連領域を対象とします。</item>
+        <item>非システムアプリによるユーザー補助サービスやデバイス管理者権限の悪用を検出します。</item>
+        <item>確認された高リスクアプリは am force-stop で直接強制停止し、実行中の脅威を即座に排除します。</item>
+    </string-array>
+    <string-array name="mode_check_steps_root">
+        <item>通常検査の全ステップ（権限の組み合わせ、APK と不審ファイルのスキャン）を含みます。</item>
+        <item>ディープスキャンは保護されたシステム領域とパーティションまで対象とし、最も広い検査範囲を提供します。</item>
+        <item>ユーザー補助/デバイス管理者の悪用などのディープな不正シグナルを検出します。</item>
+        <item>高リスクアプリは強制停止後に凍結（pm disable-user）して再起動を防ぎます。長時間無人の端末に最適です。</item>
+    </string-array>
+    <string name="behavior_panel_title">アプリの動作</string>
     <string name="mode_root_desc">Root 権限で全方位のブロックとガード</string>
     <string name="mode_root_detail">端末の Root 権限を直接利用し、全方位のインターセプトとガードを行います。マルウェアの凍結、自動起動と実行の阻止が可能です。</string>
     <string name="mode_level_4">Lv.4 フルガード</string>
@@ -50,12 +82,45 @@
     <string name="scan_done_clean">マルウェアは見つかりませんでした。端末の状態は良好です</string>
     <string name="scan_done_risk">%1$d 件の不審なアプリを検出</string>
     <string name="scan_title">スキャン結果</string>
+    <string name="result_score_max">/100</string>
+    <string name="result_tab_files">ファイル</string>
+    <string name="result_tab_apps">アプリ</string>
+    <string name="result_file_scope">スキャン範囲：%1$s</string>
+    <string name="result_file_total">ファイル総数：%1$d</string>
+    <string name="result_file_score">ファイルスコア：%1$d</string>
+    <string name="result_app_total">スキャンしたアプリ：%1$d</string>
+    <string name="result_app_score">アプリスコア：%1$d</string>
+    <string name="result_fold_files">ファイル結果（%1$d）</string>
+    <string name="result_fold_apps">アプリ結果（%1$d）</string>
+    <string name="result_no_app_risk">リスクのあるアプリが見つかりません</string>
+
+    <!-- 衛星詳細（星図の常駐衛星をタップ → サイド詳細ドロワー） -->
+    <string name="sat_detail_name">Polaris-1</string>
+    <string name="sat_detail_sub">ディープスキャンで配備された監視衛星</string>
+    <string name="sat_detail_type">監視衛星</string>
+    <string name="sat_detail_orbit_label">軌道</string>
+    <string name="sat_detail_orbit_value">36秒で一周</string>
+    <string name="sat_detail_status_label">状態</string>
+    <string name="sat_detail_status_value">軌道運用中</string>
+    <string name="sat_detail_deploy_label">配備</string>
+    <string name="sat_detail_deploy_value_fmt">ディープスキャン · %s</string>
+    <string name="sat_detail_advice">衛星は軌道上で正常に運用されており、現在の星域のリスク目標を継続的に監視しています。</string>
+    <string name="result_scope_folders">選択したフォルダ（%1$d 件）</string>
+    <string name="scan_section_files">ファイルリスク（%1$d）</string>
+    <string name="scan_section_apps">アプリリスク（%1$d）</string>
+
+    <string name="result_score_placeholder">--</string>
+    <string name="result_collapse_desc">結果を閉じる</string>
     <string name="scan_deep_badge">ディープスキャン</string>
     <string name="scan_shallow_badge">ライトスキャン</string>
     <string name="risk_high">高リスク</string>
     <string name="risk_medium">中リスク</string>
     <string name="risk_low">低リスク</string>
     <string name="risk_safe">安全</string>
+    <string name="star_info_app">サイズ %1$s · %2$s</string>
+    <string name="star_info_folder">サイズ %1$s</string>
+    <string name="scan_result_hint">上にスワイプしてスキャン結果を表示</string>
+    <string name="scan_view_results">スキャン結果を表示</string>
     <string name="action_handle">対処</string>
     <string name="action_app_details">アプリ詳細</string>
     <string name="action_force_stop">強制停止</string>
@@ -77,8 +142,20 @@
     <string name="toast_guard_started">ガードサービスを開始しました</string>
     <string name="toast_guard_stopped">ガードサービスを停止しました</string>
     <string name="toast_scan_start">スキャンを開始</string>
+    <string name="toast_open_failed">このアプリを開けません</string>
     <string name="notification_channel_scan">スキャン通知</string>
     <string name="notification_channel_guard">ガードインターセプト</string>
+    <string name="notification_channel_update">ウイルス定義更新</string>
+    <string name="notification_section">通知</string>
+    <string name="notification_intro">カテゴリ別に通知を管理します。変更はすぐに反映されます。</string>
+    <string name="notify_guard_title">ガード常駐通知</string>
+    <string name="notify_guard_desc">ガード中に表示。オフにすると消音のみ（フォアグラウンドサービスのため削除不可）</string>
+    <string name="notify_block_title">ブロック常駐通知</string>
+    <string name="notify_block_desc">ブロックモード中の加護表示。完全にオフ可</string>
+    <string name="notify_virus_title">ウイルス定義更新通知</string>
+    <string name="notify_virus_desc">ウイルス定義の自動更新完了時に通知</string>
+    <string name="notification_virus_updated_title">ウイルス定義を更新しました</string>
+    <string name="notification_virus_updated_text">脅威インテリジェンス定義を v%1$d に更新</string>
     <string name="notification_scan_title">Polaris が不審なアプリを検出</string>
     <string name="notification_blocked_title">Polaris がマルウェアをブロック</string>
     <string name="notification_blocked_text">%1$s の実行を阻止しました</string>
@@ -107,6 +184,8 @@
     <string name="ai_think_8">判定結果を生成：削除か維持か…</string>
     <string name="ai_home_entry">AI エンジン</string>
     <string name="ai_home_status_off">未接続 · タップして設定</string>
+    <string name="ai_summary_providers">%1$d 社のプロバイダーに接続済み</string>
+    <string name="ai_summary_models">%1$d 個のモデルを有効化</string>
     <string name="ai_home_status_on">%1$s に接続済み</string>
     <string name="ai_home_status_multi_provider">%1$d プロバイダーに接続済み · %2$s モード</string>
 
@@ -149,6 +228,14 @@
     <string name="ai_scan_start">AI が解析中です。お待ちください…</string>
     <string name="ai_judge_failed">AI 解析に失敗：%1$s</string>
     <string name="ai_not_configured">AI エンジンは未接続です。先に API を設定してください</string>
+
+    <!-- AI 検出モード（レビュー / 独立検出） -->
+    <string name="ai_mode_title">AI 検出モード</string>
+    <string name="ai_mode_review">レビュー</string>
+    <string name="ai_mode_review_desc">ローカルで検出されたリスクのみを AI が再判定し、API 使用量を節約（デフォルト）</string>
+    <string name="ai_mode_independent">独立検出</string>
+    <string name="ai_mode_independent_desc">全候補を AI に送り、AI がリスクレベルを判定して最終結果に統合</string>
+    <string name="ai_independent_clean">AI 独立検出：%1$d 件を確認、新たなリスクなし</string>
 
     <!-- AI カスタムプロバイダー -->
     <string name="ai_custom_provider_title">カスタム LLM プロバイダー</string>
@@ -247,6 +334,10 @@
     <string name="settings_engine_hint">設定すると、モードに入るたびにこのエンジンがデフォルトになります（シートで一時変更も可能）</string>
     <string name="settings_ai_configure">設定</string>
     <string name="detection_config_title">検出設定</string>
+    <string name="detection_subtitle">AI 判定と機械学習</string>
+    <string name="detection_engine_section">エンジン</string>
+    <string name="detection_default_engine">既定エンジン</string>
+    <string name="detection_ai_section">AI 判定</string>
     <string name="detection_ai_on">AI 接続済み</string>
     <string name="detection_ai_off">AI 未接続</string>
     <string name="detection_ml_on">ML 有効</string>
@@ -266,6 +357,7 @@
     <string name="theme_toast_system">システムに従うに切り替えました</string>
 
     <!-- ============ カスタムテーマカラー ============ -->
+    <string name="display_section">表示</string>
     <string name="theme_mode_title">表示モード</string>
     <string name="theme_color_section">外観</string>
     <string name="appearance_entry_summary">ダークモードとテーマカラー</string>
@@ -327,6 +419,16 @@
     <string name="block_toggle_off">遮断モードをオフ</string>
     <string name="block_guard_desc">ガード中：画面ロック · 強制全画面 · 通知盗撮 · 身代金要求 · 利用権侵害</string>
     <string name="block_pin">固定</string>
+    <string name="app_monitor_title">アプリ監視</string>
+    <string name="block_realtime_title">リアルタイム防御</string>
+    <string name="block_realtime_desc">バックグラウンドで守り、悪意あるアプリを即時遮断</string>
+    <string name="block_perms_title">必要な権限</string>
+    <string name="block_add_apps">アプリを追加</string>
+    <string name="block_search_hint">アプリ名またはパッケージ名で検索</string>
+    <string name="block_search_empty">一致するアプリがありません</string>
+    <string name="block_fullscreen_hint">全画面</string>
+    <string name="block_fullscreen_exit_hint">元に戻す</string>
+    <string name="close">閉じる</string>
 
     <!-- 遮断モジュール · 必要な権限 -->
     <string name="perm_grant">許可</string>
@@ -426,6 +528,11 @@
     <string name="virusdb_point_name">Polar Point（精选版 · 約 7.5 万件）</string>
     <string name="virusdb_region_desc">フル版、ハッシュ精密遮断（357 MB）</string>
     <string name="virusdb_point_desc">精选版、軽量内蔵、オフライン対応</string>
+    <string name="virusdb_region_chip">Region·%1$s</string>
+    <string name="virusdb_point_chip">Point·%1$s</string>
+    <string name="virusdb_status_short_downloaded">ダウンロード済み</string>
+    <string name="virusdb_status_short_downloading">ダウンロード中</string>
+    <string name="virusdb_status_short_not_downloaded">未ダウンロード</string>
 
     <!-- 欢迎画面 Region ダウンロード（中断可・再開可） -->
     <string name="virusdb_downloading">ダウンロード中…</string>
@@ -440,6 +547,8 @@
 
     <!-- ============ ML 機械学習検出 ============ -->
     <string name="ml_engine_title">ML 検出エンジン</string>
+    <string name="ml_engine_switch">MLエンジン</string>
+    <string name="detection_more_config">詳細設定</string>
     <string name="ml_engine_subtitle">オンデバイスのローカルモデル。ネット不要で追加の検出次元を提供</string>
     <string name="ml_results_title">ML 検出結果</string>
     <string name="ml_no_results">ML 検出結果はありません</string>
@@ -565,6 +674,17 @@
     <!-- チュートリアル -->
     <string name="tutorial_welcome_title">Polarisへようこそ</string>
     <string name="tutorial_welcome_subtitle">デバイスを守ります</string>
+    <string name="onboarding_welcome_btn">はじめる</string>
+    <string name="onboarding_appearance_title">外観設定</string>
+    <string name="onboarding_appearance_subtitle">テーマカラーと表示モードを選ぶと、このページで即時プレビューされます</string>
+    <string name="onboarding_virusdb_subtitle">スキャンに使用するウイルス定義のソースを選択</string>
+    <string name="onboarding_ai_title">AI 接続</string>
+    <string name="onboarding_ai_subtitle">より賢い判定のため AI エンジンを接続（任意）</string>
+    <string name="onboarding_ai_enable">AI エンジンを有効化</string>
+    <string name="onboarding_ai_config">プロバイダーを設定</string>
+    <string name="onboarding_ai_status">接続済み：%s</string>
+    <string name="onboarding_ai_status_none">プロバイダー未設定</string>
+    <string name="onboarding_ai_status_disabled">AI エンジン無効</string>
     <string name="tutorial_enter">始める</string>
     <string name="tutorial_scan_title">全面スキャン</string>
     <string name="tutorial_scan_desc">すべてのアプリをスキャンして悪意のあるプログラムを検出</string>
@@ -580,4 +700,74 @@
     <string name="pulldown_perm_empty">表示できる権限記録がありません</string>
     <string name="pulldown_recent_count">%1$d 個のファイル</string>
     <string name="pulldown_close">閉じる</string>
+
+    <!-- 恒星の詳細パネル（星をタップすると右からスライド） -->
+    <string name="star_detail_title">星の詳細</string>
+    <string name="star_detail_close">閉じる</string>
+    <string name="star_detail_type">種別</string>
+    <string name="star_detail_type_app">アプリ</string>
+    <string name="star_detail_type_folder">フォルダ</string>
+    <string name="star_detail_size">サイズ</string>
+    <string name="star_detail_risk">安全性</string>
+    <string name="star_detail_children">含む項目</string>
+    <string name="star_detail_children_fmt">%1$d 件 · 最大 %2$s</string>
+    <string name="star_detail_sub_app">パッケージ %1$s</string>
+    <string name="star_detail_sub_folder">パス %1$s</string>
+    <string name="star_detail_risk_unknown">危険なし</string>
+    <string name="star_detail_time">最終スキャン</string>
+    <string name="star_detail_never">未スキャン</string>
+    <string name="star_detail_open">開く</string>
+    <string name="star_detail_advice_safe">リスクは検出されていません。</string>
+    <string name="star_detail_advice_low">軽微な疑わしい項目があります。権限にご注意ください。</string>
+    <string name="star_detail_advice_medium">中程度のリスクがあります。対処してから利用してください。</string>
+    <string name="star_detail_advice_high">高リスクを検出しました。直ちにアンインストールまたは隔離してください。</string>
+    <string name="star_detail_facts_title">星の性質</string>
+    <string name="star_detail_planets">惑星数</string>
+    <string name="star_detail_planets_fmt">%1$d 個</string>
+    <string name="star_detail_mag">等級</string>
+    <string name="star_detail_mag_fmt">%1$.1f 等</string>
+    <string name="star_detail_temp">温度</string>
+    <string name="star_detail_temp_fmt">%1$d K</string>
+    <string name="star_detail_spec">光谱型</string>
+    <string name="star_detail_radius">半径</string>
+    <string name="star_detail_radius_fmt">%1$.1f R☉</string>
+    <string name="star_detail_mass">質量</string>
+    <string name="star_detail_mass_fmt">%1$.2f M☉</string>
+
+    <!-- 扫描流程 / 动画测试 / 病毒库规模（补齐三语） -->
+    <string name="scan_scope_title">スキャン範囲を選択</string>
+    <string name="scan_scope_global">全デバイススキャン</string>
+    <string name="scan_scope_global_desc">デバイスストレージを走査し、すべてのファイルを検査します（「すべてのファイルへのアクセス」権限が必要）</string>
+    <string name="scan_scope_folder">フォルダを選択</string>
+    <string name="scan_scope_folder_desc">1 つまたは複数のフォルダを個別にスキャンします（SAF 認可、追加権限不要）</string>
+    <string name="scan_scope_apps">インストール済みアプリ</string>
+    <string name="scan_scope_apps_desc">インストール済みアプリの権限と動作を検査します。ディープモードではアクセシビリティサービスやデバイス管理者の悪用も検出します</string>
+    <string name="scan_next">次へ</string>
+    <string name="scan_folders_title">フォルダを選択</string>
+    <string name="scan_folders_hint">複数のフォルダを追加できます。開始後は順番にスキャンします。</string>
+    <string name="scan_folder_add">フォルダを追加</string>
+    <string name="scan_folder_empty">フォルダがまだ追加されていません</string>
+    <string name="scan_folder_remove">削除</string>
+    <string name="scan_back">戻る</string>
+    <string name="scan_again">再スキャン</string>
+    <string name="scan_back_to_modes">モード選択に戻る</string>
+    <string name="scan_counting">ファイルを集計中：%1$d</string>
+    <string name="scan_scanned">%1$d 個のファイルをスキャン済み</string>
+    <string name="scan_no_risk">リスクのあるファイルは見つかりませんでした</string>
+    <string name="scan_result_count_label">スキャン結果（%1$d）</string>
+    <string name="scan_low_risk_group">低リスク・安全な項目（%1$d）</string>
+    <string name="anim_test_on">アニメーションテストモード ON：スキャン進捗とアイコン回転を一定のテンポで 1 回再生します。</string>
+    <string name="anim_test_off">アニメーションテストモード OFF。</string>
+    <string name="virusdb_region_scale">約 161 万件の脅威インテリジェンス</string>
+    <string name="virusdb_point_scale">約 7.5 万件の脅威インテリジェンス</string>
+    <string name="virusdb_builtin_note">内蔵 · オフライン利用可 · 更新不要</string>
+    <string name="toggle_collapse">展開または折りたたみ</string>
+    <string name="onboarding_star_caption">初期設定を完了</string>
+    <string name="action_view">表示</string>
+    <string name="block_need_deep_mode">インターセプトはアクセシビリティ / Shizuku / Root モードでのみ有効です</string>
+    <string name="tools_traffic_detail_compact">↓%1$s · ↑%2$s</string>
+    <string name="tools_traffic_need_usage_access">アプリ別の通信量を集計するには「使用状況へのアクセス」権限が必要です。タップして許可してください</string>
+    <string name="tools_no_traffic_today">本日の通信量はまだありません</string>
+    <string name="notify_ip_hit_title">%1$s が悪意のあるホストに接続しています</string>
+    <string name="notify_ip_hit_text">リモート %1$s が脅威情報に一致：%2$s</string>
 </resources>

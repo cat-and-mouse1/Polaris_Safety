@@ -12,8 +12,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.Looper;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
@@ -21,6 +21,9 @@ import androidx.core.app.ServiceCompat;
 import androidx.core.content.ContextCompat;
 
 import com.polaris.app.R;
+import com.polaris.app.scan.IocDatabase;
+import com.polaris.app.scan.IocEntry;
+import com.polaris.app.scan.NetConnScanner;
 import com.polaris.app.scan.Notifier;
 import com.polaris.app.util.BehaviorLog;
 import com.polaris.app.util.Prefs;
@@ -52,17 +55,33 @@ public class GuardService extends Service {
     private static final long POLL_INTERVAL_MS = 2000L;
     /** 每 15 次轮询（约 30 秒）刷新一次拦截常驻通知。 */
     private static final int NOTIFY_REFRESH_POLLS = 15;
+    /** 每 5 次轮询（约 10 秒）重新读取一次恶意列表，避免每 2 秒反序列化一次。 */
+    private static final int MALICIOUS_REFRESH_POLLS = 5;
+    /** 每 5 次轮询（约 10 秒）检查一次「是否有应用连到威胁情报里的恶意 IP」。 */
+    private static final int CONN_CHECK_POLLS = 5;
     private static final Pattern FOCUS_PATTERN =
             Pattern.compile("mCurrentFocus=.*?u\\d+ ([^/\\s}]+)/");
 
-    private final Handler handler = new Handler(Looper.getMainLooper());
+    /**
+     * 轮询跑在独立后台线程：每轮都要 fork shell 执行 dumpsys / su 命令，
+     * 放在主线程会造成持续掉帧与 ANR 风险。
+     */
+    private HandlerThread pollThread;
+    private Handler pollHandler;
     private int pollCount = 0;
     private final Runnable poller = new Runnable() {
         @Override
         public void run() {
             try {
+                if (pollCount % MALICIOUS_REFRESH_POLLS == 0) {
+                    // 恶意列表由后台扫描更新，低频刷新即可（命中判定用缓存）
+                    malicious = prefs.getMaliciousPackages();
+                }
                 pollAndBlock();
                 pollCount++;
+                if (pollCount % CONN_CHECK_POLLS == 0) {
+                    checkMaliciousConnections();
+                }
                 if (pollCount % NOTIFY_REFRESH_POLLS == 0) {
                     // 后台守护期间保持拦截常驻通知与权限状态同步
                     Notifier.updateBlockNotification(GuardService.this);
@@ -70,13 +89,15 @@ public class GuardService extends Service {
             } catch (Exception e) {
                 Log.w(TAG, "poll failed: " + e.getMessage());
             } finally {
-                handler.postDelayed(this, POLL_INTERVAL_MS);
+                if (pollHandler != null) pollHandler.postDelayed(this, POLL_INTERVAL_MS);
             }
         }
     };
 
-    private int mode = Prefs.MODE_NONE;
-    private Set<String> malicious;
+    private volatile int mode = Prefs.MODE_NONE;
+    private volatile Set<String> malicious;
+    /** 已告警过的「ip@uid」，避免同一连接每 10 秒重复提示；超过上限整体清空。 */
+    private final Set<String> alertedConns = new java.util.HashSet<>();
     private Prefs prefs;
 
     @Override
@@ -84,6 +105,9 @@ public class GuardService extends Service {
         super.onCreate();
         prefs = new Prefs(this);
         createChannel();
+        pollThread = new HandlerThread("polaris-guard-poll");
+        pollThread.start();
+        pollHandler = new Handler(pollThread.getLooper());
     }
 
     @Override
@@ -105,15 +129,67 @@ public class GuardService extends Service {
         // 服务（重新）启动时恢复拦截模式常驻通知，后台守护不中断
         Notifier.updateBlockNotification(this);
 
-        handler.removeCallbacks(poller);
-        handler.post(poller);
+        pollCount = 0;
+        if (pollHandler != null) {
+            pollHandler.removeCallbacks(poller);
+            pollHandler.post(poller);
+        }
         Log.i(TAG, "Guard started, mode=" + mode);
         return START_STICKY;
     }
 
+    /**
+     * 检查「是否有应用连到了威胁情报里的恶意 IP」。
+     *
+     * <p>只在 Shizuku / root 模式下有意义：普通应用读 /proc/net/tcp 只能看到自己的连接，
+     * 拿不到全局视图。命令优先走 Shizuku（shell 身份即可读整表），回退 su。
+     *
+     * <p>恶意 IP 在 IOC 库里存在包名（pkg）字段中，因此复用 pkg 索引查询，不需要额外的 IP 表。
+     */
+    private void checkMaliciousConnections() {
+        if (mode != Prefs.MODE_SHIZUKU && mode != Prefs.MODE_ROOT) return;
+
+        String table = ShizukuHelper.runShell("cat", "/proc/net/tcp");
+        if (table == null || table.isEmpty()) {
+            table = RootChecker.runAsRootOutput("cat /proc/net/tcp");
+        }
+        if (table == null || table.isEmpty()) return;
+
+        java.util.List<NetConnScanner.Conn> conns = NetConnScanner.parse(table);
+        if (conns.isEmpty()) return;
+
+        IocDatabase db = IocDatabase.getInstance(this, "region");
+        for (NetConnScanner.Conn c : conns) {
+            IocEntry hit = db.matchByPkg(c.ip);
+            if (hit == null) continue;
+            String key = c.ip + "@" + c.uid;
+            if (!alertedConns.add(key)) continue;
+            String app = labelForUid(c.uid);
+            Log.w(TAG, "Malicious IP connection: " + app + "(" + c.uid + ") -> "
+                    + c.ip + ":" + c.port + " [" + hit.family + "]");
+            BehaviorLog.log(this, BehaviorLog.TYPE_MALICIOUS_IP, app,
+                    c.ip + ":" + c.port + "（" + hit.family + "）");
+            Notifier.notifyIpHit(this, app, c.ip, c.port, hit.family);
+        }
+        if (alertedConns.size() > 500) alertedConns.clear();
+    }
+
+    /** uid → 应用名；取不到时回退成 uid 字符串。 */
+    private String labelForUid(int uid) {
+        try {
+            PackageManager pm = getPackageManager();
+            String[] pkgs = pm.getPackagesForUid(uid);
+            if (pkgs != null && pkgs.length > 0) {
+                ApplicationInfo ai = pm.getApplicationInfo(pkgs[0], 0);
+                return pm.getApplicationLabel(ai).toString();
+            }
+        } catch (Exception ignored) {
+        }
+        return "uid " + uid;
+    }
+
     private void pollAndBlock() {
-        // 每次轮询刷新恶意列表（后台扫描后可能更新）
-        malicious = prefs.getMaliciousPackages();
+        // 恶意列表由 poller 低频刷新（见 MALICIOUS_REFRESH_POLLS）
         if (mode == Prefs.MODE_NONE || malicious == null || malicious.isEmpty()) return;
 
         String foreground = getForegroundPackage();
@@ -235,13 +311,17 @@ public class GuardService extends Service {
 
     private Notification buildNotification() {
         String title = getString(R.string.app_name) + " · " + getString(R.string.app_subtitle);
-        return new NotificationCompat.Builder(this, CHANNEL_ID)
+        NotificationCompat.Builder b = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_shield)
                 .setContentTitle(title)
                 .setContentText(getString(R.string.toast_guard_started))
                 .setOngoing(true)
-                .setPriority(NotificationCompat.PRIORITY_LOW)
-                .build();
+                .setPriority(NotificationCompat.PRIORITY_LOW);
+        // 守护常驻通知来自前台服务，系统强制必须显示；关闭开关后仅转为静音/最小化。
+        if (prefs != null && !prefs.isGuardNotifyEnabled()) {
+            b.setSilent(true);
+        }
+        return b.build();
     }
 
     private void notifyBlocked(String pkg) {
@@ -275,7 +355,8 @@ public class GuardService extends Service {
 
     @Override
     public void onDestroy() {
-        handler.removeCallbacks(poller);
+        if (pollHandler != null) pollHandler.removeCallbacks(poller);
+        if (pollThread != null) pollThread.quitSafely();
         super.onDestroy();
     }
 }

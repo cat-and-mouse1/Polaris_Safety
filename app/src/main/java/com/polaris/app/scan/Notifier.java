@@ -27,30 +27,45 @@ public final class Notifier {
     public static final String CHANNEL_SCAN = "scan";
     public static final String CHANNEL_BLOCK = "block";
     public static final String CHANNEL_MONITOR = "monitor";
+    public static final String CHANNEL_UPDATE = "update";
     public static final int BLOCK_NOTIFICATION_ID = 7;
     private static final int MONITOR_NOTIFICATION_ID = 3000;
+    private static final int VIRUS_UPDATE_NOTIFICATION_ID = 2001;
 
     private Notifier() {}
 
+    /** 渠道是否已在本进程创建过（渠道内容固定，重复 createNotificationChannel 无意义）。 */
+    private static volatile boolean sChannelsReady = false;
+
     public static void ensureChannels(Context context) {
-        NotificationManager nm =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        if (nm == null) return;
-        NotificationChannel scan = new NotificationChannel(
-                CHANNEL_SCAN,
-                context.getString(R.string.notification_channel_scan),
-                NotificationManager.IMPORTANCE_DEFAULT);
-        nm.createNotificationChannel(scan);
-        NotificationChannel block = new NotificationChannel(
-                CHANNEL_BLOCK,
-                context.getString(R.string.block_mode_title),
-                NotificationManager.IMPORTANCE_LOW);
-        nm.createNotificationChannel(block);
-        NotificationChannel monitor = new NotificationChannel(
-                CHANNEL_MONITOR,
-                context.getString(R.string.monitor_channel_name),
-                NotificationManager.IMPORTANCE_HIGH);
-        nm.createNotificationChannel(monitor);
+        if (sChannelsReady) return;
+        synchronized (Notifier.class) {
+            if (sChannelsReady) return;
+            NotificationManager nm =
+                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (nm == null) return;
+            NotificationChannel scan = new NotificationChannel(
+                    CHANNEL_SCAN,
+                    context.getString(R.string.notification_channel_scan),
+                    NotificationManager.IMPORTANCE_DEFAULT);
+            nm.createNotificationChannel(scan);
+            NotificationChannel block = new NotificationChannel(
+                    CHANNEL_BLOCK,
+                    context.getString(R.string.block_mode_title),
+                    NotificationManager.IMPORTANCE_LOW);
+            nm.createNotificationChannel(block);
+            NotificationChannel monitor = new NotificationChannel(
+                    CHANNEL_MONITOR,
+                    context.getString(R.string.monitor_channel_name),
+                    NotificationManager.IMPORTANCE_HIGH);
+            nm.createNotificationChannel(monitor);
+            NotificationChannel update = new NotificationChannel(
+                    CHANNEL_UPDATE,
+                    context.getString(R.string.notification_channel_update),
+                    NotificationManager.IMPORTANCE_DEFAULT);
+            nm.createNotificationChannel(update);
+            sChannelsReady = true;
+        }
     }
 
     public static void notifyRisks(Context context, List<AppRiskInfo> risks) {
@@ -77,6 +92,29 @@ public final class Notifier {
         }
     }
 
+    /**
+     * 恶意 IP 连接告警：守护轮询发现「某应用连到了威胁情报里的恶意 IP」时调用。
+     * 按 ip@uid 去重由调用方负责。
+     */
+    public static void notifyIpHit(Context context, String app, String ip, int port, String family) {
+        ensureChannels(context);
+        if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return;
+        String title = context.getString(R.string.notify_ip_hit_title, app);
+        String text = context.getString(R.string.notify_ip_hit_text, ip + ":" + port, family);
+        Notification n = new NotificationCompat.Builder(context, CHANNEL_MONITOR)
+                .setSmallIcon(R.drawable.ic_shield)
+                .setContentTitle(title)
+                .setContentText(text)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true)
+                .build();
+        try {
+            NotificationManagerCompat.from(context).notify(MONITOR_NOTIFICATION_ID + 1, n);
+        } catch (SecurityException ignored) {
+        }
+    }
+
     // ---------- 拦截模式常驻通知 ----------
 
     /**
@@ -91,7 +129,7 @@ public final class Notifier {
         if (nm == null) return;
 
         Prefs prefs = new Prefs(context);
-        if (!prefs.isBlockMode()) {
+        if (!prefs.isBlockMode() || !prefs.isBlockNotifyEnabled()) {
             nm.cancel(BLOCK_NOTIFICATION_ID);
             return;
         }
@@ -186,5 +224,27 @@ public final class Notifier {
         }
         BehaviorLog.log(context, BehaviorLog.TYPE_MONITOR,
                 appName, context.getString(R.string.monitor_alert_text, appName, reason));
+    }
+
+    // ---------- 病毒库更新通知 ----------
+
+    /** 病毒库自动更新完成后提醒（受「病毒库更新通知」开关控制）。 */
+    public static void notifyVirusUpdate(Context context, int newVersion) {
+        Prefs prefs = new Prefs(context);
+        if (!prefs.isVirusUpdateNotifyEnabled()) return;
+        ensureChannels(context);
+        if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return;
+        Notification n = new NotificationCompat.Builder(context, CHANNEL_UPDATE)
+                .setSmallIcon(R.drawable.ic_shield)
+                .setContentTitle(context.getString(R.string.notification_virus_updated_title))
+                .setContentText(context.getString(R.string.notification_virus_updated_text, newVersion))
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(
+                        context.getString(R.string.notification_virus_updated_text, newVersion)))
+                .setAutoCancel(true)
+                .build();
+        try {
+            NotificationManagerCompat.from(context).notify(VIRUS_UPDATE_NOTIFICATION_ID, n);
+        } catch (SecurityException ignored) {
+        }
     }
 }

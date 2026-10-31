@@ -20,9 +20,11 @@ public final class BehaviorLog {
     public static final String TYPE_QUARANTINE = "quarantine";     // 隔离风险文件
     public static final String TYPE_RESCUE = "rescue";             // 救援覆盖层
     public static final String TYPE_EMERGENCY = "emergency";       // 紧急遇险（三击音量键）
+    public static final String TYPE_MALICIOUS_IP = "malicious_ip"; // 应用连接了威胁情报里的恶意 IP
     public static final String TYPE_MONITOR = "monitor";           // 应用监控告警
     public static final String TYPE_UNINSTALL = "uninstall";       // 卸载恶意应用
     public static final String TYPE_FREEZE = "freeze";             // 冻结恶意应用
+    public static final String TYPE_DELETE = "delete";             // 删除风险文件
 
     /** 一条行为记录。 */
     public static class Entry {
