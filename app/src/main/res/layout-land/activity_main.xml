@@ -12,13 +12,23 @@
         android:layout_height="match_parent"
         android:fitsSystemWindows="true">
 
-        <!-- 主内容：横屏左右分栏 -->
-        <LinearLayout
+        <!-- 星图底座：表面色底 + StarMapView 氛围层（半透明网格 / 星点 / 闪烁亮星） -->
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="?attr/colorSurface"
-            android:orientation="horizontal"
-            android:fitsSystemWindows="true">
+            android:background="?attr/colorSurface">
+
+            <com.polaris.app.view.StarMapView
+                android:id="@+id/starMap"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <!-- 主内容：横屏左右分栏 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:fitsSystemWindows="true">
 
             <!-- 左栏：头部 + 四角星图标 + 圆环 + 扫描状态 -->
             <LinearLayout
@@ -44,70 +54,161 @@
                         android:contentDescription="@string/drawer_open"
                         android:src="@drawable/ic_menu"
                         app:tint="?attr/colorOnSurface" />
-
-                    <ImageButton
-                        android:id="@+id/btnToolbox"
-                        android:layout_width="44dp"
-                        android:layout_height="44dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="@string/tools_title"
-                        android:src="@drawable/ic_toolbox"
-                        app:tint="?attr/colorOnSurface" />
                 </LinearLayout>
 
-                <!-- 图标区：剩余空间垂直居中 -->
+                <!-- 图标区：头部徽标行（小星 + 欢迎文字，左上） + 剩余空间放扫描状态 -->
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1">
 
+                    <!-- 头部徽标行：小四角星（左） + 欢迎文字（右）；圆环视图保留 id 供扫描进度逻辑调用，视觉隐藏 -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:orientation="vertical">
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingTop="10dp">
 
-                    <!-- 应用图标：中心四角星 + 外圈 3 圈同心圆环 -->
-                    <FrameLayout
-                        android:id="@+id/homeAppIcon"
-                        android:layout_width="96dp"
-                        android:layout_height="96dp"
-                        android:layout_gravity="center_horizontal">
+                        <FrameLayout
+                            android:id="@+id/homeAppIcon"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp">
 
-                    <com.polaris.app.view.ConcentricRingsView
-                        android:id="@+id/homeRings"
+                            <com.polaris.app.view.ConcentricRingsView
+                                android:id="@+id/homeRings"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:visibility="gone" />
+
+                            <ImageView
+                                android:id="@+id/homeStar"
+                                android:layout_width="72dp"
+                                android:layout_height="72dp"
+                                android:layout_gravity="center"
+                                android:contentDescription="@string/star_desc"
+                                android:src="@drawable/ic_star"
+                                app:tint="?attr/colorPrimary" />
+                        </FrameLayout>
+
+                        <TextView
+                            android:id="@+id/homeGreeting"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="14dp"
+                            android:maxLines="1"
+                            android:ellipsize="end"
+                            android:textAppearance="?attr/textAppearanceTitleLarge"
+                            android:textColor="?attr/colorOnSurface" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/scanStatusText"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="start"
+                        android:lineSpacingExtra="2dp"
+                        android:maxLines="2"
+                        android:paddingHorizontal="8dp"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:visibility="gone" />
 
-                    <FrameLayout
-                        android:id="@+id/homeIconDisc"
+                    <!-- 已有激活模式时的快捷面板：屏幕左下角「以（模式）开始扫描」+ 右侧「重新配置模式」 -->
+                    <LinearLayout
+                        android:id="@+id/modeResume"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:background="@drawable/bg_mode_badge">
+                        android:layout_gravity="bottom|start"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginBottom="16dp"
+                        android:orientation="vertical"
+                        android:visibility="gone">
 
-                        <ImageView
-                            android:id="@+id/homeStar"
-                            android:layout_width="56dp"
-                            android:layout_height="56dp"
-                            android:layout_gravity="center"
-                            android:contentDescription="@string/star_desc"
-                            android:src="@drawable/ic_star" />
-                    </FrameLayout>
-                </FrameLayout>
+                        <!-- 应用行为面板：默认隐藏（保留视图供 BehaviorLog 逻辑引用） -->
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/behaviorPanel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="12dp"
+                            android:visibility="gone"
+                            app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+                            app:cardCornerRadius="16dp"
+                            app:cardElevation="0dp"
+                            app:strokeColor="?attr/colorOutlineVariant"
+                            app:strokeWidth="1dp">
 
-                <TextView
-                    android:id="@+id/scanStatusText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:gravity="center"
-                    android:lineSpacingExtra="2dp"
-                    android:maxLines="2"
-                    android:paddingHorizontal="20dp"
-                    android:textAppearance="?attr/textAppearanceBodySmall"
-                    android:textColor="?attr/colorOnSurfaceVariant"
-                    android:visibility="gone" />
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:paddingHorizontal="16dp"
+                                android:paddingVertical="12dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/behavior_panel_title"
+                                    android:textAppearance="?attr/textAppearanceLabelLarge"
+                                    android:textColor="?attr/colorOnSurfaceVariant" />
+
+                                <LinearLayout
+                                    android:id="@+id/behaviorRows"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="6dp"
+                                    android:orientation="vertical" />
+
+                                <TextView
+                                    android:id="@+id/behaviorEmpty"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="6dp"
+                                    android:text="@string/behavior_empty"
+                                    android:textAppearance="?attr/textAppearanceBodySmall"
+                                    android:textColor="?attr/colorOnSurfaceVariant"
+                                    android:visibility="gone" />
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <!-- 拦截入口：深层扫描模式显示（代码控制显隐），直达扫描中心拦截板块 -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnResumeBlock"
+                            android:layout_width="wrap_content"
+                            android:layout_height="44dp"
+                            android:layout_marginBottom="8dp"
+                            android:minWidth="0dp"
+                            android:paddingHorizontal="20dp"
+                            android:text="@string/tab_block"
+                            android:visibility="gone"
+                            app:cornerRadius="22dp" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="start|center_vertical"
+                            android:orientation="horizontal">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnResumeScan"
+                                android:layout_width="wrap_content"
+                                android:layout_height="52dp"
+                                android:minWidth="0dp"
+                                android:paddingHorizontal="20dp"
+                                android:text="@string/scan_next"
+                                app:cornerRadius="26dp" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnReconfigureMode"
+                                style="@style/Widget.Material3.Button.TextButton"
+                                android:layout_width="wrap_content"
+                                android:layout_height="44dp"
+                                android:layout_marginStart="6dp"
+                                android:minWidth="0dp"
+                                android:paddingHorizontal="10dp"
+                                android:text="@string/mode_reconfigure" />
+                        </LinearLayout>
                     </LinearLayout>
                 </FrameLayout>
             </LinearLayout>
@@ -327,6 +428,17 @@
                             </LinearLayout>
                         </com.google.android.material.card.MaterialCardView>
 
+                        <!-- 勾选「选择文件夹」后出现：进入文件夹多选页（可与「已安装应用」组合扫描） -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/scopeFolderNext"
+                            android:layout_width="match_parent"
+                            android:layout_height="44dp"
+                            android:layout_marginHorizontal="16dp"
+                            android:layout_marginTop="12dp"
+                            android:text="@string/scan_next"
+                            android:visibility="gone"
+                            app:cornerRadius="22dp" />
+
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -404,7 +516,6 @@
 
                             <com.google.android.material.button.MaterialButton
                                 android:id="@+id/folderAddButton"
-                                style="@style/Widget.Material3.Button.TonalButton"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginHorizontal="16dp"
@@ -444,18 +555,89 @@
                         android:id="@+id/resultArea"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:background="?attr/colorSurface"
+                        android:clickable="true"
+                        android:focusable="true"
                         android:orientation="vertical"
                         android:visibility="gone">
 
-                        <TextView
-                            android:id="@+id/resultTitle"
+                        <!-- 结果页顶部：百分制评分（大号主题色分数 + 灰色 /100）+ 右侧结果计数 -->
+                        <LinearLayout
+                            android:id="@+id/resultScoreRow"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginHorizontal="16dp"
                             android:layout_marginTop="4dp"
-                            android:text="@string/scan_title"
-                            android:textAppearance="?attr/textAppearanceTitleMedium"
-                            android:textColor="?attr/colorOnSurface" />
+                            android:layout_marginBottom="8dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/resultScore"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/result_score_placeholder"
+                                android:textAppearance="?attr/textAppearanceDisplayMedium"
+                                android:textColor="?attr/colorPrimary" />
+
+                            <TextView
+                                android:id="@+id/resultScoreMax"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:text="@string/result_score_max"
+                                android:textAppearance="?attr/textAppearanceBodySmall"
+                                android:textColor="?attr/colorOnSurfaceVariant" />
+
+                            <View
+                                android:layout_width="0dp"
+                                android:layout_height="1dp"
+                                android:layout_weight="1" />
+
+                            <!-- 分数右侧简要说明：文件/应用各自的风险计数（逐段显示） -->
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="end"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/resultBriefFiles"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textAppearance="?attr/textAppearanceLabelMedium"
+                                    android:textColor="?attr/colorOnSurfaceVariant"
+                                    android:visibility="gone" />
+
+                                <TextView
+                                    android:id="@+id/resultBriefApps"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textAppearance="?attr/textAppearanceLabelMedium"
+                                    android:textColor="?attr/colorOnSurfaceVariant"
+                                    android:visibility="gone" />
+                            </LinearLayout>
+
+                            <TextView
+                                android:id="@+id/resultTitle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="end"
+                                android:text="@string/scan_title"
+                                android:textAppearance="?attr/textAppearanceTitleSmall"
+                                android:textColor="?attr/colorOnSurfaceVariant" />
+
+                            <!-- 向下收回：点击把结果页滑回星图 -->
+                            <ImageButton
+                                android:id="@+id/resultCollapse"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:layout_marginStart="2dp"
+                                android:layout_marginEnd="-6dp"
+                                android:background="?attr/selectableItemBackgroundBorderless"
+                                android:contentDescription="@string/result_collapse_desc"
+                                android:src="@drawable/ic_expand_more" />
+                        </LinearLayout>
 
                         <ScrollView
                             android:layout_width="match_parent"
@@ -469,37 +651,108 @@
                                 android:layout_height="wrap_content"
                                 android:orientation="vertical">
 
-                                <TextView
-                                    android:id="@+id/fileSectionTitle"
+                                <!-- 双段都有结果时显示的分栏选择（文件 / 应用）；单段时隐藏 -->
+                                <com.google.android.material.button.MaterialButtonToggleGroup
+                                    android:id="@+id/resultTabs"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:layout_marginHorizontal="16dp"
-                                    android:layout_marginTop="4dp"
-                                    android:textAppearance="?attr/textAppearanceLabelLarge"
-                                    android:textColor="?attr/colorPrimary" />
+                                    android:layout_marginTop="2dp"
+                                    android:visibility="gone"
+                                    app:checkedButton="@+id/tabFiles"
+                                    app:selectionRequired="true"
+                                    app:singleSelection="true">
 
+                                    <Button
+                                        android:id="@+id/tabFiles"
+                                        style="?attr/materialButtonOutlinedStyle"
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:text="@string/result_tab_files" />
+
+                                    <Button
+                                        android:id="@+id/tabApps"
+                                        style="?attr/materialButtonOutlinedStyle"
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:text="@string/result_tab_apps" />
+                                </com.google.android.material.button.MaterialButtonToggleGroup>
+
+                                <!-- 文件段面板：扫描范围 + 文件总数 + 段评分 + 可折叠文件结果 -->
                                 <LinearLayout
-                                    android:id="@+id/resultList"
+                                    android:id="@+id/filePanel"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:orientation="vertical"
-                                    android:paddingBottom="8dp" />
-
-                                <TextView
-                                    android:id="@+id/appSectionTitle"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginHorizontal="16dp"
+                                    android:layout_marginHorizontal="10dp"
                                     android:layout_marginTop="10dp"
-                                    android:textAppearance="?attr/textAppearanceLabelLarge"
-                                    android:textColor="?attr/colorPrimary" />
+                                    android:padding="8dp"
+                                    android:orientation="vertical"
+                                    android:visibility="gone">
 
+                                    <TextView
+                                        android:id="@+id/fileMetaText"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginHorizontal="16dp"
+                                        android:layout_marginTop="6dp"
+                                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                                        android:textColor="?attr/colorOnSurfaceVariant" />
+
+                                    <TextView
+                                        android:id="@+id/fileScoreText"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginHorizontal="16dp"
+                                        android:layout_marginTop="2dp"
+                                        android:textAppearance="?attr/textAppearanceTitleMedium"
+                                        android:textColor="?attr/colorPrimary" />
+
+                                    <LinearLayout
+                                        android:id="@+id/resultList"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:orientation="vertical"
+                                        android:paddingBottom="8dp" />
+                                </LinearLayout>
+
+                                <!-- 应用段面板：应用总数 + 段评分 + 可折叠应用结果（逐应用评分） -->
                                 <LinearLayout
-                                    android:id="@+id/appResultList"
+                                    android:id="@+id/appPanel"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
+                                    android:layout_marginHorizontal="10dp"
+                                    android:layout_marginTop="10dp"
+                                    android:padding="8dp"
                                     android:orientation="vertical"
-                                    android:paddingBottom="8dp" />
+                                    android:visibility="gone">
+
+                                    <TextView
+                                        android:id="@+id/appMetaText"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginHorizontal="16dp"
+                                        android:layout_marginTop="6dp"
+                                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                                        android:textColor="?attr/colorOnSurfaceVariant" />
+
+                                    <TextView
+                                        android:id="@+id/appScoreText"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginHorizontal="16dp"
+                                        android:layout_marginTop="2dp"
+                                        android:textAppearance="?attr/textAppearanceTitleMedium"
+                                        android:textColor="?attr/colorPrimary" />
+
+                                    <LinearLayout
+                                        android:id="@+id/appResultList"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:orientation="vertical"
+                                        android:paddingBottom="8dp" />
+                                </LinearLayout>
                             </LinearLayout>
                         </ScrollView>
 
@@ -529,9 +782,121 @@
                                 app:cornerRadius="20dp" />
                         </LinearLayout>
                     </LinearLayout>
+
                 </FrameLayout>
             </LinearLayout>
         </LinearLayout>
+
+        <!-- 星图缩放条：底部右侧（扫描星域激活时显示，与捏合手势双向同步） -->
+        <com.google.android.material.slider.Slider
+            android:id="@+id/zoomSlider"
+            android:layout_width="180dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="20dp"
+            android:value="1"
+            android:valueFrom="0.5"
+            android:valueTo="4.5"
+            android:visibility="gone"
+            app:labelBehavior="gone"
+            app:thumbRadius="4dp"
+            app:trackHeight="4dp" />
+
+        <!-- 扫描完成入口：形态由代码按视觉方向切换（横=右缘竖块/竖=左下横块） -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/resultEntryBar"
+            android:layout_width="44dp"
+            android:layout_height="160dp"
+            android:layout_gravity="center_vertical|end"
+            android:clickable="true"
+            android:focusable="true"
+            android:visibility="gone"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerHighest"
+            app:cardCornerRadius="22dp"
+            app:cardElevation="0dp"
+            app:strokeColor="?attr/colorOutlineVariant"
+            app:strokeWidth="1dp">
+
+            <TextView
+                android:id="@+id/entryText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:ems="1"
+                android:gravity="center"
+                android:lineSpacingExtra="2dp"
+                android:text="@string/scan_view_results"
+                android:textAppearance="?attr/textAppearanceLabelLarge"
+                android:textColor="?attr/colorOnSurface" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 扫描进度面板：底部横贯（全局条=整体进度；局部亮条=当前对象进度；左上文字=当前对象） -->
+        <LinearLayout
+            android:id="@+id/scanProgressPanel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="14dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/scanObjText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textAppearance="?attr/textAppearanceLabelMedium"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="8dp"
+                android:background="@drawable/scan_progress_track">
+
+                <View
+                    android:id="@+id/progressGlobalBar"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/scan_progress_global" />
+
+                <View
+                    android:id="@+id/progressLocalBar"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/scan_progress_local" />
+            </FrameLayout>
+        </LinearLayout>
+
+        <!-- 恒星详情面板：点按恒星从右侧划出并占满整个高度（宽/位置由代码按方向动态设置） -->
+        <include
+            android:id="@+id/starDetailPanel"
+            layout="@layout/layout_star_detail_panel"
+            android:layout_width="300dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="end"
+            android:layout_marginEnd="0dp" />
+
+        <!-- 火箭发射入场动画层（深层扫描 / 拦截模式）：盖住星图，位于内容层之上 -->
+        <com.polaris.app.view.RocketIntroView
+            android:id="@+id/rocketIntro"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
+        <!-- 拦截模式地下功能面板容器：点击拦截按钮后由火箭动画揭示，仅占据屏幕下方区域 -->
+        <FrameLayout
+            android:id="@+id/interceptUnderground"
+            android:layout_width="match_parent"
+            android:layout_height="560dp"
+            android:layout_gravity="bottom"
+            android:visibility="gone">
+            <include layout="@layout/intercept_underground_panel" />
+        </FrameLayout>
+    </FrameLayout>
 
         <!-- 左侧守护面板（横屏由 layout-land 适配） -->
         <include

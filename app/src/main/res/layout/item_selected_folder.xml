@@ -18,9 +18,9 @@
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="14dp"
-        android:paddingTop="6dp"
-        android:paddingEnd="6dp"
-        android:paddingBottom="6dp">
+        android:paddingTop="10dp"
+        android:paddingEnd="14dp"
+        android:paddingBottom="10dp">
 
         <ImageView
             android:layout_width="20dp"
@@ -34,6 +34,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
+            android:layout_marginEnd="4dp"
             android:layout_weight="1"
             android:ellipsize="middle"
             android:maxLines="1"
@@ -44,10 +45,15 @@
             android:id="@+id/folderRowRemove"
             style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
-            android:layout_height="36dp"
+            android:layout_height="40dp"
             android:minWidth="0dp"
+            android:gravity="center"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
             android:contentDescription="@string/scan_folder_remove"
             android:text="@string/scan_folder_remove"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
             app:cornerRadius="18dp" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

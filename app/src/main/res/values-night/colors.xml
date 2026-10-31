@@ -38,4 +38,10 @@
     <color name="md_theme_surfaceContainer">#1C2025</color>
     <color name="md_theme_surfaceContainerHigh">#262A30</color>
     <color name="md_theme_surfaceContainerHighest">#31353B</color>
+
+    <!-- 威胁等级色（仅用于安全程度表达：安全=蓝 / 低=黄 / 中=橙 / 高=红，深色主题） -->
+    <color name="risk_safe">#4FC3F7</color>
+    <color name="risk_low">#FFD54F</color>
+    <color name="risk_medium">#FFB74D</color>
+    <color name="risk_high">#EF5350</color>
 </resources>

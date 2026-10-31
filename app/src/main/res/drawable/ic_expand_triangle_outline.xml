@@ -1,0 +1,15 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- 常见展开指示：宽角 caret（⌃，描边不填充），向上=展开；运行时 app:tint 取主题色；
+         点击后旋转 180° 朝下=收起 -->
+    <path
+        android:pathData="M6,15 L12,9 L18,15"
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

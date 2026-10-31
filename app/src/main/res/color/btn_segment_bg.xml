@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 分段选择钮：选中 = 主题色实底；未选中 = 表面高容器色 -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true" android:color="?attr/colorPrimary" />
+    <item android:color="?attr/colorSurfaceContainerHighest" />
+</selector>

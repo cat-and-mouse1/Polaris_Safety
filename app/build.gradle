@@ -25,11 +25,9 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
 
-    sourceSets {
-        main {
-            java.srcDirs = ['src/main/java']
-        }
-    }
+    // sourceSets 保持 AGP 默认（src/main/java 本身就是默认值）。
+    // 之前显式覆盖 java.srcDirs 会让 unit-test 的 classpath 解析异常
+    // （testDebugUnitTest 报 ClassNotFoundException），故移除。
 }
 
 dependencies {
@@ -54,4 +52,58 @@ dependencies {
     // Unit testing
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.mockito:mockito-core:5.11.0'
+}
+
+// ---------------------------------------------------------------------------
+// 布局 ID 一致性校验（横屏变体 vs 竖屏）
+//
+// 背景：Activity 代码对 findViewById 结果大量未判空，而 layout-land 只有少数布局
+// 有独立变体。历史上两次启动闪退（drawerToolbox / resultBrief*）都是「竖屏加了控件、
+// 横屏变体没同步」导致。该任务在 preBuild 阶段拦截同类问题。
+//
+// 说明：下列 ID 是设计上有意只在单侧存在的（横屏紧凑模式 / 侧边导航），加入白名单；
+// 若出现白名单之外的新差异，说明有人改了布局但漏同步，构建直接失败。
+// ---------------------------------------------------------------------------
+def LAYOUT_ID_WHITELIST = [
+        'contentRoot', 'modeDetail', 'observatoryIntro', 'btnPickBack', 'btnPickMode',
+        'resultTitle', 'scopeFolderNext',
+        'tabLayout', 'tabNavAllowlist', 'tabNavBehavior', 'tabNavList', 'tabNavQuarantine',
+        'panelTabs', 'panelNavList', 'panelNavPerm', 'panelNavRecent', 'panelNavTraffic',
+] as Set
+
+tasks.register('checkLayoutIdParity') {
+    group = 'verification'
+    description = '校验 layout-land 与 layout 同名布局的 ID 差异是否已同步'
+
+    def portraitDir = file('src/main/res/layout')
+    def landDir = file('src/main/res/layout-land')
+
+    doLast {
+        if (!landDir.exists()) return
+        def idsOf = { File f ->
+            def m = f.getText('UTF-8') =~ /@\+id\/([A-Za-z0-9_]+)/
+            m.collect { it[1] } as Set
+        }
+        def problems = []
+        landDir.listFiles()?.findAll { it.name.endsWith('.xml') }?.each { land ->
+            def portrait = new File(portraitDir, land.name)
+            if (!portrait.exists()) return
+            def p = idsOf(portrait)
+            def l = idsOf(land)
+            def onlyPortrait = (p - l) - LAYOUT_ID_WHITELIST
+            def onlyLand = (l - p) - LAYOUT_ID_WHITELIST
+            if (onlyPortrait) problems << "  ${land.name}: 仅竖屏存在 ${onlyPortrait.sort()}"
+            if (onlyLand) problems << "  ${land.name}: 仅横屏存在 ${onlyLand.sort()}"
+        }
+        if (problems) {
+            throw new GradleException(
+                    '横竖屏布局 ID 不一致（会导致横屏 NPE）：\n' + problems.join('\n')
+                            + '\n请同步 src/main/res/layout-land/ 对应布局，'
+                            + '若确属设计差异请加入 build.gradle 的 LAYOUT_ID_WHITELIST。')
+        }
+    }
+}
+
+tasks.matching { it.name == 'preBuild' }.configureEach {
+    dependsOn 'checkLayoutIdParity'
 }

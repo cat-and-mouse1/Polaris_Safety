@@ -43,6 +43,8 @@
     <color name="ic_launcher_background">#FFFFFF</color>
     <color name="brand_star">#111111</color>
     <color name="brand_plate">#F8F9FF</color>
+    <!-- 欢迎页沉浸式星空底色（深空藏蓝，与品牌蓝 #00639B 同族） -->
+    <color name="onboarding_space_bg">#0A1A2F</color>
 
     <!-- AI 服务商品牌色 -->
     <color name="ai_brand_hy3">#0052D9</color>
@@ -63,4 +65,20 @@
     <!-- 状态指示器颜色 -->
     <color name="green_500">#4CAF50</color>
     <color name="red_500">#F44336</color>
+
+    <!-- 威胁等级色（仅用于安全程度表达：安全=蓝 / 低=黄 / 中=橙 / 高=红，浅色主题） -->
+    <color name="risk_safe">#2E7DD0</color>
+    <color name="risk_low">#A67C00</color>
+    <color name="risk_medium">#C05E10</color>
+    <color name="risk_high">#C43030</color>
+
+    <!-- 实色底（红色渐变横幅 / 等级徽章）上的文字与图标：必须是白色以保证对比度，
+         不能直接用 ?attr/colorOnError（深色主题下该色为暗红，会看不清） -->
+    <color name="text_on_solid">#FFFFFF</color>
+
+    <!-- 紧急救援覆盖层专用色：红=危险/中断，绿=放行，语义固定不随主题变化 -->
+    <color name="rescue_danger">#FF0000</color>
+    <color name="rescue_safe">#00C853</color>
+    <!-- 救援全屏遮罩（85% 黑）：压低背景亮度以突出告警 -->
+    <color name="rescue_scrim">#D9000000</color>
 </resources>

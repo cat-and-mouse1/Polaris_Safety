@@ -30,7 +30,7 @@
                 android:layout_height="24dp"
                 android:layout_gravity="center"
                 android:importantForAccessibility="no"
-                app:tint="?attr/colorError" />
+                app:tint="?attr/colorPrimary" />
         </FrameLayout>
 
         <LinearLayout
@@ -65,9 +65,9 @@
             android:minWidth="64dp"
             android:text="@string/perm_grant"
             android:textAppearance="?attr/textAppearanceLabelLarge"
-            android:textColor="#E53935"
+            android:textColor="?attr/colorPrimary"
             app:cornerRadius="20dp"
-            app:strokeColor="#E53935"
+            app:strokeColor="?attr/colorPrimary"
             app:strokeWidth="1dp" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

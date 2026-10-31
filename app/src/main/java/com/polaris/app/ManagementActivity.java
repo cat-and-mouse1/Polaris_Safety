@@ -351,6 +351,10 @@ public class ManagementActivity extends BaseActivity {
                     iconRes = R.drawable.ic_delete;
                     tintRes = R.color.mode_color_4;
                     break;
+                case BehaviorLog.TYPE_DELETE:
+                    iconRes = R.drawable.ic_delete;
+                    tintRes = R.color.mode_color_1;
+                    break;
                 case BehaviorLog.TYPE_FREEZE:
                     iconRes = R.drawable.ic_restore;
                     tintRes = R.color.mode_color_3;

@@ -565,7 +565,7 @@
                             android:layout_gravity="center"
                             android:contentDescription="@string/block_guard_title"
                             android:src="@drawable/ic_shield"
-                            app:tint="#FFFFFF" />
+                            app:tint="@color/text_on_solid" />
                     </FrameLayout>
 
                     <LinearLayout
@@ -581,7 +581,7 @@
                             android:text="@string/block_guard_title"
                             android:textAppearance="?attr/textAppearanceTitleMedium"
                             android:textStyle="bold"
-                            android:textColor="#FFFFFF" />
+                            android:textColor="@color/text_on_solid" />
 
                         <TextView
                             android:id="@+id/blockStateText"
@@ -590,7 +590,7 @@
                             android:layout_marginTop="2dp"
                             android:text="@string/block_state_off"
                             android:textAppearance="?attr/textAppearanceBodySmall"
-                            android:textColor="#FFFFFF" />
+                            android:textColor="@color/text_on_solid" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -600,8 +600,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="14dp"
                     android:text="@string/block_toggle_on"
-                    android:textColor="#C62828"
-                    app:backgroundTint="#FFFFFF"
+                    android:textColor="?attr/colorError"
+                    app:backgroundTint="?attr/colorSurface"
                     app:cornerRadius="22dp" />
             </LinearLayout>
 
@@ -619,10 +619,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="12dp"
-                app:cardBackgroundColor="#FFF5F5"
+                app:cardBackgroundColor="?attr/colorErrorContainer"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"
-                app:strokeColor="#E53935"
+                app:strokeColor="?attr/colorError"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
@@ -642,7 +642,7 @@
                             android:layout_height="22dp"
                             android:contentDescription="@string/emergency_hint_title"
                             android:src="@drawable/ic_shield"
-                            app:tint="#E53935" />
+                            app:tint="?attr/colorError" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -651,7 +651,7 @@
                             android:text="@string/emergency_hint_title"
                             android:textAppearance="?attr/textAppearanceTitleSmall"
                             android:textStyle="bold"
-                            android:textColor="#C62828" />
+                            android:textColor="?attr/colorError" />
                     </LinearLayout>
 
                     <TextView
@@ -660,7 +660,7 @@
                         android:layout_marginTop="6dp"
                         android:text="@string/emergency_hint_desc"
                         android:textAppearance="?attr/textAppearanceBodySmall"
-                        android:textColor="#8A2B23" />
+                        android:textColor="?attr/colorOnErrorContainer" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -672,10 +672,10 @@
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="14dp"
                 android:visibility="gone"
-                app:cardBackgroundColor="#FFF5F5"
+                app:cardBackgroundColor="?attr/colorErrorContainer"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"
-                app:strokeColor="#E53935"
+                app:strokeColor="?attr/colorError"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
@@ -703,7 +703,7 @@
                             android:text="@string/block_notification_title"
                             android:textAppearance="?attr/textAppearanceTitleSmall"
                             android:textStyle="bold"
-                            android:textColor="#C62828" />
+                            android:textColor="?attr/colorError" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -714,7 +714,7 @@
                             android:text="@string/block_pin"
                             android:textAppearance="?attr/textAppearanceLabelSmall"
                             android:textStyle="bold"
-                            android:textColor="#FFFFFF" />
+                            android:textColor="@color/text_on_solid" />
                     </LinearLayout>
 
                     <TextView
@@ -723,7 +723,7 @@
                         android:layout_marginTop="6dp"
                         android:text="@string/block_guard_desc"
                         android:textAppearance="?attr/textAppearanceBodySmall"
-                        android:textColor="#8A2B23" />
+                        android:textColor="?attr/colorOnErrorContainer" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -800,7 +800,7 @@
                     android:layout_height="22dp"
                     android:contentDescription="@string/block_list_title"
                     android:src="@drawable/ic_shield"
-                    app:tint="#E53935" />
+                    app:tint="?attr/colorError" />
 
                 <TextView
                     android:layout_width="0dp"

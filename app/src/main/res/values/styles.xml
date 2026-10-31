@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- 设置页分段选择钮（多模型策略 / AI 检测模式 / 检测模型等）：
+         选中项 = 主题色实底 + onPrimary 文字，与未选中项形成明确视觉区分 -->
+    <style name="PolarisSegmentButton" parent="Widget.Material3.Button.TonalButton">
+        <item name="backgroundTint">@color/btn_segment_bg</item>
+        <item name="android:textColor">@color/btn_segment_text</item>
+        <item name="rippleColor">?attr/colorOutlineVariant</item>
+    </style>
+</resources>
