@@ -17,8 +17,7 @@ import androidx.annotation.Nullable;
 import com.google.android.material.button.MaterialButton;
 import com.polaris.app.R;
 import com.polaris.app.MainActivity;
-import com.polaris.app.scan.AppRiskInfo;
-import com.polaris.app.scan.MalwareScanner;
+import com.polaris.app.scan.AppScanRunner;
 import com.polaris.app.util.AiProvider;
 import com.polaris.app.util.Prefs;
 
@@ -68,7 +67,8 @@ public class SettingsDetectionActivity extends BaseActivity {
 
         // ML 扫描按钮
         MaterialButton mlScanButton = findViewById(R.id.mlScanButton);
-        mlScanButton.setOnClickListener(v -> startMlScan(mlScanButton));
+        mlScanButton.setOnClickListener(v ->
+                AppScanRunner.launchQuickScan(this, prefs, mlScanButton));
 
         // ML 模型选择器
         AutoCompleteTextView mlModelSelector = findViewById(R.id.mlModelSelector);
@@ -177,45 +177,4 @@ public class SettingsDetectionActivity extends BaseActivity {
         }
     }
 
-    private void startMlScan(MaterialButton btn) {
-        if (!prefs.isMlEnabled()) {
-            Toast.makeText(this, R.string.ml_engine_title, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        btn.setEnabled(false);
-        btn.setText(R.string.ml_scanning);
-
-        MalwareScanner.scanAsync(this, prefs.isDeepScanMode(), risks -> {
-            runOnUiThread(() -> {
-                btn.setEnabled(true);
-                btn.setText(R.string.ml_scan_now);
-
-                List<AppRiskInfo> result = (risks != null) ? risks : new ArrayList<>();
-
-                // 按 ML 分数降序（mlScore=-1 的排最后）
-                result.sort((a, b) -> Integer.compare(b.mlScore, a.mlScore));
-
-                // 存入缓存供 ResultActivity 读取
-                MainActivity.lastRisks = result;
-                MainActivity.aiVerdicts = null;
-
-                // 持久化扫描摘要
-                int safe = 0, suspicious = 0, malCount = 0;
-                for (AppRiskInfo r : result) {
-                    if (r.level == AppRiskInfo.LEVEL_SAFE) safe++;
-                    else if (r.level == AppRiskInfo.LEVEL_LOW) suspicious++;
-                    if (r.level >= AppRiskInfo.LEVEL_MEDIUM) malCount++;
-                }
-                prefs.saveLastScanSummary(result.size(), safe, suspicious, malCount);
-                prefs.setLastScanMs(System.currentTimeMillis());
-                prefs.incrementScanCount();
-
-                // 始终跳转结果页
-                Intent i = new Intent(this, ResultActivity.class);
-                i.putExtra("deep", false);
-                startActivity(i);
-            });
-        });
-    }
 }

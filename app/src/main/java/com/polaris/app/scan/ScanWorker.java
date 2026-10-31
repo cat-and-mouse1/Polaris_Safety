@@ -8,11 +8,8 @@ import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
 import com.polaris.app.util.Prefs;
-import com.polaris.app.util.TextUtil;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * 每日定期扫描（应用级）。
@@ -34,26 +31,13 @@ public class ScanWorker extends Worker {
         try {
             Prefs prefs = new Prefs(getApplicationContext());
             boolean deep = prefs.isDeepScanMode();
-            List<AppRiskInfo> risks =
-                    new MalwareScanner(getApplicationContext(), deep).scan();
+            List<AppRiskInfo> risks = AppScanRunner.scanAppsSync(
+                    getApplicationContext(), deep, null);
 
-            Set<String> malicious = new HashSet<>();
-            int safe = 0, suspicious = 0, malCount = 0;
-            for (AppRiskInfo r : risks) {
-                if (r.level == AppRiskInfo.LEVEL_SAFE) safe++;
-                else if (r.level == AppRiskInfo.LEVEL_LOW) suspicious++;
-                if (r.level >= AppRiskInfo.LEVEL_MEDIUM) {
-                    malicious.add(r.packageName);
-                    malCount++;
-                }
-            }
-            prefs.setMaliciousPackages(malicious);
-            prefs.setLastScanMs(System.currentTimeMillis());
-            prefs.incrementScanCount();
-            prefs.saveLastScanSummary(risks.size(), safe, suspicious, malCount);
+            int malCount = AppScanRunner.persist(prefs, risks, true);
 
             Notifier.notifyRisks(getApplicationContext(), risks);
-            Log.i(TAG, "Periodic scan done, suspicious=" + malicious.size());
+            Log.i(TAG, "Periodic scan done, suspicious=" + malCount);
             return Result.success();
         } catch (Exception e) {
             Log.e(TAG, "Periodic scan failed: " + e.getMessage(), e);
