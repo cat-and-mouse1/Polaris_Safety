@@ -41,3 +41,6 @@ data(1).zip
 /design-preview-*.html
 design_preview-material.html
 /_build_point.py
+
+# 349MB 数据源，仅本地保留；分发用 iodb.bin
+polar-region/iodb.json
