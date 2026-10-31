@@ -616,9 +616,13 @@ public class Prefs {
 
     // ---------- IP 连接检测 ----------
 
-    /** IP 连接检测是否开启（默认开启）。注意：仅在 Shizuku / Root 模式下实际生效。 */
+    /**
+     * IP 连接检测是否开启（默认关闭，由用户在「检测配置」里主动开启）。
+     * 默认关闭的原因：该功能仅在 Shizuku / Root 模式下真正运行，其余模式下开着的只是一个
+     * 不工作的开关，会让用户误以为已在保护。需用户明确选择后再生效。
+     */
     public boolean isIpCheckEnabled() {
-        return sp.getBoolean(KEY_IP_CHECK, true);
+        return sp.getBoolean(KEY_IP_CHECK, false);
     }
 
     public void setIpCheckEnabled(boolean on) {
