@@ -1360,7 +1360,7 @@ public class MainActivity extends BaseActivity {
     }
 
     /** 是否使用 AI 引擎（由设置页统一配置）。 */
-    private boolean useAiEngine() {
+    boolean useAiEngine() {
         return Prefs.ENGINE_AI.equals(prefs.getPreferredEngine());
     }
 
@@ -2416,516 +2416,37 @@ public class MainActivity extends BaseActivity {
 
     // ---------- 顶部图标（含圆环）的收起与恢复 ----------
 
-    /** 进结果页：图标与圆环整体上滑收起，把纵向空间让给结果列表。 */
-    private void collapseHomeIcon() {
-        if (homeAppIcon == null) return;
-        // 横屏：图标位于左栏垂直居中，结果页无需隐藏
-        android.util.DisplayMetrics dm = getResources().getDisplayMetrics();
-        if (dm.widthPixels > dm.heightPixels) return;
-        if (homeAppIcon.getVisibility() != View.VISIBLE) return;
-        int h = homeAppIcon.getHeight();
-        if (h <= 0) {
-            homeAppIcon.setVisibility(View.GONE);
-            return;
-        }
-        homeAppIcon.animate().translationY(-h).alpha(0f).setDuration(com.polaris.app.util.UiFx.SLIDE_OUT_MS)
-                .setInterpolator(com.polaris.app.util.UiFx.SLIDE_OUT_EASE)
-                .withEndAction(() -> {
-                    homeAppIcon.setVisibility(View.GONE);
-                    homeAppIcon.setTranslationY(0f);
-                    homeAppIcon.setAlpha(1f);
-                }).start();
+    private final HomeIconFx homeiconfx = new HomeIconFx(this);
 
-        // 同步把占位高度收到 0，否则会留下一块空白
-        ValueAnimator va = ValueAnimator.ofInt(h, 0);
-        va.setDuration(com.polaris.app.util.UiFx.SLIDE_OUT_MS);
-        va.addUpdateListener(a -> {
-            ViewGroup.LayoutParams lp = homeAppIcon.getLayoutParams();
-            lp.height = (Integer) a.getAnimatedValue();
-            homeAppIcon.setLayoutParams(lp);
-        });
-        va.start();
-    }
+    private void collapseHomeIcon() { homeiconfx.collapseHomeIcon(); }
+    private void expandHomeIcon() { homeiconfx.expandHomeIcon(); }
+    private void startIconSpin() { homeiconfx.startIconSpin(); }
+    private void stopIconSpin() { homeiconfx.stopIconSpin(); }
 
-    /** 离开结果页：把图标与圆环滑回来并恢复占位高度。 */
-    private void expandHomeIcon() {
-        if (homeAppIcon == null || homeIconSize <= 0) return;
-        // 横屏：图标常驻左栏，确保可见即可
-        android.util.DisplayMetrics dm = getResources().getDisplayMetrics();
-        if (dm.widthPixels > dm.heightPixels) {
-            if (homeAppIcon.getVisibility() != View.VISIBLE) {
-                homeAppIcon.setVisibility(View.VISIBLE);
-                homeAppIcon.setAlpha(1f);
-                homeAppIcon.setTranslationY(0f);
-            }
-            return;
-        }
-        if (homeAppIcon.getVisibility() == View.VISIBLE
-                && homeAppIcon.getLayoutParams().height == homeIconSize) {
-            return;
-        }
-        homeAppIcon.setVisibility(View.VISIBLE);
-        homeAppIcon.setAlpha(1f);
-        homeAppIcon.setTranslationY(0f);
-        ValueAnimator va = ValueAnimator.ofInt(
-                Math.max(0, homeAppIcon.getLayoutParams().height), homeIconSize);
-        va.setDuration(com.polaris.app.util.UiFx.SLIDE_IN_MS);
-        va.setInterpolator(com.polaris.app.util.UiFx.SLIDE_IN_EASE);
-        va.addUpdateListener(a -> {
-            ViewGroup.LayoutParams lp = homeAppIcon.getLayoutParams();
-            lp.height = (Integer) a.getAnimatedValue();
-            homeAppIcon.setLayoutParams(lp);
-        });
-        va.start();
-    }
+
+
 
 
     private TextView buildEmptyView() {
         return buildEmptyView(R.string.scan_no_risk);
     }
 
-    private TextView buildEmptyView(int textRes) {
-        TextView empty = new TextView(this);
-        empty.setText(textRes);
-        empty.setGravity(Gravity.CENTER);
-        empty.setTextColor(getColor(R.color.md_theme_onSurfaceVariant));
-        empty.setTextSize(15);
-        empty.setPadding(0, 24, 0, 24);
-        return empty;
-    }
 
-    /** 紧凑文件条目（折叠组内）：等级 + 文件名 + 路径，点击弹出操作菜单。 */
-    private void bindFileRiskCompact(View item, FileRiskInfo info) {
-        TextView levelText = item.findViewById(R.id.riskLevelText);
-        TextView fileName = item.findViewById(R.id.fileName);
-        TextView filePath = item.findViewById(R.id.filePath);
 
-        fileName.setText(info.name);
-        filePath.setText(displayPath(info));
 
-        switch (info.level) {
-            case FileRiskInfo.LEVEL_HIGH:
-                levelText.setText(R.string.risk_high);
-                levelText.setTextColor(getColor(R.color.md_theme_error));
-                break;
-            case FileRiskInfo.LEVEL_MEDIUM:
-                levelText.setText(R.string.risk_medium);
-                levelText.setTextColor(getColor(R.color.md_theme_tertiary));
-                break;
-            default:
-                levelText.setText(R.string.risk_low);
-                levelText.setTextColor(getColor(R.color.md_theme_secondary));
-                break;
-        }
-        item.setOnClickListener(v -> showFileActions(info, v));
-    }
 
-    /** 紧凑应用条目（折叠组内）：图标 + 名称 + 包名 + 等级，点击直接处置。 */
-    private void bindAppRiskCompact(View item, AppRiskInfo info) {
-        ImageView icon = item.findViewById(R.id.appIcon);
-        TextView name = item.findViewById(R.id.appName);
-        TextView pkg = item.findViewById(R.id.packageName);
-        TextView chip = item.findViewById(R.id.riskLevelChip);
 
-        if (info.icon != null) icon.setImageDrawable(info.icon);
-        name.setText(info.appName != null ? info.appName : info.packageName);
-        pkg.setText(info.packageName);
 
-        switch (info.level) {
-            case AppRiskInfo.LEVEL_HIGH:
-                chip.setText(R.string.risk_high);
-                chip.setTextColor(getColor(R.color.md_theme_error));
-                break;
-            case AppRiskInfo.LEVEL_MEDIUM:
-                chip.setText(R.string.risk_medium);
-                chip.setTextColor(getColor(R.color.md_theme_tertiary));
-                break;
-            case AppRiskInfo.LEVEL_LOW:
-                chip.setText(R.string.risk_low);
-                chip.setTextColor(getColor(R.color.md_theme_secondary));
-                break;
-            default:
-                chip.setText(R.string.risk_safe);
-                chip.setTextColor(getColor(R.color.md_theme_onSurfaceVariant));
-                break;
-        }
-        item.setOnClickListener(v -> handleApp(info));
-    }
 
-    /** 紧凑文件条目的操作菜单：隔离 / 放行 / 删除。 */
-    private void showFileActions(FileRiskInfo info, View anchor) {
-        String[] actions = {
-                getString(R.string.file_action_quarantine),
-                getString(R.string.file_action_allow),
-                getString(R.string.file_action_delete),
-        };
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
-                .setTitle(info.name)
-                .setItems(actions, (d, which) -> {
-                    if (which == 0) quarantine(info, anchor);
-                    else if (which == 1) allowFile(info);
-                    else deleteFile(info, anchor);
-                })
-                .show();
-    }
 
-    /** 渲染单条应用风险（复用 ResultActivity 的 item_risk 布局）。 */
-    private void bindAppRiskItem(View item, AppRiskInfo info) {
-        ImageView icon = item.findViewById(R.id.appIcon);
-        TextView name = item.findViewById(R.id.appName);
-        TextView pkg = item.findViewById(R.id.packageName);
-        TextView score = item.findViewById(R.id.scoreText);
-        TextView reason = item.findViewById(R.id.reasonText);
-        TextView chip = item.findViewById(R.id.riskLevelChip);
-        TextView mlBadge = item.findViewById(R.id.mlBadge);
-        com.google.android.material.button.MaterialButton handle =
-                item.findViewById(R.id.handleButton);
-        com.google.android.material.button.MaterialButton mlBtn =
-                item.findViewById(R.id.mlResultBtn);
 
-        if (icon != null && info.icon != null) icon.setImageDrawable(info.icon);
-        name.setText(info.appName != null ? info.appName : info.packageName);
-        pkg.setText(info.packageName);
-        score.setText("风险指数 " + info.score + " / 100"
-                + (info.isSystem ? " · 系统应用" : ""));
 
-        switch (info.level) {
-            case AppRiskInfo.LEVEL_HIGH:
-                chip.setText(R.string.risk_high);
-                chip.setTextColor(Color.WHITE);
-                chip.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.md_theme_error)));
-                break;
-            case AppRiskInfo.LEVEL_MEDIUM:
-                chip.setText(R.string.risk_medium);
-                chip.setTextColor(getColor(R.color.md_theme_onTertiaryContainer));
-                chip.setBackgroundTintList(
-                        ColorStateList.valueOf(getColor(R.color.md_theme_tertiaryContainer)));
-                break;
-            case AppRiskInfo.LEVEL_LOW:
-                chip.setText(R.string.risk_low);
-                chip.setTextColor(getColor(R.color.md_theme_onSecondaryContainer));
-                chip.setBackgroundTintList(
-                        ColorStateList.valueOf(getColor(R.color.md_theme_secondaryContainer)));
-                break;
-            default:
-                chip.setText(R.string.risk_safe);
-                chip.setTextColor(getColor(R.color.md_theme_onSurfaceVariant));
-                chip.setBackgroundTintList(
-                        ColorStateList.valueOf(getColor(R.color.md_theme_surfaceContainerHighest)));
-                break;
-        }
 
-        String reasonText = joinReasons(info.reasons);
-        reason.setText(reasonText.isEmpty() ? getString(R.string.scan_no_risk) : reasonText);
 
-        if (info.mlScore >= 0) {
-            mlBadge.setVisibility(View.VISIBLE);
-            mlBadge.setText("ML: " + info.mlScore + "/100");
-            mlBadge.setTextColor(Color.WHITE);
-            mlBadge.setBackgroundTintList(
-                    ColorStateList.valueOf(getColor(R.color.md_theme_tertiary)));
-            mlBtn.setVisibility(View.VISIBLE);
-            mlBtn.setText("查看");
-            mlBtn.setOnClickListener(v -> showMlDialog(info));
-        } else {
-            mlBadge.setVisibility(View.GONE);
-            mlBtn.setVisibility(View.GONE);
-        }
 
-        bindAppAiPanel(item, info);
 
-        handle.setText(info.level >= AppRiskInfo.LEVEL_MEDIUM
-                ? R.string.action_handle : R.string.action_app_details);
-        handle.setOnClickListener(v -> handleApp(info));
-    }
 
-    /** 应用条目的 AI 判定面板（AI 引擎未启用时整块隐藏）。 */
-    private void bindAppAiPanel(View item, AppRiskInfo info) {
-        View panel = item.findViewById(R.id.aiVerdictPanel);
-        TextView chip = item.findViewById(R.id.aiVerdictChip);
-        TextView confidence = item.findViewById(R.id.aiConfidenceText);
-        TextView reasonText = item.findViewById(R.id.aiReasonText);
 
-        if (!useAiEngine()) {
-            panel.setVisibility(View.GONE);
-            return;
-        }
-        panel.setVisibility(View.VISIBLE);
-
-        AiClient.AiVerdict v = null;
-        if (lastAppVerdicts != null) {
-            for (AiClient.AiVerdict x : lastAppVerdicts) {
-                if (info.packageName.equals(x.packageName)) {
-                    v = x;
-                    break;
-                }
-            }
-        }
-        if (v == null) {
-            chip.setText(R.string.ai_verdict_pending);
-            chip.setTextColor(getColor(R.color.md_theme_onSurfaceVariant));
-            chip.setBackgroundTintList(
-                    ColorStateList.valueOf(getColor(R.color.md_theme_surfaceContainerHighest)));
-            confidence.setText("");
-            reasonText.setText("");
-            return;
-        }
-        if (v.remove) {
-            chip.setText(R.string.ai_verdict_remove);
-            chip.setTextColor(getColor(R.color.md_theme_onError));
-            chip.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.md_theme_error)));
-        } else {
-            chip.setText(R.string.ai_verdict_keep);
-            chip.setTextColor(Color.WHITE);
-            chip.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.ai_success)));
-        }
-        confidence.setText(getString(R.string.ai_confidence, Math.round(v.confidence * 100)));
-        reasonText.setText(v.reason != null && !v.reason.isEmpty()
-                ? getString(R.string.ai_reason_prefix, v.reason) : "");
-    }
-
-    private void showMlDialog(AppRiskInfo info) {
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.ml_results_title)
-                .setMessage(getString(R.string.ml_detail_format,
-                        info.appName != null ? info.appName : info.packageName,
-                        info.mlScore,
-                        info.mlReason != null ? info.mlReason : getString(R.string.ml_unknown)))
-                .setPositiveButton(android.R.string.ok, null)
-                .show();
-    }
-
-    /** 应用条目处置：按当前守护模式强停 / 冻结，最后打开系统应用详情页。 */
-    private void handleApp(AppRiskInfo info) {
-        int mode = prefs.getActiveMode();
-        if (mode == Prefs.MODE_SHIZUKU) {
-            boolean ok = ShizukuHelper.runShell("am", "force-stop", info.packageName) != null;
-            Toast.makeText(this, ok ? R.string.action_force_stop : R.string.mode_status_no_permission,
-                    Toast.LENGTH_SHORT).show();
-            if (ok) BehaviorLog.log(this, BehaviorLog.TYPE_FORCE_STOP,
-                    String.valueOf(info.appName),
-                    getString(R.string.behavior_detail_force_stop, info.appName));
-        } else if (mode == Prefs.MODE_ROOT) {
-            boolean stopped = RootChecker.runAsRoot("am force-stop " + info.packageName);
-            boolean frozen = RootChecker.runAsRoot("pm disable-user --user 0 " + info.packageName);
-            Toast.makeText(this,
-                    stopped && frozen ? R.string.action_freeze : R.string.mode_status_no_permission,
-                    Toast.LENGTH_SHORT).show();
-            if (stopped) BehaviorLog.log(this, BehaviorLog.TYPE_FORCE_STOP,
-                    String.valueOf(info.appName),
-                    getString(R.string.behavior_detail_force_stop, info.appName));
-            if (frozen) BehaviorLog.log(this, BehaviorLog.TYPE_FREEZE,
-                    String.valueOf(info.appName),
-                    getString(R.string.behavior_detail_freeze, info.appName));
-        }
-        openAppDetails(info.packageName);
-    }
-
-    private void openAppDetails(String pkg) {
-        try {
-            startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                    Uri.parse("package:" + pkg)));
-        } catch (Exception e) {
-            Toast.makeText(this, R.string.action_app_details, Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void bindRiskItem(View item, FileRiskInfo info) {
-        TextView levelText = item.findViewById(R.id.riskLevelText);
-        TextView fileName = item.findViewById(R.id.fileName);
-        TextView filePath = item.findViewById(R.id.filePath);
-        TextView fileMeta = item.findViewById(R.id.fileMeta);
-        TextView fileReasons = item.findViewById(R.id.fileReasons);
-        TextView mlBadge = item.findViewById(R.id.mlBadge);
-
-        fileName.setText(info.name);
-        filePath.setText(displayPath(info));
-        fileMeta.setText(getString(R.string.file_meta, humanSize(info.size), info.score));
-        fileReasons.setText(joinReasons(info.reasons));
-
-        if (info.mlScore >= 0) {
-            int mlLevel;
-            if (info.mlScore >= 80) mlLevel = FileRiskInfo.LEVEL_HIGH;
-            else if (info.mlScore >= 45) mlLevel = FileRiskInfo.LEVEL_MEDIUM;
-            else if (info.mlScore >= 20) mlLevel = FileRiskInfo.LEVEL_LOW;
-            else mlLevel = FileRiskInfo.LEVEL_SAFE;
-            String mlLabel;
-            int mlColor;
-            switch (mlLevel) {
-                case FileRiskInfo.LEVEL_HIGH:
-                    mlLabel = getString(R.string.risk_high);
-                    mlColor = getColor(R.color.md_theme_error);
-                    break;
-                case FileRiskInfo.LEVEL_MEDIUM:
-                    mlLabel = getString(R.string.risk_medium);
-                    mlColor = getColor(R.color.md_theme_tertiary);
-                    break;
-                case FileRiskInfo.LEVEL_LOW:
-                    mlLabel = getString(R.string.risk_low);
-                    mlColor = getColor(R.color.md_theme_secondary);
-                    break;
-                default:
-                    mlLabel = getString(R.string.risk_safe);
-                    mlColor = getColor(R.color.ai_success);
-                    break;
-            }
-            mlBadge.setVisibility(View.VISIBLE);
-            mlBadge.setText("ML: " + mlLabel);
-            mlBadge.setTextColor(Color.WHITE);
-            mlBadge.setBackgroundTintList(ColorStateList.valueOf(mlColor));
-        } else {
-            mlBadge.setVisibility(View.GONE);
-        }
-
-        switch (info.level) {
-            case FileRiskInfo.LEVEL_HIGH:
-                levelText.setText(R.string.risk_high);
-                levelText.setTextColor(getColor(R.color.md_theme_error));
-                break;
-            case FileRiskInfo.LEVEL_MEDIUM:
-                levelText.setText(R.string.risk_medium);
-                levelText.setTextColor(getColor(R.color.md_theme_tertiary));
-                break;
-            default:
-                levelText.setText(R.string.risk_low);
-                levelText.setTextColor(getColor(R.color.md_theme_secondary));
-                break;
-        }
-
-        View aiPanel = item.findViewById(R.id.aiVerdictPanel);
-        if (useAiEngine() && info.verdict != null) {
-            TextView chip = item.findViewById(R.id.aiVerdictChip);
-            TextView conf = item.findViewById(R.id.aiConfidenceText);
-            TextView reason = item.findViewById(R.id.aiReasonText);
-            aiPanel.setVisibility(View.VISIBLE);
-            if (info.verdict.remove) {
-                chip.setText(R.string.ai_verdict_remove);
-                chip.setTextColor(Color.WHITE);
-                chip.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.md_theme_error)));
-                conf.setText(getString(R.string.ai_confidence, Math.round(info.verdict.confidence * 100)));
-                reason.setText(getString(R.string.ai_reason_prefix, info.verdict.reason));
-            } else {
-                chip.setText(R.string.ai_verdict_keep);
-                chip.setTextColor(getColor(R.color.ai_success));
-                chip.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.md_theme_surfaceContainerHighest)));
-                conf.setText(getString(R.string.ai_confidence, Math.round(info.verdict.confidence * 100)));
-                reason.setText(getString(R.string.ai_reason_prefix, info.verdict.reason));
-            }
-            if (info.mlScore >= 0) {
-                reason.append("\n\n[ML Detection]\nScore: " + info.mlScore + "/100\nAnalysis: " + info.mlReason);
-            }
-        } else if (useAiEngine()) {
-            TextView chip = item.findViewById(R.id.aiVerdictChip);
-            aiPanel.setVisibility(View.VISIBLE);
-            chip.setText(R.string.ai_verdict_pending);
-            chip.setTextColor(getColor(R.color.md_theme_onSurfaceVariant));
-            chip.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.md_theme_surfaceContainerHighest)));
-            if (info.mlScore >= 0) {
-                TextView reason = item.findViewById(R.id.aiReasonText);
-                reason.setText("[ML Detection]\nScore: " + info.mlScore + "/100\nAnalysis: " + info.mlReason);
-            }
-        } else {
-            aiPanel.setVisibility(View.GONE);
-        }
-
-        item.findViewById(R.id.btnQuarantine).setOnClickListener(v -> quarantine(info, v));
-        item.findViewById(R.id.btnAllow).setOnClickListener(v -> allowFile(info));
-        item.findViewById(R.id.btnDelete).setOnClickListener(v -> deleteFile(info, v));
-
-        com.google.android.material.button.MaterialButton mlBtn = item.findViewById(R.id.mlResultBtn);
-        if (info.mlScore >= 0) {
-            mlBtn.setVisibility(View.VISIBLE);
-            mlBtn.setOnClickListener(v -> showMlResultDialog(info));
-        } else {
-            mlBtn.setVisibility(View.GONE);
-        }
-    }
-
-    private void quarantine(FileRiskInfo info, View btn) {
-        QuarantineManager.QuarantineRecord rec;
-        if ("saf".equals(info.source)) {
-            // 多文件夹扫描：优先使用该文件所属的那棵授权树
-            Uri ownerTree = info.treeUri != null ? Uri.parse(info.treeUri) : currentTreeUri;
-            rec = qm.quarantineSaf(ownerTree, Uri.parse(info.path), info.name,
-                    info.name, info.size, joinReasons(info.reasons), info.score);
-        } else {
-            rec = qm.quarantineFile(new File(info.path), joinReasons(info.reasons), info.score);
-        }
-        if (rec != null) {
-            Toast.makeText(this, R.string.file_quarantined_toast, Toast.LENGTH_SHORT).show();
-            removeResultItem(btn);
-            BehaviorLog.log(this, BehaviorLog.TYPE_QUARANTINE, info.name,
-                    joinReasons(info.reasons));
-        } else {
-            Toast.makeText(this, R.string.file_action_failed, Toast.LENGTH_LONG).show();
-        }
-    }
-
-    private void allowFile(FileRiskInfo info) {
-        prefs.addToFileAllowlist(info.path);
-        Toast.makeText(this, R.string.file_allowed_toast, Toast.LENGTH_SHORT).show();
-        // 该条目在下次扫描时跳过；此处不立即移除以免打断浏览
-    }
-
-    private void deleteFile(FileRiskInfo info, View btn) {
-        boolean deleted = false;
-        try {
-            if ("saf".equals(info.source)
-                    && (info.treeUri != null || currentTreeUri != null)) {
-                DocumentFile df = DocumentFile.fromSingleUri(this, Uri.parse(info.path));
-                deleted = df != null && df.exists() && df.delete();
-            } else {
-                File f = new File(info.path);
-                deleted = f.exists() && f.delete();
-            }
-        } catch (Exception ignored) {
-            deleted = false;
-        }
-        if (deleted) {
-            Toast.makeText(this, R.string.file_deleted_toast, Toast.LENGTH_SHORT).show();
-            removeResultItem(btn);
-            BehaviorLog.log(this, BehaviorLog.TYPE_DELETE, info.name,
-                    joinReasons(info.reasons));
-        } else {
-            Toast.makeText(this, R.string.file_action_failed, Toast.LENGTH_LONG).show();
-        }
-    }
-
-    private void removeResultItem(View btn) {
-        try {
-            View card = (View) ((View) btn.getParent()).getParent();
-            if (card.getParent() instanceof ViewGroup) {
-                ((ViewGroup) card.getParent()).removeView(card);
-            }
-        } catch (Exception ignored) {
-        }
-    }
-
-    private void showMlResultDialog(FileRiskInfo info) {
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
-                .setTitle(getString(R.string.ml_results_title))
-                .setMessage(getString(R.string.ml_detail_format,
-                        info.name, info.mlScore,
-                        info.mlReason != null ? info.mlReason : getString(R.string.ml_unknown)))
-                .setPositiveButton(android.R.string.ok, null)
-                .show();
-    }
-
-    private void startIconSpin() {
-        if (iconSpin != null) iconSpin.cancel();
-        iconSpin = ObjectAnimator.ofFloat(homeStar, "rotation", 0f, 360f);
-        iconSpin.setDuration(1100);
-        iconSpin.setRepeatCount(ValueAnimator.INFINITE);
-        iconSpin.start();
-    }
-
-    private void stopIconSpin() {
-        if (iconSpin != null) {
-            iconSpin.cancel();
-            iconSpin = null;
-        }
-        homeStar.setRotation(0f);
-    }
 
     // ---------- 动画测试模式（设置 → 应用信息 → 连点版本号 5 次开启） ----------
 
@@ -3072,11 +2593,30 @@ public class MainActivity extends BaseActivity {
 
     // ---------- 结果渲染辅助 ----------
 
-    private String displayPath(FileRiskInfo info) {
+    private final ResultItemBinder resultitembinder = new ResultItemBinder(this);
+
+    private TextView buildEmptyView(int textRes) { return resultitembinder.buildEmptyView(textRes); }
+    private void bindFileRiskCompact(View item, FileRiskInfo info) { resultitembinder.bindFileRiskCompact(item, info); }
+    private void bindAppRiskCompact(View item, AppRiskInfo info) { resultitembinder.bindAppRiskCompact(item, info); }
+    private void showFileActions(FileRiskInfo info, View anchor) { resultitembinder.showFileActions(info, anchor); }
+    private void bindAppRiskItem(View item, AppRiskInfo info) { resultitembinder.bindAppRiskItem(item, info); }
+    private void bindAppAiPanel(View item, AppRiskInfo info) { resultitembinder.bindAppAiPanel(item, info); }
+    private void showMlDialog(AppRiskInfo info) { resultitembinder.showMlDialog(info); }
+    private void handleApp(AppRiskInfo info) { resultitembinder.handleApp(info); }
+    private void openAppDetails(String pkg) { resultitembinder.openAppDetails(pkg); }
+    private void bindRiskItem(View item, FileRiskInfo info) { resultitembinder.bindRiskItem(item, info); }
+    private void quarantine(FileRiskInfo info, View btn) { resultitembinder.quarantine(info, btn); }
+    private void allowFile(FileRiskInfo info) { resultitembinder.allowFile(info); }
+    private void deleteFile(FileRiskInfo info, View btn) { resultitembinder.deleteFile(info, btn); }
+    private void removeResultItem(View btn) { resultitembinder.removeResultItem(btn); }
+    private void showMlResultDialog(FileRiskInfo info) { resultitembinder.showMlResultDialog(info); }
+
+
+    String displayPath(FileRiskInfo info) {
         return "saf".equals(info.source) ? getString(R.string.file_source_saf, info.name) : info.path;
     }
 
-    private static String humanSize(long size) {
+    static String humanSize(long size) {
         if (size < 1024) return size + " B";
         if (size < 1024 * 1024) return String.format(java.util.Locale.US, "%.1f KB", size / 1024.0);
         if (size < 1024L * 1024 * 1024) {
@@ -3085,7 +2625,7 @@ public class MainActivity extends BaseActivity {
         return String.format(java.util.Locale.US, "%.1f GB", size / (1024.0 * 1024 * 1024));
     }
 
-    private static String joinReasons(List<String> reasons) {
+     static String joinReasons(List<String> reasons) {
         if (reasons == null || reasons.isEmpty()) return "";
         StringBuilder sb = new StringBuilder();
         for (String r : reasons) {
