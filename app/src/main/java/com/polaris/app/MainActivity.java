@@ -1858,17 +1858,9 @@ public class MainActivity extends BaseActivity {
         }, null);
     }
 
-    /** 文件夹恒星分组键：SAF 授权扫描按 treeUri（每个授权文件夹一颗恒星）；全盘扫描按存储根下一级目录（根目录直属文件归存储根恒星）。 */
+    /** 文件夹恒星分组键：SAF 授权扫描按 treeUri；全盘扫描按存储根下一级目录。 */
     private String folderKeyFor(com.polaris.app.scan.FileRiskInfo info) {
-        if (info.treeUri != null && info.treeUri.length() > 0) {
-            return info.treeUri;
-        }
-        String root = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
-        String p = info.path != null ? info.path : "";
-        String rel = p.startsWith(root) ? p.substring(root.length()) : p;
-        if (rel.startsWith("/")) rel = rel.substring(1);
-        int slash = rel.indexOf('/');
-        return slash < 0 ? "/" : rel.substring(0, slash);
+        return com.polaris.app.util.SafNames.keyFor(info);
     }
 
     /** 缩放条显隐：跟随扫描星域激活状态。 */
@@ -2404,21 +2396,7 @@ public class MainActivity extends BaseActivity {
 
     /** 从 SAF tree uri 里取出可读的文件夹名。 */
     private String folderDisplayName(Uri treeUri) {
-        try {
-            String docId = DocumentsContract.getTreeDocumentId(treeUri);
-            if (docId != null) {
-                int colon = docId.indexOf(':');
-                String tail = colon >= 0 ? docId.substring(colon + 1) : docId;
-                if (!tail.isEmpty()) {
-                    int slash = tail.lastIndexOf('/');
-                    return slash >= 0 ? tail.substring(slash + 1) : tail;
-                }
-                return docId;
-            }
-        } catch (Exception ignored) {
-        }
-        String seg = treeUri.getLastPathSegment();
-        return seg != null ? seg : treeUri.toString();
+        return com.polaris.app.util.SafNames.displayName(treeUri);
     }
 
     /** 文件夹页「开始扫描」：至少需要一个文件夹；只产出文件段结果。 */
@@ -3961,31 +3939,15 @@ public class MainActivity extends BaseActivity {
     private void updateHomeGreeting() {
         if (homeGreeting == null) return;
         java.util.Calendar cal = java.util.Calendar.getInstance();
-        int hour = cal.get(java.util.Calendar.HOUR_OF_DAY);
-        String greeting;
-        if (hour >= 6 && hour < 12) {
-            greeting = getString(R.string.guard_dashboard_greeting_morning);
-        } else if (hour >= 12 && hour < 18) {
-            greeting = getString(R.string.guard_dashboard_greeting_afternoon);
-        } else {
-            greeting = getString(R.string.guard_dashboard_greeting_evening);
-        }
-        homeGreeting.setText(greeting + " User");
+        homeGreeting.setText(com.polaris.app.util.GuardText.greeting(this,
+                cal.get(java.util.Calendar.HOUR_OF_DAY)) + " User");
     }
 
     private void loadGuardDashboard() {
         // 根据时间显示问候语 + 设备名
         java.util.Calendar cal = java.util.Calendar.getInstance();
-        int hour = cal.get(java.util.Calendar.HOUR_OF_DAY);
-        String greeting;
-        if (hour >= 6 && hour < 12) {
-            greeting = getString(R.string.guard_dashboard_greeting_morning);
-        } else if (hour >= 12 && hour < 18) {
-            greeting = getString(R.string.guard_dashboard_greeting_afternoon);
-        } else {
-            greeting = getString(R.string.guard_dashboard_greeting_evening);
-        }
-        guardGreetingText.setText(greeting + " User");
+        guardGreetingText.setText(com.polaris.app.util.GuardText.greeting(this,
+                cal.get(java.util.Calendar.HOUR_OF_DAY)) + " User");
 
         // 加载守护状态
         int activeMode = prefs.getActiveMode();
@@ -3994,44 +3956,13 @@ public class MainActivity extends BaseActivity {
             guardModeText.setText(R.string.guard_dashboard_mode_none);
         } else {
             guardStatusText.setText(R.string.mode_status_active);
-            String modeName;
-            switch (activeMode) {
-                case Prefs.MODE_NORMAL:
-                    modeName = getString(R.string.mode_normal_name);
-                    break;
-                case Prefs.MODE_ACCESSIBILITY:
-                    modeName = getString(R.string.mode_accessibility_name);
-                    break;
-                case Prefs.MODE_SHIZUKU:
-                    modeName = getString(R.string.mode_shizuku_name);
-                    break;
-                case Prefs.MODE_ROOT:
-                    modeName = getString(R.string.mode_root_name);
-                    break;
-                default:
-                    modeName = getString(R.string.mode_normal_name);
-            }
-            guardModeText.setText(getString(R.string.guard_dashboard_mode_active, modeName));
+            guardModeText.setText(getString(R.string.guard_dashboard_mode_active,
+                    com.polaris.app.util.GuardText.modeName(this, activeMode)));
         }
 
         // 加载最近扫描时间
-        long lastScanMs = prefs.getLastScanMs();
-        if (lastScanMs > 0) {
-            long diff = System.currentTimeMillis() - lastScanMs;
-            String timeAgo;
-            if (diff < 60_000) {
-                timeAgo = getString(R.string.guard_dashboard_time_just_now);
-            } else if (diff < 3_600_000) {
-                timeAgo = getString(R.string.guard_dashboard_time_minutes, (int) (diff / 60_000));
-            } else if (diff < 86_400_000) {
-                timeAgo = getString(R.string.guard_dashboard_time_hours, (int) (diff / 3_600_000));
-            } else {
-                timeAgo = getString(R.string.guard_dashboard_time_days, (int) (diff / 86_400_000));
-            }
-            lastGuardTime.setText(timeAgo);
-        } else {
-            lastGuardTime.setText(getString(R.string.guard_dashboard_time_never));
-        }
+        lastGuardTime.setText(com.polaris.app.util.GuardText.timeAgo(
+                this, prefs.getLastScanMs(), System.currentTimeMillis()));
 
         // 加载累计守护次数
         int totalScans = prefs.getTotalScanCount();
@@ -4050,21 +3981,9 @@ public class MainActivity extends BaseActivity {
             recentScanResult.setText(getString(R.string.guard_dashboard_no_scan_detail));
             return;
         }
-
-        int safe = prefs.getLastScanSafe();
-        int suspicious = prefs.getLastScanSuspicious();
-        int malicious = prefs.getLastScanMalicious();
-
-        StringBuilder sb = new StringBuilder();
-        sb.append(getString(R.string.guard_dashboard_scan_total, total)).append("\n");
-        sb.append(getString(R.string.guard_dashboard_scan_safe, safe)).append("\n");
-        if (suspicious > 0) {
-            sb.append(getString(R.string.guard_dashboard_scan_suspicious, suspicious)).append("\n");
-        }
-        if (malicious > 0) {
-            sb.append(getString(R.string.guard_dashboard_scan_malicious, malicious));
-        }
-        recentScanResult.setText(sb.toString().trim());
+        recentScanResult.setText(com.polaris.app.util.GuardText.recentScanSummary(this,
+                total, prefs.getLastScanSafe(), prefs.getLastScanSuspicious(),
+                prefs.getLastScanMalicious()));
     }
 
     private void loadRecentFiles() {
