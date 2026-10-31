@@ -773,6 +773,6 @@
     <string name="ip_check_title">IP Connection Check</string>
     <string name="ip_check_subtitle">Detect apps connecting to known malicious servers</string>
     <string name="ip_check_status_off">Off</string>
-    <string name="ip_check_status_on">On · checked every 10s while guarding</string>
+    <string name="ip_check_status_on">On · checked every 30s while guarding</string>
     <string name="ip_check_status_need_mode">Takes effect only in Shizuku or Root mode</string>
 </resources>

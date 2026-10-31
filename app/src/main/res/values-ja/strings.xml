@@ -773,6 +773,6 @@
     <string name="ip_check_title">IP 接続チェック</string>
     <string name="ip_check_subtitle">既知の悪意あるサーバーへの接続を検出します</string>
     <string name="ip_check_status_off">オフ</string>
-    <string name="ip_check_status_on">オン · ガード中は 10 秒ごとに確認</string>
+    <string name="ip_check_status_on">オン · ガード中は 30 秒ごとに確認</string>
     <string name="ip_check_status_need_mode">Shizuku または Root モードでのみ有効になります</string>
 </resources>

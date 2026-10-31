@@ -57,8 +57,14 @@ public class GuardService extends Service {
     private static final int NOTIFY_REFRESH_POLLS = 15;
     /** 每 5 次轮询（约 10 秒）重新读取一次恶意列表，避免每 2 秒反序列化一次。 */
     private static final int MALICIOUS_REFRESH_POLLS = 5;
-    /** 每 5 次轮询（约 10 秒）检查一次「是否有应用连到威胁情报里的恶意 IP」。 */
-    private static final int CONN_CHECK_POLLS = 5;
+    /**
+     * 每 15 次轮询（2s × 15 = 约 30 秒）检查一次「是否有应用连到威胁情报里的恶意 IP」。
+     *
+     * <p>不设更短的间隔：每次检查要 fork 一个 shell 读 /proc/net/tcp，成本主要在进程创建；
+     * 而恶意软件的 C2 连接大多很短（发完即断），10 秒采样同样抓不到，只有长连接（远控/挖矿/下载器）
+     * 才真正可检出，30 秒与 10 秒对这种连接的命中率没有实质差别。
+     */
+    private static final int CONN_CHECK_POLLS = 15;
     private static final Pattern FOCUS_PATTERN =
             Pattern.compile("mCurrentFocus=.*?u\\d+ ([^/\\s}]+)/");
 
