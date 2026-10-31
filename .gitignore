@@ -44,3 +44,21 @@ design_preview-material.html
 
 # 349MB 数据源，仅本地保留；分发用 iodb.bin
 polar-region/iodb.json
+
+# 会话产物：调试截图 / UI dump / 临时脚本输出（不属仓库）
+/*.png
+/*.xml
+!col.xml
+col_det*.png
+_e2e/
+rec_frames/
+__pycache__/
+polar-region/__pycache__/
+tools/__pycache__/
+tools/verify/out/
+_p1.txt
+_build.log
+_act_refs.txt
+nav_check.py
+*.v1.bak
+tools/keys/
