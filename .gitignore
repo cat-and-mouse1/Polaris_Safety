@@ -48,7 +48,7 @@ polar-region/iodb.json
 # 会话产物：调试截图 / UI dump / 临时脚本输出（不属仓库）
 /*.png
 /*.xml
-!col.xml
+
 col_det*.png
 _e2e/
 rec_frames/
