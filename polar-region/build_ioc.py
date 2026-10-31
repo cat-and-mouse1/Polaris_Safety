@@ -1,10 +1,19 @@
 #!/usr/bin/env python3
 """构建完整 IOC 数据库 (本地文件聚合 -> iodb.json)."""
-import os, json, re
+import os, json, re, datetime
 BASE = os.path.dirname(os.path.abspath(__file__))
 IP_RE = re.compile(r"^\d{1,3}(\.\d{1,3}){3}$")
 
+DB_VERSION = 14
+HASH_ALGO_BY_LEN = {32: "md5", 40: "sha1", 64: "sha256"}
+
 def load_local_hashes(filepath):
+    """读取哈希清单，返回 [(algo, hex)]。
+
+    算法一律按「字符串长度」判定，不按文件名——历史 feed 的文件名并不可信
+    （例如 balakdesi_sha256.txt 里实际是 32 位 MD5）。之前把这些值统一写进
+    sha256 字段，导致客户端按 SHA-256 查询时 144 万条形同废数据。
+    """
     hashes = []
     try:
         with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
@@ -14,7 +23,7 @@ def load_local_hashes(filepath):
                     continue
                 s = s.split()[0]
                 if re.fullmatch(r"[0-9a-f]{32}|[0-9a-f]{40}|[0-9a-f]{64}", s):
-                    hashes.append(s)
+                    hashes.append((HASH_ALGO_BY_LEN[len(s)], s))
     except Exception as e:
         print(f"  Failed to load {filepath}: {e}")
     return hashes
@@ -55,22 +64,30 @@ def load_local_ips(filepath):
 
 def build():
     entries, seen_hashes, seen_pkgs = [], set(), set()
+    algo_counts = {"md5": 0, "sha1": 0, "sha256": 0}
     def P(p): return os.path.join(BASE, p)
-    # 14) 本地 SHA-256/MD5 哈希
+    # 14) 本地哈希（MD5 / SHA-1 / SHA-256 按长度分流到各自字段）
     print("\n[14/17] Loading local hashes...")
     for hf in ["data/hashes/romainmarcoux_sha256.txt", "data/hashes/amitambekar_sha256_aa.txt",
                "data/hashes/amitambekar_sha256_ab.txt", "data/hashes/balakdesi_sha256.txt"]:
         fp = P(hf)
         if os.path.exists(fp):
             hs = load_local_hashes(fp)
-            print(f"  {hf}: {len(hs)}")
-            for h in hs:
-                if h not in seen_hashes:
-                    seen_hashes.add(h)
-                    entries.append({"pkg": "", "sha256": h, "family": "Local Hash Database",
-                        "type": "trojan", "severity": "high",
-                        "desc": "Malicious hash from local database",
-                        "tags": ["local", "aggregated"], "url": ""})
+            by_algo = {}
+            for algo, _ in hs:
+                by_algo[algo] = by_algo.get(algo, 0) + 1
+            print(f"  {hf}: {len(hs)} ({by_algo})")
+            for algo, h in hs:
+                if h in seen_hashes:
+                    continue
+                seen_hashes.add(h)
+                algo_counts[algo] += 1
+                e = {"pkg": "", "sha256": "", "md5": "", "sha1": "",
+                     "family": "Local Hash Database", "type": "trojan", "severity": "high",
+                     "desc": "Malicious hash from local database",
+                     "tags": ["local", "aggregated"], "url": ""}
+                e[algo] = h
+                entries.append(e)
     # 15) 本地恶意包
     print("\n[15/17] Loading local malicious packages...")
     for pf in ["data/packages/datadog_pypi.json", "data/packages/datadog_npm.json",
@@ -128,11 +145,14 @@ def build():
                         "tags": ["local", "malware"], "url": ""})
         except Exception as e:
             print(f"  Failed to load {mf}: {e}")
-    out = {"count": len(entries), "entries": entries}
+    out = {"db_version": DB_VERSION,
+           "updated_at": datetime.date.today().isoformat(),
+           "source": "Polar Region aggregated (local feeds: hashes/packages/ips/samples)",
+           "count": len(entries), "entries": entries}
     with open(P("iodb.json"), "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False)
     print(f"\nDone: {len(entries)} entries -> iodb.json "
-          f"(hashes={len(seen_hashes)}, pkgs+ips+families={len(seen_pkgs)})")
+          f"(hashes={len(seen_hashes)} {algo_counts}, pkgs+ips+families={len(seen_pkgs)})")
 
 if __name__ == "__main__":
     build()

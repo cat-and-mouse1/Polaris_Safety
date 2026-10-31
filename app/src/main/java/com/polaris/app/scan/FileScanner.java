@@ -39,6 +39,8 @@ public class FileScanner {
     public interface Callback {
         /** 进度回调：当前正在遍历的路径（可能频繁，UI 层自行节流）。 */
         void onProgress(String currentPath);
+        /** 每个文件评完级后回调（含 SAFE，供扫描星域显示全部文件）。 */
+        default void onItem(FileRiskInfo info, String displayName) {}
         /** 完成回调：风险文件列表（按分数降序，仅含 LOW+）。 */
         void onResult(List<FileRiskInfo> risks);
     }
@@ -105,12 +107,20 @@ public class FileScanner {
     private volatile IocDatabase iocRegion;
     private final MlScanner mlScanner;
     private int scanned = 0;
+    /** 取消标志：Activity 销毁时置位，遍历循环尽快退出，避免继续占用 CPU 并回调死页面。 */
+    private volatile boolean cancelled = false;
+
+    /** 请求停止当前扫描（幂等，可跨线程调用）。 */
+    public void cancel() {
+        cancelled = true;
+    }
 
     public FileScanner(Context context) {
         this.context = context.getApplicationContext();
         this.prefs = new Prefs(context);
         this.iocPoint = IocDatabase.getInstance(context, "point");
-        this.mlScanner = new MlScanner(context);
+        // 尊重用户设置：ML 关闭时不加载模型（省内存/CPU，且与 MalwareScanner 口径一致）
+        this.mlScanner = prefs.isMlEnabled() ? new MlScanner(context) : null;
         // iocRegion 懒加载，见 regionDb()：region 无论下载进度都参与检测
     }
 
@@ -164,7 +174,7 @@ public class FileScanner {
             try {
                 if (treeUris != null) {
                     for (Uri treeUri : treeUris) {
-                        if (scanned >= MAX_FILES) break;
+                        if (cancelled || scanned >= MAX_FILES) break;
                         walkTree(treeUri, treeUri, out, cb, 0);
                     }
                 }
@@ -176,6 +186,7 @@ public class FileScanner {
     }
 
     private void finish(List<FileRiskInfo> out, Callback cb) {
+        if (cancelled) return;              // 已取消：不再回调（页面已销毁）
         Collections.sort(out, (a, b) -> Integer.compare(b.score, a.score));
         cb.onResult(out);
     }
@@ -183,11 +194,11 @@ public class FileScanner {
     // ---------- java.io.File 遍历 ----------
 
     private void walkFile(File dir, List<FileRiskInfo> out, Callback cb, int depth) {
-        if (scanned >= MAX_FILES) return;
+        if (cancelled || scanned >= MAX_FILES) return;
         File[] children = dir.listFiles();
         if (children == null) return;
         for (File f : children) {
-            if (scanned >= MAX_FILES) return;
+            if (cancelled || scanned >= MAX_FILES) return;
             String path = f.getAbsolutePath();
             if (prefs.isFileAllowed(path)) continue;      // 放行名单跳过
             if (f.isDirectory()) {
@@ -197,10 +208,9 @@ public class FileScanner {
             }
             scanned++;
             cb.onProgress(f.getName());
-            if (f.length() > 0) {
-                FileRiskInfo info = evaluateFile(path, f.getName(), f.length(), readHeader(f));
-                if (info.level >= FileRiskInfo.LEVEL_LOW) out.add(info);
-            }
+            FileRiskInfo info = evaluateFile(path, f.getName(), f.length(), readHeader(f));
+            cb.onItem(info, f.getName());
+            if (info.level >= FileRiskInfo.LEVEL_LOW) out.add(info);
         }
     }
 
@@ -208,7 +218,7 @@ public class FileScanner {
 
     private void walkTree(Uri treeUri, Uri dirUri, List<FileRiskInfo> out,
                           Callback cb, int depth) {
-        if (scanned >= MAX_FILES) return;
+        if (cancelled || scanned >= MAX_FILES) return;
         final Uri childrenUri;
         try {
             childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(
@@ -220,7 +230,7 @@ public class FileScanner {
         try (Cursor c = context.getContentResolver().query(
                 childrenUri, DOC_COLUMNS, null, null, null)) {
             if (c == null) return;
-            while (c.moveToNext() && scanned < MAX_FILES) {
+            while (!cancelled && c.moveToNext() && scanned < MAX_FILES) {
                 String docId = c.getString(0);
                 String name = c.getString(1);
                 String mime = c.getString(2);
@@ -239,6 +249,7 @@ public class FileScanner {
                         readDocHeader(docUri));
                 info.source = "saf";
                 info.treeUri = treeUri.toString();
+                cb.onItem(info, display);
                 if (info.level >= FileRiskInfo.LEVEL_LOW) out.add(info);
             }
         } catch (Exception e) {
@@ -323,13 +334,15 @@ public class FileScanner {
         }
 
         // 8) 开源情报融合：region（全量，已下载多少用多少）+ point 双库并行，
-        //    region 无论下载进度都参与检测；SHA-256 优先，包名兜底，命中取风险更高者。
+        //    region 无论下载进度都参与检测；SHA-256 → MD5 → 包名依次兜底，命中取风险更高者。
         if (isHashableExt(ext)) {
-            String hash = computeSha256(path);
+            String[] digests = computeHashes(path);
+            String hash = digests == null ? null : digests[0];
+            String md5 = digests == null ? null : digests[1];
             if (hash != null) {
                 info.sha256 = hash;
                 String candPkg = extractPkgToken(lower);
-                IocDatabase.IocEntry hit = bestIocHit(hash, candPkg);
+                IocEntry hit = bestIocHit(hash, md5, candPkg);
                 if (hit != null) {
                     info.iocFamily = hit.family;
                     info.iocSeverity = hit.severity;
@@ -421,14 +434,15 @@ public class FileScanner {
     /**
      * 在 region（全量库）与 point（内置精选库）中并行查询，返回风险更高的命中。
      * region 无论下载进度如何都参与：全量缓存下覆盖最新 IOC，未下载/下载中则回退内置种子；
-     * 单库内仍保持「SHA-256 优先、包名兜底」。
+     * 单库内按 SHA-256 → MD5 → 包名依次兜底（region 里 144 万条历史情报只有 MD5）。
      */
-    private IocDatabase.IocEntry bestIocHit(String hash, String pkg) {
-        IocDatabase.IocEntry best = null;
+    private IocEntry bestIocHit(String hash, String md5, String pkg) {
+        IocEntry best = null;
         int bestScore = -1;
         for (IocDatabase db : new IocDatabase[]{regionDb(), iocPoint}) {
             if (db == null) continue;
-            IocDatabase.IocEntry h = db.matchByHash(hash);
+            IocEntry h = db.matchByHash(hash);
+            if (h == null && md5 != null) h = db.matchByMd5(md5);
             if (h == null && pkg != null) h = db.matchByPkg(pkg);
             if (h == null) continue;
             int s = IocDatabase.severityScore(h.severity);
@@ -440,8 +454,14 @@ public class FileScanner {
         return best;
     }
 
-    /** 计算文件 SHA-256（全盘路径或 SAF content URI 均可）。大文件上限 200MB。 */
-    private String computeSha256(String path) {
+    /**
+     * 同时计算 SHA-256 与 MD5（单次读取、双摘要并行），返回 {sha256, md5}；
+     * 文件不可读/超限返回 null。大文件上限 200MB。
+     *
+     * <p>为什么要 MD5：region 全量库 161 万条里 144 万条是历史 feed 的 MD5，
+     * 只算 SHA-256 会让这部分情报永远命中不了。单次读取保证不额外增加 IO 开销。
+     */
+    private String[] computeHashes(String path) {
         InputStream in = null;
         try {
             if (path != null && path.startsWith("content:")) {
@@ -453,14 +473,15 @@ public class FileScanner {
                 }
             }
             if (in == null) return null;
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            MessageDigest sha = MessageDigest.getInstance("SHA-256");
+            MessageDigest md5 = MessageDigest.getInstance("MD5");
             byte[] buf = new byte[8192];
             int n;
-            while ((n = in.read(buf)) > 0) md.update(buf, 0, n);
-            byte[] dig = md.digest();
-            StringBuilder sb = new StringBuilder(dig.length * 2);
-            for (byte b : dig) sb.append(String.format("%02x", b));
-            return sb.toString();
+            while ((n = in.read(buf)) > 0) {
+                sha.update(buf, 0, n);
+                md5.update(buf, 0, n);
+            }
+            return new String[]{hex(sha.digest()), hex(md5.digest())};
         } catch (Exception e) {
             return null;
         } finally {
@@ -468,6 +489,16 @@ public class FileScanner {
                 try { in.close(); } catch (IOException ignored) { }
             }
         }
+    }
+
+    /** 字节数组转小写十六进制（避免 String.format 的符号扩展问题）。 */
+    private static String hex(byte[] dig) {
+        StringBuilder sb = new StringBuilder(dig.length * 2);
+        for (byte b : dig) {
+            sb.append(Character.forDigit((b >> 4) & 0xF, 16));
+            sb.append(Character.forDigit(b & 0xF, 16));
+        }
+        return sb.toString();
     }
 
     /**

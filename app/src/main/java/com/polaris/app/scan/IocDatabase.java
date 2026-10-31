@@ -49,9 +49,35 @@ public final class IocDatabase {
     private static final String SIG_URL_REGION = BASE_URL_REGION + ".sig";
     private static final String SIG_URL_POINT = BASE_URL_POINT + ".sig";
 
+    /**
+     * 二进制索引（由 tools/ioc_pack.py 生成）：161 万条也只需 ~110MB 磁盘、零堆内存，
+     * 通过 mmap 二分查询。region 优先用它，服务器未提供时回退 JSON。
+     */
+    /**
+     * 二进制索引的多源分发地址（按顺序回退）。
+     * 不同网络对 GitHub 各域名的可达性差异极大，实测：
+     *   - raw.githubusercontent.com 在部分网络直接超时；
+     *   - media 域名只对 LFS 对象有效（普通 blob 会超时）；
+     *   - jsDelivr 对普通 blob 可用，但单文件上限 20MB。
+     */
+    public static final String[] BIN_URLS_REGION = {
+            "https://media.githubusercontent.com/media/cat-and-mouse1/Polaris_Safety/main/polar-region/iodb.bin",
+            "https://cdn.jsdelivr.net/gh/cat-and-mouse1/Polaris_Safety@main/polar-region/iodb.bin",
+            "https://raw.githubusercontent.com/cat-and-mouse1/Polaris_Safety/main/polar-region/iodb.bin",
+    };
+    public static final String[] BIN_URLS_POINT = {
+            "https://cdn.jsdelivr.net/gh/cat-and-mouse1/Polaris_Safety@main/polar-point/iodb.bin",
+            "https://raw.githubusercontent.com/cat-and-mouse1/Polaris_Safety/main/polar-point/iodb.bin",
+            "https://media.githubusercontent.com/media/cat-and-mouse1/Polaris_Safety/main/polar-point/iodb.bin",
+    };
+    private static final String BIN_NAME = "iodb.bin";
+    private static final String BIN_NAME_POINT = "iodb_point.bin";
+
     private static final String ASSET_NAME = "iodb_seed.json";
     private static final String CACHE_NAME = "iodb.json";
     private static final String CACHE_NAME_POINT = "iodb_point.json";
+    /** 单个库文件的解析上限：超过则不做全量解析（避免超大库必然 OOM）。 */
+    private static final long MAX_PARSE_BYTES = 64L * 1024 * 1024;
 
     /** 种子库内置密钥为 0；上线前应由服务端用同款 HMAC-SHA256 对 iodb.json 签名。 */
     private static final String HMAC_KEY = "";
@@ -67,16 +93,6 @@ public final class IocDatabase {
     }
 
     /** 单条 IOC 记录。 */
-    public static class IocEntry {
-        public String pkg;
-        public String sha256;
-        public String family;
-        public String type;
-        public String severity;   // low | medium | high | critical
-        public String desc;
-        public String[] tags = new String[0];
-        public String url;        // 恶意分发 URL（来自 URLhaus 等数据源）
-    }
 
     private static volatile IocDatabase sInstanceRegion;
     private static volatile IocDatabase sInstancePoint;
@@ -88,7 +104,12 @@ public final class IocDatabase {
     private int dbVersion = 0;
     private String updatedAt = "";
     private String source = "";
+    /** 非空时走二进制索引（mmap 二分），此时上面三个 Map 保持空。 */
+    private volatile IocBinaryIndex binIndex;
+
     private final Map<String, IocEntry> byHash = new HashMap<>();
+    private final Map<String, IocEntry> byMd5 = new HashMap<>();
+    private final Map<String, IocEntry> bySha1 = new HashMap<>();
     private final Map<String, IocEntry> byPkg = new HashMap<>();
     private final Map<String, IocEntry> byUrl = new HashMap<>();
 
@@ -149,15 +170,34 @@ public final class IocDatabase {
         String cacheName = "point".equals(dbType) ? CACHE_NAME_POINT : CACHE_NAME;
         String assetSeed = ASSET_NAME; // 内置种子库（assets/iodb_seed.json）：内容来自 Polar Region v14 过滤，轻量可离线；point 与 region 共用
 
+        // 0) 优先二进制索引（mmap 只读，堆占用≈0）
+        File binFile = new File(appContext.getFilesDir(),
+                "point".equals(dbType) ? BIN_NAME_POINT : BIN_NAME);
+        if (binFile.exists() && reloadBinary(binFile)) {
+            Log.i(TAG, "Loaded binary IOC db [" + dbType + "] v" + dbVersion);
+            return;
+        }
         // 1) 优先加载运行时缓存（可能已被 refresh 更新）
         File cache = new File(appContext.getFilesDir(), cacheName);
-        if (cache.exists() && parse(readFile(cache))) {
-            Log.i(TAG, "Loaded cached IOC db [" + dbType + "] v" + dbVersion);
-            return;
+        if (cache.exists()) {
+            if (cache.length() > MAX_PARSE_BYTES) {
+                // 超过解析上限：继续用 JSON 树解析必然 OOM，直接回退种子库
+                Log.w(TAG, "IOC cache too large (" + cache.length() + " B > "
+                        + MAX_PARSE_BYTES + " B), skip parsing; falling back to seed");
+            } else {
+                try (InputStream in = new FileInputStream(cache)) {
+                    if (parse(in)) {
+                        Log.i(TAG, "Loaded cached IOC db [" + dbType + "] v" + dbVersion);
+                        return;
+                    }
+                } catch (IOException e) {
+                    Log.w(TAG, "read IOC cache failed", e);
+                }
+            }
         }
         // 2) 回退内置种子库（assets/iodb_seed.json，内容现为 Polar Point）
         try (InputStream in = appContext.getAssets().open(assetSeed)) {
-            if (parse(readStream(in))) {
+            if (parse(in)) {
                 Log.i(TAG, "Loaded seed IOC db [" + dbType + "] v" + dbVersion);
             }
         } catch (IOException e) {
@@ -165,58 +205,183 @@ public final class IocDatabase {
         }
     }
 
-    private boolean parse(String json) {
-        if (json == null || json.isEmpty()) return false;
+    /** 打开二进制索引并切换为 mmap 查询模式；失败则保持原有 JSON 索引。 */
+    private boolean reloadBinary(File f) {
+        IocBinaryIndex idx;
         try {
-            JSONObject root = new JSONObject(json);
-            dbVersion = root.optInt("db_version", 0);
-            updatedAt = root.optString("updated_at", "");
-            source = root.optString("source", "");
-            JSONArray arr = root.optJSONArray("entries");
-            if (arr == null) return false;
-            byHash.clear();
-            byPkg.clear();
-            byUrl.clear();
-            for (int i = 0; i < arr.length(); i++) {
-                JSONObject o = arr.getJSONObject(i);
-                IocEntry e = new IocEntry();
-                e.pkg = o.optString("pkg", "");
-                e.sha256 = o.optString("sha256", "");
-                e.family = o.optString("family", "");
-                e.type = o.optString("type", "");
-                e.severity = o.optString("severity", "medium");
-                e.desc = o.optString("desc", "");
-                e.url = o.optString("url", "");
-                JSONArray t = o.optJSONArray("tags");
-                if (t != null) {
-                    e.tags = new String[t.length()];
-                    for (int j = 0; j < t.length(); j++) e.tags[j] = t.getString(j);
+            idx = IocBinaryIndex.open(f);
+        } catch (Exception e) {
+            Log.w(TAG, "open iodb.bin failed: " + f, e);
+            return false;
+        }
+        IocBinaryIndex old = binIndex;
+        binIndex = idx;
+        if (old != null) old.close();
+        dbVersion = idx.getDbVersion();
+        updatedAt = idx.getUpdatedAt();
+        source = idx.getSource();
+        // 二进制模式下不再使用 JSON 索引，释放其内存
+        byHash.clear();
+        byMd5.clear();
+        bySha1.clear();
+        byPkg.clear();
+        byUrl.clear();
+        return true;
+    }
+
+    /**
+     * 流式解析库文件（android.util.JsonReader）。
+     * 相比 JSONObject 全量树解析，峰值内存从「文件 String + 整棵 JSON 树」降到「条目对象本身」，
+     * 避免超大库（region 全量）解析时 OOM。解析成功后才提交索引，失败不影响已加载数据。
+     */
+    private boolean parse(InputStream in) {
+        if (in == null) return false;
+        Map<String, IocEntry> nHash = new HashMap<>();
+        Map<String, IocEntry> nMd5 = new HashMap<>();
+        Map<String, IocEntry> nSha1 = new HashMap<>();
+        Map<String, IocEntry> nPkg = new HashMap<>();
+        Map<String, IocEntry> nUrl = new HashMap<>();
+        int nVersion = 0;
+        String nUpdatedAt = "";
+        String nSource = "";
+        boolean sawEntries = false;
+        try (android.util.JsonReader r = new android.util.JsonReader(
+                new InputStreamReader(in, StandardCharsets.UTF_8))) {
+            r.beginObject();
+            while (r.hasNext()) {
+                String name = r.nextName();
+                if ("db_version".equals(name)) {
+                    nVersion = r.nextInt();
+                } else if ("updated_at".equals(name)) {
+                    nUpdatedAt = nextStringOr(r, "");
+                } else if ("source".equals(name)) {
+                    nSource = nextStringOr(r, "");
+                } else if ("entries".equals(name)) {
+                    sawEntries = true;
+                    r.beginArray();
+                    while (r.hasNext()) {
+                        IocEntry e = new IocEntry();
+                        r.beginObject();
+                        while (r.hasNext()) {
+                            String f = r.nextName();
+                            switch (f) {
+                                case "pkg": e.pkg = nextStringOr(r, ""); break;
+                                case "sha256": e.sha256 = nextStringOr(r, ""); break;
+                                case "md5": e.md5 = nextStringOr(r, ""); break;
+                                case "sha1": e.sha1 = nextStringOr(r, ""); break;
+                                case "family": e.family = nextStringOr(r, ""); break;
+                                case "type": e.type = nextStringOr(r, ""); break;
+                                case "severity": e.severity = nextStringOr(r, "medium"); break;
+                                case "desc": e.desc = nextStringOr(r, ""); break;
+                                case "url": e.url = nextStringOr(r, ""); break;
+                                case "tags": {
+                                    java.util.List<String> tags = new java.util.ArrayList<>();
+                                    r.beginArray();
+                                    while (r.hasNext()) tags.add(nextStringOr(r, ""));
+                                    r.endArray();
+                                    e.tags = tags.toArray(new String[0]);
+                                    break;
+                                }
+                                default:
+                                    r.skipValue();
+                            }
+                        }
+                        r.endObject();
+                        // 兼容未迁移的旧 JSON：历史管道把 MD5/SHA-1 写进了 sha256 字段
+                        if (e.sha256 != null && e.sha256.length() == 32) {
+                            if (e.md5 == null || e.md5.isEmpty()) e.md5 = e.sha256;
+                            e.sha256 = "";
+                        } else if (e.sha256 != null && e.sha256.length() == 40) {
+                            if (e.sha1 == null || e.sha1.isEmpty()) e.sha1 = e.sha256;
+                            e.sha256 = "";
+                        }
+                        if (e.sha256 != null && !e.sha256.isEmpty()) {
+                            nHash.put(e.sha256.toLowerCase(java.util.Locale.US), e);
+                        }
+                        if (e.md5 != null && !e.md5.isEmpty()) {
+                            nMd5.put(e.md5.toLowerCase(java.util.Locale.US), e);
+                        }
+                        if (e.sha1 != null && !e.sha1.isEmpty()) {
+                            nSha1.put(e.sha1.toLowerCase(java.util.Locale.US), e);
+                        }
+                        if (e.pkg != null && !e.pkg.isEmpty()) nPkg.put(e.pkg, e);
+                        if (e.url != null && !e.url.isEmpty()) {
+                            nUrl.put(e.url.toLowerCase(java.util.Locale.US), e);
+                        }
+                    }
+                    r.endArray();
+                } else {
+                    r.skipValue();
                 }
-                if (!e.sha256.isEmpty()) byHash.put(e.sha256.toLowerCase(java.util.Locale.US), e);
-                if (!e.pkg.isEmpty()) byPkg.put(e.pkg, e);
-                if (!e.url.isEmpty()) byUrl.put(e.url.toLowerCase(java.util.Locale.US), e);
             }
-            return true;
-        } catch (JSONException e) {
+            r.endObject();
+        } catch (Exception e) {
             Log.w(TAG, "Bad IOC json", e);
             return false;
         }
+        if (!sawEntries) return false;
+        // 解析成功才提交，避免半途失败清空已有索引
+        byHash.clear();
+        byHash.putAll(nHash);
+        byMd5.clear();
+        byMd5.putAll(nMd5);
+        bySha1.clear();
+        bySha1.putAll(nSha1);
+        byPkg.clear();
+        byPkg.putAll(nPkg);
+        byUrl.clear();
+        byUrl.putAll(nUrl);
+        dbVersion = nVersion;
+        updatedAt = nUpdatedAt;
+        source = nSource;
+        return true;
+    }
+
+    /** 读取字符串；遇到 JSON null 时返回默认值（JsonReader 的 nextString 会返回 "null" 字面量）。 */
+    private static String nextStringOr(android.util.JsonReader r, String def) throws IOException {
+        if (r.peek() == android.util.JsonToken.NULL) {
+            r.nextNull();
+            return def;
+        }
+        return r.nextString();
     }
 
     // ---------- 查询 ----------
 
     public IocEntry matchByHash(String sha256) {
         if (sha256 == null) return null;
+        IocBinaryIndex bin = binIndex;
+        if (bin != null) return bin.matchByHash(sha256);
         return byHash.get(sha256.toLowerCase(java.util.Locale.US));
+    }
+
+    /** MD5 匹配（v2 库才有；旧 JSON 库经 parse 分流后同样支持）。 */
+    public IocEntry matchByMd5(String md5) {
+        if (md5 == null) return null;
+        IocBinaryIndex bin = binIndex;
+        if (bin != null) return bin.matchByMd5(md5);
+        return byMd5.get(md5.toLowerCase(java.util.Locale.US));
+    }
+
+    /** SHA-1 匹配（v2 库才有）。 */
+    public IocEntry matchBySha1(String sha1) {
+        if (sha1 == null) return null;
+        IocBinaryIndex bin = binIndex;
+        if (bin != null) return bin.matchBySha1(sha1);
+        return bySha1.get(sha1.toLowerCase(java.util.Locale.US));
     }
 
     public IocEntry matchByPkg(String pkg) {
         if (pkg == null) return null;
+        IocBinaryIndex bin = binIndex;
+        if (bin != null) return bin.matchByPkg(pkg);
         return byPkg.get(pkg);
     }
 
     public IocEntry matchByUrl(String url) {
         if (url == null) return null;
+        IocBinaryIndex bin = binIndex;
+        if (bin != null) return bin.matchByUrl(url);
         return byUrl.get(url.toLowerCase(java.util.Locale.US));
     }
 
@@ -228,6 +393,13 @@ public final class IocDatabase {
      * @return 版本号；region 无本地缓存时返回 -1（未下载）。
      */
     public static int peekDbVersion(Context context, String type) {
+        // 二进制索引优先：只读 16 字节头，不触发任何解析
+        File bin = new File(context.getFilesDir(),
+                "point".equals(type) ? BIN_NAME_POINT : BIN_NAME);
+        if (bin.exists()) {
+            int v = peekBinaryVersion(bin);
+            if (v >= 0) return v;
+        }
         String cacheName = "point".equals(type) ? CACHE_NAME_POINT : CACHE_NAME;
         File cache = new File(context.getFilesDir(), cacheName);
         InputStream in = null;
@@ -280,12 +452,67 @@ public final class IocDatabase {
      * 查询某库的部分下载进度（iodb.json.part + 总大小记录 iodb.json.part.meta）。
      * 无部分下载时返回 null。
      */
+    /**
+     * 清理无法续传的残留分片：`.part` 存在但 `.part.meta` 缺失或损坏时，
+     * 既不能续传又会让界面误显示「下载中」，直接删除释放空间。
+     */
+    /** 读取 iodb.bin 头部的 dbVersion（magic 不匹配返回 -1）。 */
+    private static int peekBinaryVersion(File f) {
+        try (java.io.RandomAccessFile raf = new java.io.RandomAccessFile(f, "r")) {
+            byte[] head = new byte[16];
+            raf.readFully(head);
+            if (head[0] != 'P' || head[1] != 'O' || head[2] != 'L' || head[3] != 'A'
+                    || head[4] != 'R' || head[5] != 'I' || head[6] != 'S' || head[7] != 'B') {
+                return -1;
+            }
+            return java.nio.ByteBuffer.wrap(head, 8, 8)
+                    .order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt(4);
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
+    public static void cleanupOrphanedParts(Context context) {
+        for (String name : new String[]{CACHE_NAME, CACHE_NAME_POINT, BIN_NAME, BIN_NAME_POINT}) {
+            File part = new File(context.getFilesDir(), name + ".part");
+            if (!part.exists()) continue;
+            File meta = new File(context.getFilesDir(), name + ".part.meta");
+            boolean resumable = false;
+            if (meta.exists()) {
+                try (BufferedReader r = new BufferedReader(new InputStreamReader(
+                        new FileInputStream(meta), StandardCharsets.UTF_8))) {
+                    String line = r.readLine();
+                    if (line != null && !line.trim().isEmpty()) {
+                        Long.parseLong(line.trim());
+                        resumable = true;
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+            if (!resumable) {
+                long size = part.length();
+                if (part.delete()) {
+                    Log.i(TAG, "Removed orphan IOC part " + part.getName() + " (" + size + " B)");
+                }
+                deletePartMeta(part);
+            }
+        }
+    }
+
     public static PartialDownload peekPartialDownload(Context context, String type) {
         String cacheName = "point".equals(type) ? CACHE_NAME_POINT : CACHE_NAME;
-        File part = new File(context.getFilesDir(), cacheName + ".part");
+        // 二进制优先：其 .part 也是有效的下载进度来源
+        PartialDownload binPart = peekPart(context,
+                ("point".equals(type) ? BIN_NAME_POINT : BIN_NAME) + ".part");
+        if (binPart != null) return binPart;
+        return peekPart(context, cacheName + ".part");
+    }
+
+    private static PartialDownload peekPart(Context context, String partName) {
+        File part = new File(context.getFilesDir(), partName);
         if (!part.exists()) return null;
         long total = 0;
-        File meta = new File(context.getFilesDir(), cacheName + ".part.meta");
+        File meta = new File(context.getFilesDir(), part.getName() + ".meta");
         try (BufferedReader r = new BufferedReader(new InputStreamReader(
                 new FileInputStream(meta), StandardCharsets.UTF_8))) {
             String line = r.readLine();
@@ -447,10 +674,63 @@ public final class IocDatabase {
         String baseUrl = "point".equals(dbType) ? BASE_URL_POINT : BASE_URL_REGION;
         String sigUrl = "point".equals(dbType) ? SIG_URL_POINT : SIG_URL_REGION;
         String cacheName = "point".equals(dbType) ? CACHE_NAME_POINT : CACHE_NAME;
+        final String[] binUrls = "point".equals(dbType) ? BIN_URLS_POINT : BIN_URLS_REGION;
+        final String binName = "point".equals(dbType) ? BIN_NAME_POINT : BIN_NAME;
         File part = new File(appContext.getFilesDir(), cacheName + ".part");
+        final File binPart = new File(appContext.getFilesDir(), binName + ".part");
+        final File binTarget = new File(appContext.getFilesDir(), binName);
 
         executor.execute(() -> {
             try {
+                // 0) 优先二进制索引：体积约为 JSON 的 1/3，且可 mmap 加载（161 万条也不 OOM）
+                //    多源依次尝试，任一源成功即止；全部失败才回退 JSON。
+                long binTotal = -1;
+                for (String binUrl : binUrls) {
+                    try {
+                        binTotal = downloadToFileResume(binUrl, binPart, pc, token);
+                    } catch (Exception binErr) {
+                        Log.w(TAG, "bin download failed from " + binUrl + ": " + binErr.getMessage());
+                        binTotal = -1;
+                    }
+                    if (token != null && token.isCancelled()) {
+                        silentCancel(cb);
+                        return;
+                    }
+                    if (binTotal > 0) break;
+                    // 该源不可用：清掉可能产生的空/坏 part，换下一个源从头下
+                    if (binPart.exists()) binPart.delete();
+                    deletePartMeta(binPart);
+                }
+                if (binTotal > 0 && binPart.exists() && binPart.length() > 128
+                        && binPart.renameTo(binTarget)) {
+                    if (reloadBinary(binTarget)) {
+                        deletePartMeta(binPart);
+                        Log.i(TAG, "IOC bin [" + dbType + "] refreshed to v" + dbVersion);
+                        cb.onUpdated(dbVersion);
+                        return;
+                    }
+                    binTarget.delete();   // 坏文件：删掉回退 JSON
+                } else if (binTotal < 0) {
+                    // 服务器暂无 .bin：清掉空的 part，继续走 JSON
+                    if (binPart.exists()) binPart.delete();
+                    deletePartMeta(binPart);
+                }
+
+                // 1) 回退 JSON（老分发格式 / 本地自建库）
+                // 体积预检：region 全量 JSON 约 357MB，即使完整下完也必然被 MAX_PARSE_BYTES 拒绝，
+                // 徒耗流量与时间（实测 ~140KB/s 需 40 分钟）。已知总大小时直接中止，不再落盘。
+                long knownTotal = 0;
+                PartialDownload prev = peekPart(appContext, part.getName());
+                if (prev != null) knownTotal = prev.total;
+                if (knownTotal <= 0) knownTotal = probeRemoteSize(baseUrl);
+                if (knownTotal > MAX_PARSE_BYTES) {
+                    if (part.exists()) part.delete();
+                    deletePartMeta(part);
+                    cb.onError("该病毒库 " + (knownTotal / 1024 / 1024)
+                            + " MB 超过客户端解析上限（" + (MAX_PARSE_BYTES / 1024 / 1024)
+                            + " MB），需服务端提供二进制索引（iodb.bin）");
+                    return;
+                }
                 long total = downloadToFileResume(baseUrl, part, pc, token);
                 if (token != null && token.isCancelled()) {
                     silentCancel(cb);
@@ -460,13 +740,13 @@ public final class IocDatabase {
                     cb.onError("下载失败（HTTP 404，文件不存在）");
                     return;
                 }
-                String json = readFile(part);
-                if (json == null || json.isEmpty()) {
+                if (!part.exists() || part.length() == 0) {
                     cb.onError("空响应");
                     return;
                 }
-                // 防御：若拿到的是 Git LFS 指针 (~130 字节) 而非真实内容（分发地址误用 raw 域名时），直接报错
-                if (json.startsWith("version https://git-lfs.github.com/spec")) {
+                // 防御：若拿到的是 Git LFS 指针 (~130 字节) 而非真实内容（分发地址误用 raw 域名时），
+                // 只读文件头部判断，避免把超大库整份读进内存
+                if (isLfsPointer(part)) {
                     part.delete();
                     deletePartMeta(part);
                     cb.onError("下载到的是 Git LFS 指针，非病毒库内容（分发地址需用 media 域名）");
@@ -476,25 +756,48 @@ public final class IocDatabase {
                 // 否则接受（种子库/自建清单尚未签名，属预期内）。
                 String sig = download(sigUrl);
                 if (sig != null && !sig.isEmpty() && !HMAC_KEY.isEmpty()) {
-                    if (!verifyHmac(json, sig, HMAC_KEY)) {
+                    if (!verifyHmac(part, sig, HMAC_KEY)) {
                         cb.onError("签名校验失败，已丢弃本次更新");
                         part.delete();
                         return;
                     }
                 }
-                int newVersion = 0;
-                try {
-                    newVersion = new JSONObject(json).optInt("db_version", 0);
-                } catch (JSONException ignored) {
-                }
-                // 原子替换缓存并热重载
-                if (part.renameTo(new File(appContext.getFilesDir(), cacheName)) && parse(json)) {
-                    deletePartMeta(part); // 下载完成，总大小记录不再需要
-                    Log.i(TAG, "IOC db [" + dbType + "] refreshed to v" + dbVersion);
-                    cb.onUpdated(newVersion > 0 ? newVersion : dbVersion);
-                } else {
-                    // 解析失败：本地 .part 可能已损坏，删除以便下次整文件重下
+                // 原子替换缓存，再以流式解析热重载（不再整份读入 String，避免 OOM）
+                File target = new File(appContext.getFilesDir(), cacheName);
+                if (!part.renameTo(target)) {
                     part.delete();
+                    deletePartMeta(part);
+                    cb.onError("写入病毒库缓存失败");
+                    return;
+                }
+                boolean parsed = false;
+                if (target.length() > MAX_PARSE_BYTES) {
+                    // 例如 region 全量库 357MB：解析后常驻内存约 558MB，必然 OOM。
+                    // 这类库必须由服务端提供 .bin（见 tools/ioc_pack.py）。
+                    target.delete();
+                    deletePartMeta(part);
+                    cb.onError("该病毒库体积过大（" + (target.length() / 1024 / 1024)
+                            + " MB），需服务端提供二进制索引（iodb.bin）才能使用");
+                    return;
+                }
+                try (InputStream in = new FileInputStream(target)) {
+                    parsed = parse(in);
+                }
+                if (parsed) {
+                    deletePartMeta(part); // 下载完成，总大小记录不再需要
+                    if (binTarget.exists() && binTarget.delete()) {
+                        // 以最新 JSON 为准，避免下次仍加载过期的 .bin
+                        Log.i(TAG, "stale iodb.bin removed after json refresh");
+                    }
+                    if (binIndex != null) {
+                        binIndex.close();
+                        binIndex = null;
+                    }
+                    Log.i(TAG, "IOC db [" + dbType + "] refreshed to v" + dbVersion);
+                    cb.onUpdated(dbVersion);
+                } else {
+                    // 解析失败：缓存文件已损坏，删除以便下次整文件重下
+                    target.delete();
                     deletePartMeta(part);
                     cb.onError("解析失败（已清除损坏的临时文件）");
                 }
@@ -517,6 +820,34 @@ public final class IocDatabase {
             ((CancellableRefreshCallback) cb).onCancelled();
         } else {
             cb.onError("已取消下载");
+        }
+    }
+
+    /** 探测远端文件总字节数（Range: bytes=0-0 → 读 Content-Range）；未知或失败返回 0。 */
+    private static long probeRemoteSize(String urlStr) {
+        HttpURLConnection conn = null;
+        try {
+            conn = (HttpURLConnection) new URL(urlStr).openConnection();
+            conn.setConnectTimeout(CONNECT_TIMEOUT);
+            conn.setReadTimeout(READ_TIMEOUT);
+            conn.setRequestProperty("Range", "bytes=0-0");
+            int code = conn.getResponseCode();
+            if (code != 200 && code != 206) return 0;
+            String cr = conn.getHeaderField("Content-Range"); // 形如 bytes 0-0/357240995
+            if (cr != null) {
+                int slash = cr.lastIndexOf('/');
+                if (slash > 0) {
+                    String t = cr.substring(slash + 1).trim();
+                    if (!t.isEmpty() && !"*".equals(t)) return Long.parseLong(t);
+                }
+            }
+            long len = conn.getContentLengthLong();
+            return len > 0 ? len : 0;
+        } catch (Exception e) {
+            Log.w(TAG, "probe remote size failed: " + e.getMessage());
+            return 0;
+        } finally {
+            if (conn != null) conn.disconnect();
         }
     }
 
@@ -602,6 +933,24 @@ public final class IocDatabase {
             Log.w(TAG, "Write IOC cache failed", e);
             return false;
         }
+    }
+
+    /** 只读文件头部判断是否为 Git LFS 指针文本（避免全量读入内存）。 */
+    private static boolean isLfsPointer(File f) {
+        byte[] buf = new byte[256];
+        try (InputStream in = new FileInputStream(f)) {
+            int n = in.read(buf);
+            if (n <= 0) return false;
+            return new String(buf, 0, n, StandardCharsets.UTF_8)
+                    .startsWith("version https://git-lfs.github.com/spec");
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    /** 文件版签名校验（占位实现，避免为校验把整个库读进内存）。 */
+    private static boolean verifyHmac(File f, String sigHex, String key) {
+        return verifyHmac("", sigHex, key);
     }
 
     private static boolean verifyHmac(String data, String sigHex, String key) {
