@@ -114,191 +114,191 @@ public class MainActivity extends BaseActivity {
     /** 最近一次 ML 扫描结果缓存（按模式存储），供结果页查看。 */
     public static java.util.Map<Integer, java.util.List<AppRiskInfo>> mlResultsByMode = new java.util.HashMap<>();
 
-    private static final int REQ_NOTIFICATION = 10;
+     static final int REQ_NOTIFICATION = 10;
 
-    private LinearLayout modeList;
-    private LinearLayout modeResume;
-    private com.google.android.material.button.MaterialButton btnResumeScan;
+     LinearLayout modeList;
+     LinearLayout modeResume;
+     com.google.android.material.button.MaterialButton btnResumeScan;
     /** 快捷面板「拦截」按钮：深层扫描模式显示，直达扫描中心拦截板块。 */
-    private com.google.android.material.button.MaterialButton btnResumeBlock;
-    private com.google.android.material.button.MaterialButton btnPickBack;
-    private StarMapView starMap;
-    private com.google.android.material.slider.Slider zoomSlider;
+     com.google.android.material.button.MaterialButton btnResumeBlock;
+     com.google.android.material.button.MaterialButton btnPickBack;
+     StarMapView starMap;
+     com.google.android.material.slider.Slider zoomSlider;
     // 恒星详情面板（点按星图恒星 → 从右划出，占满整个高度）+ 其迷你星图与内容视图
-    private android.view.View starDetailPanel;
-    private StarMapView starDetailMap;
+     android.view.View starDetailPanel;
+     StarMapView starDetailMap;
     private android.widget.TextView starDetailName, starDetailSub, starDetailType;
     private android.widget.TextView starDetailSize, starDetailRisk;
     private android.widget.TextView starDetailChildren, starDetailTime, starDetailAdvice;
     private android.widget.TextView starDetailPlanets, starDetailMag, starDetailTemp, starDetailSpec;
     private android.widget.TextView starDetailRadius, starDetailMass;
-    private android.widget.LinearLayout starDetailOrbit;
+     android.widget.LinearLayout starDetailOrbit;
     // 信息行左侧标签（卫星详情模式会改写文字，恒星模式恢复标准文案）
     private android.widget.TextView starDetailTypeLabel, starDetailSizeLabel;
     private android.widget.TextView starDetailChildrenLabel, starDetailTimeLabel;
     /** 星体/星系参数区（迷你星图解算）：卫星详情模式下整体隐藏。 */
-    private android.view.View starDetailFacts;
-    private com.google.android.material.button.MaterialButton starDetailOpenBtn;
+     android.view.View starDetailFacts;
+     com.google.android.material.button.MaterialButton starDetailOpenBtn;
     /** 抽屉贴底操作区容器（细分隔线 + 「打开」按钮）：非应用段整体隐藏。 */
-    private android.widget.LinearLayout starDetailActionBar;
+     android.widget.LinearLayout starDetailActionBar;
     /** 当前详情抽屉对应的星键（app:<pkg> / folder:<键>#<后缀>），供「打开」定位对象。 */
-    private String starDetailKey;
+     String starDetailKey;
     /** 最近一次扫描出结果的时间戳（0 = 尚未扫描）。 */
-    private long lastScanFinishedAt = 0L;
-    private android.widget.LinearLayout starDetailDots;
+     long lastScanFinishedAt = 0L;
+     android.widget.LinearLayout starDetailDots;
     /** 名称右侧淡出遮罩（渐变透明 → 抽屉底色），名字过长时自然淡出。 */
-    private android.view.View starDetailNameFade;
-    private boolean starDetailOpen = false;
+     android.view.View starDetailNameFade;
+     boolean starDetailOpen = false;
     // 底部双进度条：全局（整体扫描）+ 局部（当前对象：文件夹/应用）
-    private android.view.View scanProgressPanel;
-    private android.widget.TextView scanObjText;
-    private android.view.View progressGlobalBar;
-    private android.view.View progressLocalBar;
+     android.view.View scanProgressPanel;
+     android.widget.TextView scanObjText;
+     android.view.View progressGlobalBar;
+     android.view.View progressLocalBar;
     private final java.util.HashMap<String, Integer> folderTotals = new java.util.HashMap<>();
     private final java.util.HashMap<String, Integer> folderDone = new java.util.HashMap<>();
-    private float globalFraction = 0f, localFraction = 0f;
-    private String scanObjName = "";
-    private long lastProgressUiMs = 0;
+     float globalFraction = 0f, localFraction = 0f;
+     String scanObjName = "";
+     long lastProgressUiMs = 0;
     // 结果面板：扫描完成后显示入口块（竖屏底部横块 / 横屏右缘竖块），点击拉出（星图禁交互）
-    private android.view.View resultEntryBar;
-    private boolean resultSheetShown = false;
+     android.view.View resultEntryBar;
+     boolean resultSheetShown = false;
     /** 扫描完成后是否进入结果界面（临时开关：false = 保留星图交互，不弹结果）。 */
     /** 扫描完成后渲染主页内嵌结果面板（上滑查看）。 */
-    private static final boolean SCAN_RESULT_ENABLED = true;
-    private com.google.android.material.button.MaterialButton btnPickMode;
+     static final boolean SCAN_RESULT_ENABLED = true;
+     com.google.android.material.button.MaterialButton btnPickMode;
     // 竖屏选择流程状态：按钮两态（选模式 ⇄ 下一步）与当前选中的模式卡
-    private boolean modeSelecting = false;
-    private int selectedModeKey = -1;
-    private com.google.android.material.card.MaterialCardView selectedModeCard;
+     boolean modeSelecting = false;
+     int selectedModeKey = -1;
+     com.google.android.material.card.MaterialCardView selectedModeCard;
     // 点击图标后上方浮现的详细面板：单卡，上半部检查逻辑区可收起/展开（收回时=紧凑模式卡）
-    private LinearLayout modeDetail;
-    private com.google.android.material.card.MaterialCardView detailCard;
+     LinearLayout modeDetail;
+     com.google.android.material.card.MaterialCardView detailCard;
     // 卡内可收起的「检查逻辑」区
-    private View checkSection;
-    private LinearLayout checkSteps;
-    private boolean checkExpanded = true;
+     View checkSection;
+     LinearLayout checkSteps;
+     boolean checkExpanded = true;
     // 模式就绪状态缓存（refreshStatus 填充；detail 面板按选中模式展示）
-    private static final int ST_CHECKING = 0, ST_READY = 1, ST_ACTIVE = 2, ST_NEED_AUTH = 3;
-    private final int[] modeStatusState = new int[MODE_KEYS.length];
-    private ViewGroup behaviorRows;
-    private TextView behaviorEmpty;
-    private Prefs prefs;
-    private boolean pendingShizukuActivation = false;
+     static final int ST_CHECKING = 0, ST_READY = 1, ST_ACTIVE = 2, ST_NEED_AUTH = 3;
+     final int[] modeStatusState = new int[MODE_KEYS.length];
+     ViewGroup behaviorRows;
+     TextView behaviorEmpty;
+     Prefs prefs;
+     boolean pendingShizukuActivation = false;
 
-    private DrawerLayout drawerLayout;
-    private TextView guardGreetingText;
-    private TextView guardStatusText;
-    private TextView guardModeText;
-    private TextView lastGuardTime;
-    private TextView totalGuardCount;
-    private TextView recentScanResult;
-    private LinearLayout recentFilesList;
-    private TextView noRecentFilesText;
+     DrawerLayout drawerLayout;
+     TextView guardGreetingText;
+     TextView guardStatusText;
+     TextView guardModeText;
+     TextView lastGuardTime;
+     TextView totalGuardCount;
+     TextView recentScanResult;
+     LinearLayout recentFilesList;
+     TextView noRecentFilesText;
 
     // ---------- 主页滑动向导（点模式不再开新界面） ----------
-    private static final int REQ_OPEN_TREE = 200;
-    private static final int REQ_STORAGE = 300;
-    private int pendingModeKey = -1;
-    private Uri currentTreeUri = null;
-    private boolean pendingGlobalScan = false;
+     static final int REQ_OPEN_TREE = 200;
+     static final int REQ_STORAGE = 300;
+     int pendingModeKey = -1;
+     Uri currentTreeUri = null;
+     boolean pendingGlobalScan = false;
 
     /** 范围勾选：全盘 / 已安装应用可同时选中；「选择文件夹」与两者互斥。 */
-    private boolean scopeGlobal = true;
-    private boolean scopeApps = false;
-    private boolean scopeFolder = false;
+     boolean scopeGlobal = true;
+     boolean scopeApps = false;
+     boolean scopeFolder = false;
 
     /** 本次扫描收集的两段结果（文件级 + 应用级）。 */
-    private List<FileRiskInfo> lastFileRisks;
-    private List<AppRiskInfo> lastAppRisks;
-    private List<AiClient.AiVerdict> lastAppVerdicts;
+     List<FileRiskInfo> lastFileRisks;
+     List<AppRiskInfo> lastAppRisks;
+     List<AiClient.AiVerdict> lastAppVerdicts;
     /** 文件段元信息：扫描范围描述（全盘 / 所选文件夹）与文件总数（结果页文件栏显示）。 */
-    private String lastFileScopeLabel;
-    private int lastFileScanCount;
+     String lastFileScopeLabel;
+     int lastFileScanCount;
 
     /** 文件夹扫描：用户可添加多个 SAF 授权树，扫描时逐个遍历。 */
     private final List<Uri> selectedFolders = new ArrayList<>();
 
     private View stageArea, configScope, configFolders, resultArea;
-    private View contentRoot;
+     View contentRoot;
 
     /** 模式状态探测的共享后台执行器（避免每次 onResume 新建/关闭线程池）。 */
     private static final ExecutorService STATUS_EXEC = Executors.newSingleThreadExecutor();
 
     /** 浅层扫描（Normal）入场：主题色地面 → 天文台 → 穹顶展开 → 望远镜伸出 → 视角向下。 */
-    private ObservatoryIntroView observatoryIntro;
+     ObservatoryIntroView observatoryIntro;
     /** 深层扫描模式（无障碍/Shizuku/Root）的火箭发射入场动画层。 */
-    private RocketIntroView rocketIntro;
+     RocketIntroView rocketIntro;
     /** 深扫发射末态卫星释放点（屏幕坐标）：runCombinedScan 里 resetScanField 之后再入轨，
      *  保证锚定时 pan=0/scale=1（世界=屏幕），交棒位置零跳变。 */
-    private float[] pendingSatRelease;
+     float[] pendingSatRelease;
 
     /** 拦截模式地下功能面板容器（点击拦截按钮后由火箭动画揭示，常驻在星图下方）。 */
-    private android.widget.FrameLayout interceptUnderground;
-    private android.widget.TextView itcMonitorState, itcCount;
-    private android.widget.LinearLayout itcPermList;
-    private android.widget.TextView itcPermTitle;
-    private android.widget.LinearLayout itcBlockList;   // 面板内已拦截应用列表（内联）
-    private android.widget.TextView itcBlockEmpty;      // 面板内空态提示
-    private android.widget.EditText itcBlockSearch;     // 面板内搜索框
-    private com.google.android.material.button.MaterialButton itcAddApp; // 面板内添加应用
-    private String itcBlockQuery = "";                  // 面板内搜索关键词（小写）
-    private com.google.android.material.materialswitch.MaterialSwitch itcToggle;
-    private android.widget.ImageButton itcClose;
-    private android.widget.ImageButton itcExpand;      // 面板全屏展开/收起（空心三角）
-    private android.widget.ImageButton itcBlockFold;   // 应用列表折叠按钮（560dp 与全屏两种高度都显示）
-    private android.widget.LinearLayout itcBlockBody;  // 应用列表可折叠容器
-    private boolean itcExpanded = false;               // 面板是否已全屏展开
-    private boolean itcBlockFolded = false;            // 应用列表是否已折叠
-    private boolean interceptActive;   // 拦截面板是否处于展开/激活态
-    private boolean itcProgrammatic;    // 编程设置开关时跳过监听器
-    private boolean interceptFlowActive; // 是否正处于拦截火箭动画流程（区别于普通深扫范围流程）
+     android.widget.FrameLayout interceptUnderground;
+    android.widget.TextView itcMonitorState, itcCount;
+     android.widget.LinearLayout itcPermList;
+     android.widget.TextView itcPermTitle;
+     android.widget.LinearLayout itcBlockList;   // 面板内已拦截应用列表（内联）
+     android.widget.TextView itcBlockEmpty;      // 面板内空态提示
+     android.widget.EditText itcBlockSearch;     // 面板内搜索框
+     com.google.android.material.button.MaterialButton itcAddApp; // 面板内添加应用
+     String itcBlockQuery = "";                  // 面板内搜索关键词（小写）
+     com.google.android.material.materialswitch.MaterialSwitch itcToggle;
+     android.widget.ImageButton itcClose;
+     android.widget.ImageButton itcExpand;      // 面板全屏展开/收起（空心三角）
+     android.widget.ImageButton itcBlockFold;   // 应用列表折叠按钮（560dp 与全屏两种高度都显示）
+     android.widget.LinearLayout itcBlockBody;  // 应用列表可折叠容器
+     boolean itcExpanded = false;               // 面板是否已全屏展开
+     boolean itcBlockFolded = false;            // 应用列表是否已折叠
+     boolean interceptActive;   // 拦截面板是否处于展开/激活态
+     boolean itcProgrammatic;    // 编程设置开关时跳过监听器
+     boolean interceptFlowActive; // 是否正处于拦截火箭动画流程（区别于普通深扫范围流程）
     /** 天文台入场动画是否已播过（每会话只播一次，避免反复选 Normal 都被拖 2.6s）。 */
-    private boolean introPlayed;
-    private ViewGroup folderListContainer;
-    private LinearLayout appResultList;
-    private TextView folderEmptyText;
-    private TextView scanStatusText;
+     boolean introPlayed;
+     ViewGroup folderListContainer;
+     LinearLayout appResultList;
+     TextView folderEmptyText;
+     TextView scanStatusText;
     /** 分数右侧简要说明：文件风险（N）/ 应用风险（M），逐段显示。 */
     private TextView resultBriefFiles, resultBriefApps;
     /** 双段都有结果时显示的文件/应用分栏（hero 区）。 */
-    private com.google.android.material.button.MaterialButtonToggleGroup resultTabs;
+     com.google.android.material.button.MaterialButtonToggleGroup resultTabs;
     private LinearLayout filePanel, appPanel;
     private TextView fileMetaText, fileScoreText, appMetaText, appScoreText;
     /** 结果页顶部百分制评分：大号主题色分数 + 灰色 /100 后缀。 */
     private TextView resultScore, resultScoreMax;
-    private View resultScoreRow;
+     View resultScoreRow;
     /** 结果页顶部「向下收回」按钮：点击把结果页滑回星图。 */
-    private View resultCollapseBtn;
+     View resultCollapseBtn;
     /** 顶部大图标（含 3 圈环）：进结果页时上滑收起，离开时恢复。 */
-    private View homeAppIcon;
-    private TextView homeGreeting;
-    private int homeIconSize = 0;
+     View homeAppIcon;
+     TextView homeGreeting;
+     int homeIconSize = 0;
 
     /** 动画测试模式：进度与旋转按固定时长完整播放一遍，与实际扫描速度解耦。 */
     private final com.polaris.app.util.AnimTestProgress animTest = new com.polaris.app.util.AnimTestProgress();
-    private LinearLayout resultList;
+     LinearLayout resultList;
     /** 应用段折叠组句柄，用于「先展开后自动收回」的微交互。 */
-    private SectionHold appSectionHold;
-    private Runnable appAutoCollapse;
-    private boolean appPeekShown;        // 展开自动收回只在当前结果页第一次展示时播放
-    private static final long APP_PEEK_MS = 500L;
-    private com.polaris.app.view.ConcentricRingsView homeRings;
-    private ImageView homeStar;
-    private FileScanner scanner;
-    private QuarantineManager qm;
-    private ObjectAnimator iconSpin;
-    private int totalToScan = 1;
-    private int scannedCount = 0;
-    private boolean scanning = false;
-    private static final int COUNT_CAP = 200000;
+     SectionHold appSectionHold;
+     Runnable appAutoCollapse;
+     boolean appPeekShown;        // 展开自动收回只在当前结果页第一次展示时播放
+     static final long APP_PEEK_MS = 500L;
+     com.polaris.app.view.ConcentricRingsView homeRings;
+     ImageView homeStar;
+     FileScanner scanner;
+     QuarantineManager qm;
+     ObjectAnimator iconSpin;
+     int totalToScan = 1;
+     int scannedCount = 0;
+     boolean scanning = false;
+     static final int COUNT_CAP = 200000;
 
     // ---------- 下拉面板（应用使用的权限 + 最近添加文件） ----------
     // 下拉面板（全屏承载工具箱：权限使用 / 最近文件 / 单文件扫描）
-    private View pullOverlay;
-    private ToolsPanelView pullPanel;
+     View pullOverlay;
+     ToolsPanelView pullPanel;
 
-    private boolean pullOpen = false;
-    private int pullSheetHeight = 0;
+     boolean pullOpen = false;
+     int pullSheetHeight = 0;
 
     private static final int[] MODE_KEYS = {
             Prefs.MODE_NORMAL, Prefs.MODE_ACCESSIBILITY,
@@ -1116,234 +1116,42 @@ public class MainActivity extends BaseActivity {
     }
 
     // ---------- 拦截模式：火箭动画 → 地面抬升 → 地下功能面板 ----------
+
+    private final InterceptPanelController interceptpanelcontroller = new InterceptPanelController(this);
+
+    private void startInterceptFlow() { interceptpanelcontroller.startInterceptFlow(); }
+    private void showInterceptPanel() { interceptpanelcontroller.showInterceptPanel(); }
+    private void hideInterceptPanel() { interceptpanelcontroller.hideInterceptPanel(); }
+    private void toggleInterceptExpand() { interceptpanelcontroller.toggleInterceptExpand(); }
+    private void setInterceptExpanded(boolean expand) { interceptpanelcontroller.setInterceptExpanded(expand); }
+    private void toggleInterceptBlockFold() { interceptpanelcontroller.toggleInterceptBlockFold(); }
+    private void renderInterceptPanel() { interceptpanelcontroller.renderInterceptPanel(); }
+    private void renderInterceptBlockList() { interceptpanelcontroller.renderInterceptBlockList(); }
+    private void renderInterceptPerms() { interceptpanelcontroller.renderInterceptPerms(); }
+    private void onInterceptToggle(boolean on) { interceptpanelcontroller.onInterceptToggle(on); }
+    private void ensureInterceptNotificationThenEnable() { interceptpanelcontroller.ensureInterceptNotificationThenEnable(); }
+    private void enableInterceptBlockMode() { interceptpanelcontroller.enableInterceptBlockMode(); }
+    private void disableInterceptBlockMode() { interceptpanelcontroller.disableInterceptBlockMode(); }
+    private void syncDockModule() { interceptpanelcontroller.syncDockModule(); }
+    private void restoreResidentOrbits() { interceptpanelcontroller.restoreResidentOrbits(); }
+    private void showBlockAppPicker() { interceptpanelcontroller.showBlockAppPicker(); }
+    private String appLabel(String pkg) { return interceptpanelcontroller.appLabel(pkg); }
+    private void launchUninstall(String pkg) { interceptpanelcontroller.launchUninstall(pkg); }
+
     // 替代原独立拦截页（FileScanActivity open_tab=block），面板常驻星图下方，
     // 复用 Prefs / GuardService(自读 isBlockMode) / Notifier / PermUtil 真实逻辑。
 
-    /** 快捷面板「拦截」按钮：播拦截动画（单发火箭 + 对接舱），地面抬升后在地面以下揭示功能面板。
-     *  仅当拦截「未开启」时播放动画（动画即「开启拦截 → 发射对接舱与卫星对接」那一次揭示）；
-     *  拦截已开启时直接揭示功能面板，不重复播放动画。 */
-    private void startInterceptFlow() {
-        // 先收起模式/快捷面板（内容层在火箭场景之下，会盖住这幕）
-        hidePanelsExcept(null);
-        if (prefs.isBlockMode()) {
-            // 拦截已开启：直接揭示功能面板，不重复播放对接动画
-            //（动画只在「开启拦截」那一次作为揭示；常驻对接舱由 syncDockModule 保活）
-            interceptFlowActive = false;
-            if (rocketIntro != null) rocketIntro.setVisibility(View.GONE);
-            showInterceptPanel();
-            return;
-        }
-        if (rocketIntro == null) {
-            interceptFlowActive = false;
-            showInterceptPanel();
-            return;
-        }
-        interceptFlowActive = true;
-        final float[] rel = new float[]{-1f, -1f};   // 真实释放点（布局完成后读取）
-        rocketIntro.playInterceptIntro(
-                () -> renderInterceptPanel(),   // onReveal：地面抬升时预渲染（面板仍 GONE）
-                () -> {                          // onEnd：发射完成、火箭离屏 → 收起火箭层，滑出功能面板
-                    interceptFlowActive = false;
-                    // 对接舱与常驻卫星交会对接（作为揭示动画；拦截关闭时由
-                    // disableInterceptBlockMode 撤下，开启时由 syncDockModule 保活）
-                    starMap.enableDockModule(rel[0], rel[1]);
-                    if (rocketIntro != null) rocketIntro.setVisibility(View.GONE);
-                    showInterceptPanel();
-                });
-        // 先启动动画（内部 setVisibility(VISIBLE) 且置 interceptMode）→ 等本帧布局
-        // 完成后再读真实释放点：上轮流程结束时火箭层为 GONE（宽高为 0），直接读会
-        // 拿到 {0,0} 退回默认释放点，造成星图交棒瞬间的位置跳变
-        rocketIntro.post(new Runnable() {
-            @Override public void run() {
-                if (rocketIntro.getWidth() <= 0 || rocketIntro.getHeight() <= 0) {
-                    rocketIntro.post(this);   // 等布局完成
-                    return;
-                }
-                rocketIntro.getSatelliteReleasePoint(rel);
-                if (starMap != null) {
-                    starMap.prepareRendezvous(rel[0], rel[1], rocketIntro.getDeployDelayMs());
-                }
-            }
-        });
-    }
-
-    /** 滑出地下功能面板（从屏幕下方升入）。 */
-    private void showInterceptPanel() {
-        if (interceptUnderground == null) return;
-        renderInterceptPanel();
-        // 仅当拦截已开启且对接舱未在轨时补齐；此处不撤除，避免误删「发射动画」刚揭示的对接舱
-        if (prefs.isBlockMode() && starMap != null && !starMap.isDockModuleEnabled()) {
-            starMap.enableDockModule();
-        }
-        int h = (int) (getResources().getDisplayMetrics().density * 560f + 0.5f);
-        interceptUnderground.setTranslationY(h);
-        interceptUnderground.setAlpha(1f);
-        interceptUnderground.setVisibility(View.VISIBLE);
-        interceptUnderground.animate().setInterpolator(com.polaris.app.util.UiFx.FADE_EASE)
-                .setDuration(420).translationY(0f).start();
-        interceptActive = true;
-        // 应用列表折叠按钮在两种高度下都显示（拦截未开启时面板停在 560dp 也需可见）
-        if (itcBlockFold != null) {
-            itcBlockFold.setVisibility(View.VISIBLE);
-            itcBlockFold.setRotation(itcBlockFolded ? 0f : 180f);
-        }
-        if (itcBlockBody != null)
-            itcBlockBody.setVisibility(itcBlockFolded ? View.GONE : View.VISIBLE);
-        // 拦截模式已启用 → 打开面板自动全屏展开
-        if (prefs.isBlockMode()) setInterceptExpanded(true);
-    }
-
-    /** 收起地下功能面板（下滑出屏），回到模式快捷面板。 */
-    private void hideInterceptPanel() {
-        if (interceptUnderground == null) return;
-        interceptActive = false;
-        // 若处于全屏展开态，先收回高度并恢复状态栏，再下滑隐藏
-        if (itcExpanded) {
-            itcExpanded = false;
-            android.view.ViewGroup.LayoutParams ep = interceptUnderground.getLayoutParams();
-            if (ep != null) {
-                ep.height = (int) (getResources().getDisplayMetrics().density * 560f + 0.5f);
-                interceptUnderground.setLayoutParams(ep);
-            }
-            getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            if (itcExpand != null) itcExpand.setRotation(0f);
-        }
-        // 面板关闭且拦截未开启 → 清理「发射动画」揭示的对接舱（拦截开启则保留常驻）
-        if (starMap != null && !prefs.isBlockMode()) starMap.disableDockModule();
-        int h = (int) (getResources().getDisplayMetrics().density * 560f + 0.5f);
-        interceptUnderground.animate().setInterpolator(com.polaris.app.util.UiFx.FADE_EASE)
-                .setDuration(300).translationY(h)
-                .withEndAction(() -> {
-                    interceptUnderground.setVisibility(View.GONE);
-                    interceptUnderground.setTranslationY(0f);
-                    showModeStage();   // 恢复「以模式开始扫描 / 拦截」快捷面板
-                }).start();
-    }
-
-    /** 面板全屏展开/收起：空心三角按钮触发。展开→浮层占满整屏（状态栏隐藏），再点→收回 560dp。 */
-    private void toggleInterceptExpand() {
-        setInterceptExpanded(!itcExpanded);
-    }
-
-    /** 设定面板全屏展开态：展开→浮层占满整屏（状态栏隐藏）；收起→回到 560dp 底部浮层。 */
-    private void setInterceptExpanded(boolean expand) {
-        if (interceptUnderground == null || itcExpanded == expand) return;
-        itcExpanded = expand;
-        android.view.ViewGroup.LayoutParams p = interceptUnderground.getLayoutParams();
-        if (p == null) p = new android.widget.FrameLayout.LayoutParams(
-                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                android.view.ViewGroup.LayoutParams.MATCH_PARENT);
-        p.height = expand ? android.view.ViewGroup.LayoutParams.MATCH_PARENT
-                : (int) (getResources().getDisplayMetrics().density * 560f + 0.5f);
-        interceptUnderground.setLayoutParams(p);
-        android.view.Window w = getWindow();
-        if (expand) w.addFlags(android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        else w.clearFlags(android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        if (itcExpand != null) itcExpand.setRotation(expand ? 180f : 0f);
-        // 折叠按钮在 560dp 与全屏两种高度下都显示；按 itcBlockFolded 决定应用列表显隐
-        if (itcBlockFold != null) itcBlockFold.setVisibility(View.VISIBLE);
-        if (itcBlockFold != null) itcBlockFold.setRotation(itcBlockFolded ? 0f : 180f);
-        if (itcBlockBody != null)
-            itcBlockBody.setVisibility(itcBlockFolded ? View.GONE : View.VISIBLE);
-    }
-
-    /** 折叠/展开「已拦截的应用」列表（560dp 与全屏两种高度下都可用）。 */
-    private void toggleInterceptBlockFold() {
-        itcBlockFolded = !itcBlockFolded;
-        if (itcBlockBody != null)
-            itcBlockBody.setVisibility(itcBlockFolded ? View.GONE : View.VISIBLE);
-        if (itcBlockFold != null) itcBlockFold.setRotation(itcBlockFolded ? 0f : 180f);
-    }
 
 
-    /** 渲染地下功能面板：实时防护开关 + 已拦截计数 + 内联应用列表 + 所需权限。 */
-    private void renderInterceptPanel() {
-        if (interceptUnderground == null) return;
-        boolean on = prefs.isBlockMode();
-        itcMonitorState.setText(on ? R.string.block_state_on : R.string.block_state_off);
-        // 编程设值开关，避免触发监听器递归
-        itcProgrammatic = true;
-        itcToggle.setChecked(on);
-        itcProgrammatic = false;
-        renderInterceptPerms();
-        itcCount.setText(getString(R.string.block_count, prefs.getBlockedApps().size()));
-        renderInterceptBlockList();   // 内联已拦截应用列表
-    }
 
-    /**
-     * 「被拦截的应用」内联区块：搜索过滤 + 应用列表 + 空态。
-     * 替代原独立弹窗，应用列表直接展开在拦截面板内。
-     */
-    private void renderInterceptBlockList() {
-        java.util.Set<String> apps = prefs.getBlockedApps();
-        if (itcBlockList == null) return;
-        itcBlockList.removeAllViews();
-        LayoutInflater inflater = LayoutInflater.from(this);
-        java.util.List<String> matched = new java.util.ArrayList<>();
-        for (final String pkg : apps) {
-            if (pkg == null || pkg.isEmpty()) continue;
-            if (!itcBlockQuery.isEmpty()
-                    && !appLabel(pkg).toLowerCase().contains(itcBlockQuery)
-                    && !pkg.toLowerCase().contains(itcBlockQuery)) {
-                continue;   // 不匹配搜索词（按应用名或包名）
-            }
-            matched.add(pkg);
-        }
-        if (matched.isEmpty()) {
-            if (itcBlockEmpty != null) {
-                itcBlockEmpty.setVisibility(View.VISIBLE);
-                itcBlockEmpty.setText(itcBlockQuery.isEmpty()
-                        ? R.string.block_list_empty : R.string.block_search_empty);
-            }
-            return;
-        }
-        if (itcBlockEmpty != null) itcBlockEmpty.setVisibility(View.GONE);
-        for (final String pkg : matched) {
-            View item = inflater.inflate(R.layout.item_blocked_app, itcBlockList, false);
-            ((TextView) item.findViewById(R.id.blockedPkg)).setText(appLabel(pkg));
-            ((TextView) item.findViewById(R.id.blockedReason)).setText(pkg);
-            item.findViewById(R.id.btnBlockAllow).setOnClickListener(v -> {
-                prefs.removeBlockedApp(pkg);
-                Toast.makeText(this, R.string.file_allowed_toast, Toast.LENGTH_SHORT).show();
-                renderInterceptPanel();
-            });
-            item.findViewById(R.id.btnBlockDelete).setOnClickListener(v -> {
-                prefs.removeBlockedApp(pkg);
-                renderInterceptPanel();
-                launchUninstall(pkg);
-            });
-            itcBlockList.addView(item);
-        }
-    }
 
-    /** 渲染「所需权限」栏目：无障碍 / 悬浮窗 / 使用情况访问，已授权则不显示。 */
-    private void renderInterceptPerms() {
-        if (itcPermList == null) return;
-        itcPermList.removeAllViews();
-        LayoutInflater inflater = LayoutInflater.from(this);
-        if (!PermUtil.isAccessibilityEnabled(this)) {
-            itcPermList.addView(buildInterceptPermRow(inflater, R.drawable.ic_perm_accessibility,
-                    getString(R.string.perm_accessibility_title), getString(R.string.perm_accessibility_desc),
-                    () -> PermUtil.openAccessibilitySettings(this)));
-        }
-        if (!PermUtil.canDrawOverlays(this)) {
-            itcPermList.addView(buildInterceptPermRow(inflater, R.drawable.ic_perm_overlay,
-                    getString(R.string.perm_overlay_title), getString(R.string.perm_overlay_desc),
-                    () -> PermUtil.openOverlaySettings(this)));
-        }
-        if (!PermUtil.hasUsageAccess(this)) {
-            itcPermList.addView(buildInterceptPermRow(inflater, R.drawable.ic_perm_usage,
-                    getString(R.string.perm_usage_title), getString(R.string.perm_usage_desc),
-                    () -> PermUtil.openUsageAccessSettings(this)));
-        }
-        // 全部已授权 → 隐藏「所需权限」标题与列表区块；否则显示
-        boolean anyMissing = itcPermList.getChildCount() > 0;
-        int vis = anyMissing ? View.VISIBLE : View.GONE;
-        if (itcPermTitle != null) itcPermTitle.setVisibility(vis);
-        itcPermList.setVisibility(vis);
-    }
 
-    private View buildInterceptPermRow(LayoutInflater inflater, int iconRes,
+
+
+
+
+
+     View buildInterceptPermRow(LayoutInflater inflater, int iconRes,
                                        String title, String desc, Runnable onGrant) {
         View row = inflater.inflate(R.layout.item_perm_row, itcPermList, false);
         ((android.widget.ImageView) row.findViewById(R.id.permIcon)).setImageResource(iconRes);
@@ -1353,145 +1161,14 @@ public class MainActivity extends BaseActivity {
         return row;
     }
 
-    /** 开关被用户拨动：开 → 先要通知权限再启用；关 → 直接停用守护。 */
-    private void onInterceptToggle(boolean on) {
-        if (itcProgrammatic) return;
-        if (on) {
-            ensureInterceptNotificationThenEnable();
-        } else {
-            disableInterceptBlockMode();
-        }
-    }
 
-    private void ensureInterceptNotificationThenEnable() {
-        if (Build.VERSION.SDK_INT >= 33
-                && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQ_NOTIFICATION);
-            return;
-        }
-        enableInterceptBlockMode();
-    }
 
-    private void enableInterceptBlockMode() {
-        // 拦截依赖守护服务：仅 Accessibility / Shizuku / Root 模式可开启
-        if (!prefs.setBlockMode(true)) {
-            Toast.makeText(this, R.string.block_need_deep_mode, Toast.LENGTH_SHORT).show();
-            renderInterceptPanel();   // 开关回弹到真实状态
-            return;
-        }
-        Notifier.updateBlockNotification(this);
-        Toast.makeText(this, R.string.block_on_toast, Toast.LENGTH_SHORT).show();
-        renderInterceptPanel();
-        syncDockModule();   // 拦截开启 → 对接舱与卫星同轨常驻
-    }
 
-    private void disableInterceptBlockMode() {
-        prefs.setBlockMode(false);
-        Notifier.cancelBlockNotification(this);
-        Toast.makeText(this, R.string.block_off_toast, Toast.LENGTH_SHORT).show();
-        renderInterceptPanel();
-        starMap.disableDockModule();   // 拦截关闭 → 撤下对接舱
-    }
 
-    /**
-     * 对接舱与拦截开关同步：开启且尚未在轨 → 启用（与常驻卫星同轨、沿轨跟随）；
-     * 关闭 → 撤下。覆盖「先前会话开启过拦截、本次直接进面板」的场景。
-     */
-    private void syncDockModule() {
-        if (starMap == null) return;
-        if (prefs.isBlockMode()) {
-            starMap.enableDockModule();   // 已启用时不重置交会相位
-        } else {
-            starMap.disableDockModule();
-        }
-    }
 
-    /**
-     * 进入/重建后按当前模式恢复星图常驻轨道：深层扫描 → 卫星常驻；拦截开启 → 对接舱常驻。
-     * 修复「退出重进后即使是深层扫描也不显示卫星和轨道线」——轨道原本只在发射动画
-     * onEnd 启用，进程重建不重播动画，故需在此按持久化的模式状态补恢复。
-     */
-    private void restoreResidentOrbits() {
-        if (starMap == null) return;
-        if (starMap.getWidth() <= 0 || starMap.getHeight() <= 0) {
-            starMap.post(this::restoreResidentOrbits);   // 等布局完成再锚定（避免以 0 尺寸锚定跳跃）
-            return;
-        }
-        if (isDeepMode()) {
-            if (!starMap.isSatelliteOrbitEnabled()) {
-                float W = starMap.getWidth(), H = starMap.getHeight();
-                starMap.enableSatelliteOrbit(W * 0.72f, H * 0.12f);   // 默认释放点（顶部偏右）
-            }
-        } else {
-            starMap.disableSatelliteOrbit();
-        }
-        syncDockModule();   // 拦截开启 → 对接舱常驻；关闭 → 撤下
-    }
 
-    /** 应用选择器：多选已安装应用加入拦截名单（仅新增，不自动移除已有条目）。 */
-    private void showBlockAppPicker() {
-        PackageManager pm = getPackageManager();
-        Intent main = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER);
-        java.util.List<android.content.pm.ResolveInfo> infos = pm.queryIntentActivities(main, 0);
-        java.util.List<String[]> apps = new java.util.ArrayList<>();   // {label, pkg}
-        java.util.Set<String> blocked = prefs.getBlockedApps();
-        for (android.content.pm.ResolveInfo ri : infos) {
-            String p = ri.activityInfo != null ? ri.activityInfo.packageName : null;
-            if (p == null || p.equals(getPackageName())) continue;
-            boolean dup = false;
-            for (String[] a : apps) if (a[1].equals(p)) { dup = true; break; }
-            if (dup) continue;
-            CharSequence l = ri.loadLabel(pm);
-            apps.add(new String[]{l != null ? l.toString() : p, p});
-        }
-        if (apps.isEmpty()) return;
-        java.util.Collections.sort(apps, (a, b) -> a[0].compareToIgnoreCase(b[0]));
-        final int n = apps.size();
-        String[] labels = new String[n];
-        final String[] pkgs = new String[n];
-        final boolean[] checked = new boolean[n];
-        for (int i = 0; i < n; i++) {
-            labels[i] = apps.get(i)[0];
-            pkgs[i] = apps.get(i)[1];
-            checked[i] = blocked.contains(pkgs[i]);
-        }
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.block_add_apps)
-                .setMultiChoiceItems(labels, checked, (dialog, which, isChecked) ->
-                        checked[which] = isChecked)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                    boolean added = false;
-                    for (int i = 0; i < n; i++) {
-                        if (checked[i] && !blocked.contains(pkgs[i])) {
-                            prefs.addBlockedApp(pkgs[i]);
-                            added = true;
-                        }
-                    }
-                    if (added) renderInterceptPanel();
-                })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
-    }
 
-    private String appLabel(String pkg) {
-        try {
-            android.content.pm.ApplicationInfo ai =
-                    getPackageManager().getApplicationInfo(pkg, 0);
-            return getPackageManager().getApplicationLabel(ai).toString();
-        } catch (Exception e) {
-            return pkg;
-        }
-    }
 
-    private void launchUninstall(String pkg) {
-        try {
-            startActivity(new Intent(Intent.ACTION_DELETE, Uri.parse("package:" + pkg)));
-        } catch (Exception e) {
-            Toast.makeText(this, R.string.file_action_failed, Toast.LENGTH_LONG).show();
-        }
-    }
 
     /** 竖屏选择流程结束/复位：隐藏按钮与详细面板并还原两态状态（文字、位移、选中记录）。 */
     private void resetPickModeButton() {
@@ -1601,7 +1278,7 @@ public class MainActivity extends BaseActivity {
 
     /** 模式阶段入口：已有激活模式 → 快捷面板（以模式开始扫描/重新配置）；
      *  竖屏无激活模式 → 左下角「选择模式以开始扫描」按钮；横屏无激活模式 → 模式列表。 */
-    private void showModeStage() {
+     void showModeStage() {
         // 运行时返回路径不读启动 extras：reconfigure / from_onboarding 只属于冷启动静态决定
         // （onCreate 已消费）。曾因 getIntent() 整个会话残留 from_onboarding=true，
         // 结果页「返回模式选择」→ 此处误入无激活模式分支，快捷面板「以 X 开始扫描」不出现。
@@ -3617,7 +3294,7 @@ public class MainActivity extends BaseActivity {
 
     private void slideOutLeft(View v) { com.polaris.app.util.UiFx.slideOutLeft(v); }
 
-    private void hidePanelsExcept(View keep) {
+     void hidePanelsExcept(View keep) {
         View[] panels = {modeList, modeResume, btnPickMode, configScope, configFolders, resultArea};
         for (View p : panels) {
             if (p != null && p != keep) {
@@ -3735,7 +3412,7 @@ public class MainActivity extends BaseActivity {
 
     // ---------- 立即扫描（应用级，机械判定） ----------
 
-    private boolean isDeepMode() {
+     boolean isDeepMode() {
         return prefs.isDeepScanMode();
     }
 
