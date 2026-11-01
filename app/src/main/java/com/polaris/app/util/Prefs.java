@@ -97,6 +97,48 @@ public class Prefs {
         sp.edit().putBoolean(KEY_ANIM_TEST, on).apply();
     }
 
+    // ---------- 开发者模式 ----------
+
+    private static final String KEY_DEV_MODE = "developer_mode";
+
+    /**
+     * 开发者模式：在「应用信息」页连续点击版本号 5 次解锁，解锁后设置页底部出现
+     * 「开发者模式」分区，可逐项测试单个功能。持久化（跨进程保留），与动画测试模式的
+     * 会话标记不同——开发者模式是用户显式开关的状态。
+     */
+    public boolean isDeveloperMode() {
+        return sp.getBoolean(KEY_DEV_MODE, false);
+    }
+
+    public void setDeveloperMode(boolean on) {
+        sp.edit().putBoolean(KEY_DEV_MODE, on).apply();
+    }
+
+    // ---------- 星图种子（开发者可调，重启后生效） ----------
+
+    private static final String KEY_STAR_SEED = "star_map_seed";
+    private static final long DEFAULT_STAR_SEED = 0x501A5EEDL;
+
+    /** 星图种子：决定整片星域的恒星布局；默认 0x501A5EED。开发者可在开发者工具里修改。 */
+    public long getStarMapSeed() {
+        return sp.getLong(KEY_STAR_SEED, DEFAULT_STAR_SEED);
+    }
+
+    public void setStarMapSeed(long seed) {
+        sp.edit().putLong(KEY_STAR_SEED, seed).apply();
+    }
+
+    public boolean hasCustomStarSeed() {
+        return sp.contains(KEY_STAR_SEED);
+    }
+
+    // ---------- 开发者：清空全部设置（重置） ----------
+
+    /** 清空所有 SharedPreferences（含开发者模式），重置到出厂默认；调用方负责随后重启应用。 */
+    public void clearAllSettings() {
+        sp.edit().clear().apply();
+    }
+
     public String getLastForegroundPkg() {
         return sp.getString(KEY_LAST_FOREGROUND, null);
     }

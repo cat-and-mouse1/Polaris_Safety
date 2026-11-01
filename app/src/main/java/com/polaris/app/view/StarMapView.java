@@ -152,6 +152,18 @@ public class StarMapView extends View {
     // ---------- 固定星图（单一随机种子 + 全屏随机散布 + 动态适配缩放） ----------
     /** 星图种子：整个星域布局只由它决定（同一颗星、同一屏 → 永远同一个落点）。 */
     private static final long MAP_SEED = 0x501A5EEDL;
+
+    /**
+     * 运行时星图种子：默认沿用 {@link #MAP_SEED}，开发者模式可在开发者工具里改
+     * （写 SharedPreferences，重启后重新布局时生效）。
+     */
+    private long mapSeed() {
+        try {
+            return new com.polaris.app.util.Prefs(getContext()).getStarMapSeed();
+        } catch (Throwable t) {
+            return MAP_SEED;
+        }
+    }
     /** 动态适配缩放：让全部恒星都落进「可视区（避开抽屉）」所需的缩放。 */
     private float fitScale = 1f;
     /**
@@ -534,7 +546,7 @@ public class StarMapView extends View {
         }
         int cells = cols * rows;
         float cellW = gw / cols, cellH = gh / rows;
-        Random rnd = new Random(MAP_SEED ^ ((long) w << 11) ^ ((long) h * 7L));
+        Random rnd = new Random(mapSeed() ^ ((long) w << 11) ^ ((long) h * 7L));
         // 单元分配：四角优先（保证四角有星，否则整片看着像缩在一角），其余单元随机抽
         int[] cand = {0, cols - 1, (rows - 1) * cols, cells - 1};
         ArrayList<Integer> corners = new ArrayList<>(4);
@@ -905,7 +917,7 @@ public class StarMapView extends View {
         scale = 1f;
         // 固定星图：全部随机源只由 MAP_SEED 决定（掺屏幕尺寸，屏幕不同才有不同构图），
         // 不再用当前时间播种——否则每轮扫描的星尘/背景亮星都会重新摇一遍。
-        scanRandom.setSeed(MAP_SEED ^ ((long) w << 17) ^ ((long) h << 3));
+        scanRandom.setSeed(mapSeed() ^ ((long) w << 17) ^ ((long) h << 3));
         scanFieldStart = SystemClock.uptimeMillis();
         if (zoomListener != null) zoomListener.onZoom(scale);
         postInvalidate();

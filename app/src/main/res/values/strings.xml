@@ -373,6 +373,83 @@
     <string name="anim_test_on">动画测试模式已开启：扫描进度与图标旋转将按固定节奏完整播放一遍。</string>
     <string name="anim_test_off">动画测试模式已关闭。</string>
 
+    <!-- ============ 开发者模式 ============ -->
+    <string name="dev_section">开发者模式</string>
+    <string name="dev_mode_on">开发者模式已开启：请到「设置」底部查看开发者分区。</string>
+    <string name="dev_mode_off">开发者模式已关闭。</string>
+    <string name="dev_anim_test">动画测试模式</string>
+    <string name="dev_anim_test_desc">扫描进度与图标旋转按固定节奏完整播放一遍，无视实际扫描速度。</string>
+    <string name="dev_crash">触发崩溃测试</string>
+    <string name="dev_crash_desc">主动抛出未捕获异常，验证崩溃捕获器写日志并提示。</string>
+    <string name="dev_notify">测试通知</string>
+    <string name="dev_notify_desc">推送一条测试通知，验证通知渠道与展示。</string>
+    <string name="dev_scan">强制后台扫描</string>
+    <string name="dev_scan_desc">立即触发一次应用扫描（等同于每日定时扫描）。</string>
+    <string name="dev_close">关闭开发者模式</string>
+    <string name="dev_notify_title">通知测试</string>
+    <string name="dev_notify_text">这是一条来自开发者模式的测试通知。</string>
+
+    <!-- ============ 开发者工具子页 ============ -->
+    <string name="dev_tools_entry">开发者工具</string>
+    <string name="dev_tools_entry_desc">快速测试、结果页示例、动画预览、星图种子、病毒库调试、日志与诊断、重置。</string>
+    <string name="dev_tools_title">开发者工具</string>
+    <string name="dev_card_quicktests">快速测试</string>
+    <string name="dev_card_ui_anim">界面与动画</string>
+    <string name="dev_open_result">打开结果页（示例数据）</string>
+    <string name="dev_open_result_desc">注入一组示例风险条目并打开扫描结果页，验证布局与处置入口。</string>
+    <string name="dev_anim_preview">动画预览</string>
+    <string name="dev_anim_preview_desc">单独观看扫描进度环、图标旋转等应用内动画。</string>
+    <string name="dev_star_seed">修改星图种子</string>
+    <string name="dev_star_seed_desc">改变星域恒星布局；修改后重启应用生效。</string>
+    <string name="dev_card_virusdb">病毒库调试</string>
+    <string name="dev_clear_cache_region">清空本地缓存（区域库）</string>
+    <string name="dev_clear_cache_point">清空本地缓存（点库）</string>
+    <string name="dev_clear_cache_desc">删除本地 iodb 文件，下次进入将重新下载。</string>
+    <string name="dev_force_redownload">强制重新下载</string>
+    <string name="dev_force_redownload_desc">触发区域库与点库的刷新（含增量/全量）。</string>
+    <string name="dev_virusdb_status">查看库状态</string>
+    <string name="dev_virusdb_status_desc">显示本地区域库 / 点库版本与状态。</string>
+    <string name="dev_card_logs">日志与诊断</string>
+    <string name="dev_view_crash_log">查看崩溃日志</string>
+    <string name="dev_view_crash_log_desc">读取 cache/polaris_crash.log（全局崩溃捕获器输出）。</string>
+    <string name="dev_write_test_log">写入测试行为日志</string>
+    <string name="dev_write_test_log_desc">写入一条 BehaviorLog 记录，验证落盘与展示。</string>
+    <string name="dev_card_reset">重置与清理</string>
+    <string name="dev_reset_settings">清空所有设置并重启</string>
+    <string name="dev_reset_settings_desc">恢复出厂默认（含开发者模式），随后重启应用。</string>
+    <string name="dev_clear_scan_cache">清空扫描结果缓存</string>
+    <string name="dev_clear_scan_cache_desc">清除最近一次扫描结果（结果页缓存）。</string>
+    <string name="dev_star_seed_title">星图种子</string>
+    <string name="dev_star_seed_hint">输入种子（十进制或 0x 十六进制）</string>
+    <string name="dev_star_seed_apply">应用（重启生效）</string>
+    <string name="dev_star_seed_reset">恢复默认</string>
+    <string name="dev_star_seed_toast">星图种子已保存，重启后生效</string>
+    <string name="dev_star_seed_invalid">种子格式无效</string>
+    <string name="dev_star_seed_default">默认：0x501A5EED</string>
+    <string name="dev_crash_log_empty">崩溃日志为空（尚未发生过崩溃）。</string>
+    <string name="dev_log_written">已写入一条测试行为日志。</string>
+    <string name="dev_virusdb_cleared">已清空本地病毒库缓存。</string>
+    <string name="dev_virusdb_redownload_started">已触发病毒库重新下载。</string>
+    <string name="dev_virusdb_redownload_done">病毒库重新下载完成（v%s）。</string>
+    <string name="dev_virusdb_redownload_error">病毒库重新下载失败：%s</string>
+    <string name="dev_reset_confirm_title">清空所有设置？</string>
+    <string name="dev_reset_confirm_msg">将恢复出厂默认并重启应用，此操作不可撤销。</string>
+    <string name="dev_scan_cache_cleared">扫描结果缓存已清空。</string>
+    <string name="dev_anim_scan_progress">扫描进度环</string>
+    <string name="dev_anim_icon_spin">图标旋转</string>
+    <string name="dev_watch_home">观看主页星图（带动画）</string>
+    <string name="dev_watch_onboarding">观看开场动画</string>
+    <string name="dev_play">播放</string>
+    <string name="dev_anim_hint_in_home">以下动画在主页真实场景中单播一次（播完自动收尾，不跑真实扫描）。</string>
+    <string name="dev_anim_observatory">天文台入场</string>
+    <string name="dev_anim_rocket">火箭入场</string>
+    <string name="dev_anim_launch">火箭发射 → 卫星入轨</string>
+    <string name="dev_anim_dock">火箭 → 载荷分离 → 卫星对接</string>
+    <string name="dev_anim_reentry">卫星再入 → 天文台</string>
+    <string name="dev_anim_scan_full">扫描动画（星图 + 恒星点亮 + 进度环 + 图标）</string>
+    <string name="dev_anim_icon">图标收起 / 展开</string>
+    <string name="dev_anim_exit">退出预览</string>
+
     <!-- ============ AI 引擎页 DeepSeek ============ -->
     <string name="ai_deepseek_hint">本应用 AI 默认使用 DeepSeek，如需使用 API 请点击以下链接获取</string>
     <string name="ai_deepseek_site">https://platform.deepseek.com</string>
@@ -521,7 +598,7 @@
     <string name="virusdb_region_name">Region 库（云端全量 · 需下载）</string>
     <string name="virusdb_point_name">Point 库（内置精选 · 离线即用）</string>
     <!-- 病毒库规模介绍（静态，描述库本身的内容量，非当前已加载条数） -->
-    <string name="virusdb_region_scale">约 161 万条威胁情报</string>
+    <string name="virusdb_region_scale">约 272 万条威胁情报</string>
     <string name="virusdb_point_scale">约 7.5 万条威胁情报</string>
     <string name="virusdb_region_desc">全量版，精确哈希拦截（357 MB）</string>
     <string name="virusdb_point_desc">精选版，轻量内置，离线可用</string>

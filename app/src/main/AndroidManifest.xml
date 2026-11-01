@@ -108,6 +108,18 @@
             android:exported="false"
             android:theme="@style/Theme.Polaris" />
 
+        <!-- 开发者工具：从「开发者模式」分区进入，逐项测试单功能 -->
+        <activity
+            android:name=".DevToolsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Polaris" />
+
+        <!-- 动画预览：单独观看应用内各类动画 -->
+        <activity
+            android:name=".AnimationPreviewActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Polaris" />
+
         <!-- 应用监控：查看所有应用并选择监控，实时检查异常行为 -->
         <activity
             android:name=".AppMonitorActivity"

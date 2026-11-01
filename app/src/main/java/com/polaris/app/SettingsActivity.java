@@ -123,6 +123,9 @@ public class SettingsActivity extends BaseActivity {
         // 通知子界面入口：三类通知开关在独立页面
         findViewById(R.id.notifyCard).setOnClickListener(v ->
                 startActivity(new Intent(this, SettingsNotificationActivity.class)));
+
+        // 开发者模式分区：5 次点击版本号解锁后显示于设置底部
+        setupDeveloperMode();
     }
 
     /**
@@ -274,6 +277,28 @@ public class SettingsActivity extends BaseActivity {
         });
     }
 
+    /**
+     * 开发者模式分区：绑定各单功能测试入口，可见性按 {@link Prefs#isDeveloperMode()} 决定。
+     * 在 onCreate 与 onResume 都调用——从「应用信息」页连点版本号解锁后返回本页时，
+     * onResume 能即时显示该分区。
+     */
+    private void setupDeveloperMode() {
+        View devSection = findViewById(R.id.devSection);
+        boolean dev = prefs.isDeveloperMode();
+        devSection.setVisibility(dev ? View.VISIBLE : View.GONE);
+
+        // 开发者工具：进入更丰富的开发者选项子页（快速测试 / 界面与动画 / 病毒库 / 日志 / 重置 / 星图种子）
+        findViewById(R.id.devToolsButton).setOnClickListener(v ->
+                startActivity(new Intent(this, DevToolsActivity.class)));
+
+        // 关闭开发者模式：隐藏分区并持久化关闭
+        findViewById(R.id.devCloseButton).setOnClickListener(v -> {
+            prefs.setDeveloperMode(false);
+            devSection.setVisibility(View.GONE);
+            Toast.makeText(this, R.string.dev_mode_off, Toast.LENGTH_SHORT).show();
+        });
+    }
+
 
     // ---------- 语言切换 ----------
 
@@ -396,6 +421,10 @@ public class SettingsActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        // 开发者模式分区可见性（可能刚从「应用信息」页连点版本号解锁返回）
+        View devSection = findViewById(R.id.devSection);
+        boolean dev = prefs.isDeveloperMode();
+        devSection.setVisibility(dev ? View.VISIBLE : View.GONE);
         languageCurrentText.setText(currentLanguageName());
         applyBadgeSize();
         // 检测配置卡片：AI / ML 状态两行直接显示在设置主页（开启=主题色，关闭=次要色）

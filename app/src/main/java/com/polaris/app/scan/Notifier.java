@@ -267,4 +267,24 @@ public final class Notifier {
         } catch (SecurityException ignored) {
         }
     }
+
+    // ---------- 开发者模式测试通知 ----------
+
+    /** 开发者模式测试通知：忽略各开关，始终推送一条测试通知以验证渠道与展示（需通知权限）。 */
+    public static void notifyDevTest(Context context) {
+        ensureChannels(context);
+        if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return;
+        Notification n = new NotificationCompat.Builder(context, CHANNEL_SCAN)
+                .setSmallIcon(R.drawable.ic_shield)
+                .setContentTitle(context.getString(R.string.dev_notify_title))
+                .setContentText(context.getString(R.string.dev_notify_text))
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(
+                        context.getString(R.string.dev_notify_text)))
+                .setAutoCancel(true)
+                .build();
+        try {
+            NotificationManagerCompat.from(context).notify(9001, n);
+        } catch (SecurityException ignored) {
+        }
+    }
 }

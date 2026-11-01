@@ -729,6 +729,35 @@ public final class IocDatabase {
         }
     }
 
+    /**
+     * 开发者工具：清空某类型病毒库的本地缓存（bin / 增量包 / JSON 缓存 / 残留 part 与 sig）。
+     * 仅删文件，不动网络；随后可调用 {@link #refresh(RefreshCallback)} 强制重新下载。
+     */
+    public static void clearLocalCache(Context context, String type) {
+        File dir = context.getFilesDir();
+        String bin = "point".equals(type) ? BIN_NAME_POINT : BIN_NAME;
+        String cache = "point".equals(type) ? CACHE_NAME_POINT : CACHE_NAME;
+        String prefix = "point".equals(type) ? "iodb_point-delta-" : "iodb-delta-";
+        deleteQuietly(new File(dir, bin));
+        deleteQuietly(new File(dir, bin + ".sig"));
+        deleteQuietly(new File(dir, cache));
+        deleteQuietly(new File(dir, cache + ".part"));
+        deleteQuietly(new File(dir, cache + ".part.meta"));
+        File[] deltas = dir.listFiles((d, n) -> n.startsWith(prefix) && n.endsWith(".bin"));
+        if (deltas != null) {
+            for (File f : deltas) {
+                deleteQuietly(f);
+                deleteQuietly(new File(dir, f.getName() + ".sig"));
+            }
+        }
+    }
+
+    private static void deleteQuietly(File f) {
+        if (f != null && f.exists() && !f.delete()) {
+            Log.w(TAG, "Failed to delete IOC cache file: " + f.getName());
+        }
+    }
+
     public static PartialDownload peekPartialDownload(Context context, String type) {
         String cacheName = "point".equals(type) ? CACHE_NAME_POINT : CACHE_NAME;
         // 二进制优先：其 .part 也是有效的下载进度来源

@@ -71,14 +71,15 @@ public class AboutActivity extends BaseActivity {
         TextView versionText = findViewById(R.id.versionText);
         versionText.setText(getString(R.string.about_version, currentVersion, versionCode));
 
-        // 隐藏彩蛋：连续点击版本号 5 次，切换「动画测试模式」
+        // 隐藏彩蛋：连续点击版本号 5 次，解锁 / 关闭「开发者模式」（解锁后设置页底部出现
+        // 开发者模式分区，可逐项测试单个功能；原动画测试开关已移入该分区）
         final int[] versionTaps = {0};
         versionText.setOnClickListener(v -> {
             if (++versionTaps[0] < 5) return;
             versionTaps[0] = 0;
-            boolean on = !prefs.isAnimTestMode();
-            prefs.setAnimTestMode(on);
-            Toast.makeText(this, on ? R.string.anim_test_on : R.string.anim_test_off,
+            boolean on = !prefs.isDeveloperMode();
+            prefs.setDeveloperMode(on);
+            Toast.makeText(this, on ? R.string.dev_mode_on : R.string.dev_mode_off,
                     Toast.LENGTH_LONG).show();
         });
 

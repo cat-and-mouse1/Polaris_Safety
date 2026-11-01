@@ -648,7 +648,189 @@ public class MainActivity extends BaseActivity {
 
         setupPullDown();
 
+        // 开发者动画预览：从「动画预览」清单跳转过来时在主页单播指定动画（不跑真实扫描）
+        maybeStartAnimDemo();
+
         Shizuku.addRequestPermissionResultListener(shizukuResultListener);
+    }
+
+    // ---------- 开发者动画预览（设置 → 开发者模式 → 动画预览） ----------
+
+    /** Intent extra：要单播的动画 demo key（见 {@link #startAnimDemo}）。 */
+    public static final String EXTRA_ANIM_DEMO = "anim_demo";
+
+    private ViewGroup animDemoOverlay;      // 预览遮罩：透明但吞掉全部触摸，退出按钮挂在其上
+    private View animDemoExitBtn;
+
+    /** 动画预览入口：藏全部交互控件进入纯净预览态，布局就绪后单播动画，播完浮出退出按钮。 */
+    private void maybeStartAnimDemo() {
+        String demo = getIntent() == null ? null : getIntent().getStringExtra(EXTRA_ANIM_DEMO);
+        if (demo == null) return;
+        getIntent().removeExtra(EXTRA_ANIM_DEMO);   // 防旋转重建后重播
+        enterAnimDemoMode(demo);
+    }
+
+    /** 进入预览态：主页只留动画场景，所有可点击控件隐藏、手势锁定、全屏遮罩吞触摸。 */
+    private void enterAnimDemoMode(String demo) {
+        hideViewById(R.id.stageArea);
+        hideViewById(R.id.modeList);
+        hideViewById(R.id.modeResume);
+        hideViewById(R.id.btnDrawer);
+        hideViewById(R.id.resultEntryBar);
+        hideViewById(R.id.scanProgressPanel);
+        if (zoomSlider != null) zoomSlider.setVisibility(View.GONE);
+        if (btnPickMode != null) btnPickMode.setVisibility(View.GONE);
+        if (btnPickBack != null) btnPickBack.setVisibility(View.GONE);
+        starMap.setInteractive(false);
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        buildAnimDemoOverlay();
+        starMap.post(new Runnable() {
+            @Override public void run() {
+                if (starMap.getWidth() <= 0 || starMap.getHeight() <= 0) {
+                    starMap.post(this);   // 等首帧布局完成（星图散布 / 火箭层都要真实尺寸）
+                    return;
+                }
+                startAnimDemo(demo);
+            }
+        });
+    }
+
+    private void hideViewById(int id) {
+        View v = findViewById(id);
+        if (v != null) v.setVisibility(View.GONE);
+    }
+
+    /** 全屏透明遮罩：动画期间吞掉全部触摸（不留任何可点控件），退出按钮隐藏待播完浮现。 */
+    private void buildAnimDemoOverlay() {
+        android.widget.FrameLayout content =
+                (android.widget.FrameLayout) findViewById(android.R.id.content);
+        android.widget.FrameLayout overlay = new android.widget.FrameLayout(this);
+        overlay.setBackgroundColor(0x00000000);   // 透明：不遮动画，只负责吞触摸
+        com.google.android.material.button.MaterialButton exit =
+                new com.google.android.material.button.MaterialButton(this);
+        exit.setText(R.string.dev_anim_exit);
+        android.widget.FrameLayout.LayoutParams lp = new android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.WRAP_CONTENT,
+                android.widget.FrameLayout.LayoutParams.WRAP_CONTENT,
+                android.view.Gravity.BOTTOM | android.view.Gravity.CENTER_HORIZONTAL);
+        lp.bottomMargin = (int) (48 * getResources().getDisplayMetrics().density + 0.5f);
+        exit.setOnClickListener(v -> finish());   // 退出 = 关掉预览实例，回动画清单页
+        exit.setAlpha(0f);
+        exit.setTranslationY(40f);
+        overlay.addView(exit, lp);
+        content.addView(overlay, new android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
+        animDemoOverlay = overlay;
+        animDemoExitBtn = exit;
+    }
+
+    /** 动画播完：唯一可点控件「退出预览」淡入浮现。 */
+    private void showAnimDemoExit() {
+        if (animDemoExitBtn == null) return;
+        animDemoExitBtn.animate().alpha(1f).translationY(0f)
+                .setDuration(300)
+                .setInterpolator(com.polaris.app.util.UiFx.FADE_EASE).start();
+    }
+
+    private void startAnimDemo(String demo) {
+        switch (demo) {
+            case "observatory":
+                observatoryIntro.playIntro(this::showAnimDemoExit);
+                break;
+            case "rocket":
+                rocketIntro.playIntro(this::showAnimDemoExit);
+                break;
+            case "launch": demoLaunch(); break;
+            case "dock": demoDock(); break;
+            case "reentry": demoReentry(); break;
+            case "scan": demoScan(); break;
+            case "icon": demoIcon(); break;
+            default: showAnimDemoExit(); break;
+        }
+    }
+
+    /** 火箭发射 → 卫星入轨（与真实深扫入场同链：点火升空 → 记释放点 → 轨道常驻）。 */
+    private void demoLaunch() {
+        if (rocketIntro == null) { showAnimDemoExit(); return; }
+        rocketIntro.playLaunch(() -> {
+            float[] rp = new float[2];
+            rocketIntro.getSatelliteReleasePoint(rp);
+            starMap.resetScanField();
+            starMap.enableSatelliteOrbit(rp[0], rp[1]);
+            showAnimDemoExit();
+        });
+    }
+
+    /** 火箭 → 载荷分离 → 卫星交会对接（拦截模式揭示动画的动画部分，不带业务面板）。 */
+    private void demoDock() {
+        if (rocketIntro == null) { showAnimDemoExit(); return; }
+        final float[] rel = new float[]{-1f, -1f};
+        rocketIntro.playInterceptIntro(
+                () -> { },                       // onReveal：无功能面板要预渲染
+                () -> {                          // onEnd：发射完成 → 对接舱在轨，收起火箭层
+                    starMap.enableDockModule(rel[0], rel[1]);
+                    rocketIntro.setVisibility(View.GONE);
+                    showAnimDemoExit();
+                });
+        // 与真实链一致：先启动动画，等火箭层布局完成后再读真实释放点，预调度交会
+        rocketIntro.post(new Runnable() {
+            @Override public void run() {
+                if (rocketIntro.getWidth() <= 0 || rocketIntro.getHeight() <= 0) {
+                    rocketIntro.post(this);
+                    return;
+                }
+                rocketIntro.getSatelliteReleasePoint(rel);
+                starMap.prepareRendezvous(rel[0], rel[1], rocketIntro.getDeployDelayMs());
+            }
+        });
+    }
+
+    /** 卫星再入 → 天文台入场（真实「退出深扫」的回程链）。 */
+    private void demoReentry() {
+        starMap.enableSatelliteOrbit(starMap.getWidth() * 0.5f, starMap.getHeight() * 0.35f);
+        starMap.startSatelliteReentry(() ->
+                observatoryIntro.playIntro(this::showAnimDemoExit));
+    }
+
+    /** 完整扫描动画：星图扫描态 + 恒星点亮 + 进度环接力 + 图标旋转，3.2s 播完自动收尾。 */
+    private void demoScan() {
+        expandHomeIcon();
+        homeRings.setScanning(true);
+        homeRings.setProgress(0f);
+        startIconSpin();
+        starMap.resetScanField();
+        final int total = 48;
+        starMap.beginScanField(total);
+        animTest.start(homeRings);
+        final long step = com.polaris.app.util.AnimTestProgress.DURATION_MS / total;
+        for (int i = 0; i < total; i++) {
+            final int idx = i;
+            homeRings.postDelayed(() -> starMap.revealAppStar(
+                    "demo.app." + idx, "Demo " + (idx + 1),
+                    40_000_000L + idx * 3_000_000L,
+                    (idx % 11 == 0) ? 3 : (idx % 4 == 0) ? 2 : (idx % 3 == 0) ? 1 : 0),
+                    i * step);
+        }
+        homeRings.postDelayed(() -> {
+            homeRings.setScanning(false);
+            homeRings.setProgress(1f);
+            stopIconSpin();
+            starMap.resetScanField();   // 演示星不留在星图上
+            collapseHomeIcon();
+            showAnimDemoExit();
+        }, com.polaris.app.util.AnimTestProgress.DURATION_MS + 150);
+    }
+
+    /** 图标收起 / 展开 + 旋转（HomeIconFx）。 */
+    private void demoIcon() {
+        expandHomeIcon();
+        startIconSpin();
+        homeRings.postDelayed(() -> {
+            stopIconSpin();
+            collapseHomeIcon();
+            showAnimDemoExit();
+        }, 1600);
     }
 
     // ---------- 工具箱面板：打开 / 关闭 ----------
