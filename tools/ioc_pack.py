@@ -177,17 +177,27 @@ def read_head(path):
     return version, updated, source
 
 
-def compile_db(src, dst, limit=0, base_version=0):
+def compile_db(src, dst, limit=0, base_version=0,
+               db_version=None, updated_at=None, source=None):
     """
     编译 iodb.json → iodb.bin。
 
     base_version > 0 时表示这是一个「增量包」：文件内容只包含 base 版本之后新增的条目，
     header 偏移 88 记录基线版本，客户端据此判断该增量能否叠加到本地 base 上。
     普通全量包保持 0。
+
+    db_version / updated_at / source：显式覆盖（源 JSON 头部缺这些字段时用，
+    例如 build_ioc.py 只写 {"count":..., "entries":[...]}）。None = 沿用 JSON 头部。
     """
-    version, updated, source = read_head(src)
+    version, updated, src_name = read_head(src)
+    if db_version is not None:
+        version = db_version
+    if updated_at is not None:
+        updated = updated_at
+    if source is not None:
+        src_name = source
     print(f"源库: {src}")
-    print(f"  db_version={version} updated_at={updated!r} source={source!r}")
+    print(f"  db_version={version} updated_at={updated!r} source={src_name!r}")
 
     strs = StringDict()
     details = array.array("I")    # 每条 6 个 u32
@@ -202,6 +212,17 @@ def compile_db(src, dst, limit=0, base_version=0):
         sha = (e.get("sha256") or "").strip().lower()
         md5 = (e.get("md5") or "").strip().lower()
         sha1 = (e.get("sha1") or "").strip().lower()
+        # 新数据源约定（build_ioc.py）：哈希值统一放 "hash" 字段，算法放 "hash_type"。
+        # sha256/md5/sha1 三个具名字段全空但 hash 有值时，按 hash_type（缺省按长度）路由。
+        h = (e.get("hash") or "").strip().lower()
+        ht = (e.get("hash_type") or "").strip().lower()
+        if h and not sha and not md5 and not sha1:
+            if ht == "sha256" or (not ht and len(h) == 64):
+                sha = h
+            elif ht == "md5" or (not ht and len(h) == 32):
+                md5 = h
+            elif ht == "sha1" or (not ht and len(h) == 40):
+                sha1 = h
         pkg = (e.get("pkg") or "").strip()
         url = (e.get("url") or "").strip()
         detail_index = n
@@ -238,7 +259,7 @@ def compile_db(src, dst, limit=0, base_version=0):
 
     # 头部元信息也进字符串池（必须在生成 str_offsets 之前 intern）
     updated_id = strs.intern(updated)
-    source_id = strs.intern(source)
+    source_id = strs.intern(src_name)
     print(f"  共 {n} 条；sha256={len(sha256_rows)} md5={len(md5_rows)} sha1={len(sha1_rows)}；"
           f"包名 {len(pkg_rows)}；URL {len(url_rows)}；字符串 {len(strs.blobs)}")
 
@@ -336,8 +357,15 @@ def main():
     ap.add_argument("--limit", type=int, default=0, help="只取前 N 条（调试用）")
     ap.add_argument("--base-version", type=int, default=0,
                     help="增量包的基线版本（0 = 全量包）")
+    ap.add_argument("--db-version", type=int, default=None,
+                    help="覆盖库版本号（源 JSON 头部缺 db_version 时用）")
+    ap.add_argument("--updated-at", default=None,
+                    help="覆盖更新时间字符串（如 2026-11-01）")
+    ap.add_argument("--source", default=None,
+                    help="覆盖来源描述字符串")
     args = ap.parse_args()
-    return compile_db(args.src, args.dst, args.limit, args.base_version)
+    return compile_db(args.src, args.dst, args.limit, args.base_version,
+                      args.db_version, args.updated_at, args.source)
 
 
 if __name__ == "__main__":
